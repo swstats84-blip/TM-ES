@@ -92,8 +92,8 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.88";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.88-fast-cache-first-paint";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.89";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.89-fast-cache-state-fix";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
@@ -1551,7 +1551,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    restorePromise=(async()=>{
      const x=await dbGet();
      if(!x||x.schema!==1||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>MAX_AGE||!hasUseful(x)){if(x)dbDelete();return false}
-     if(!window.state||typeof state!=='object')return false;
+     if(typeof state!=='object'||!state)return false;
      const live=window.__psuCanonicalReadyStateV287||{};let applied=false;
      if(!live.schedule&&Array.isArray(x.scheduleEvents)&&x.scheduleEvents.length){state.scheduleEvents=copy(x.scheduleEvents,[]);applied=true}
      if(!live.progress){
@@ -1572,7 +1572,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    return restorePromise;
  }
  async function save(){
-   if(saveBusy||!window.state||typeof state!=='object')return;const live=window.__psuCanonicalReadyStateV287||{};if(!live.schedule||!live.progress)return;
+   if(saveBusy||typeof state!=='object'||!state)return;const live=window.__psuCanonicalReadyStateV287||{};if(!live.schedule||!live.progress)return;
    const payload={schema:1,at:Date.now(),scheduleEvents:copy(state.scheduleEvents,[]),progress:copy(state.progress,[]),progressVisibleUnitsV445:copy(state.progressVisibleUnitsV445,[]),progressListInitializedV558:state.progressListInitializedV558===true,progressManualIncludeUnits:copy(state.progressManualIncludeUnits,{}),deletedProgressUnits:copy(state.deletedProgressUnits,{})};
    if(!hasUseful(payload))return;saveBusy=true;try{await dbPut(payload);try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(_e){}}finally{saveBusy=false}
  }
