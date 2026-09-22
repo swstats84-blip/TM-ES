@@ -92,8 +92,8 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.89";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.89-fast-cache-state-fix";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.90";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.90-last-complete-screen";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
@@ -1535,6 +1535,35 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
 
 
 
+<script id="web-v290-last-complete-screen-script">
+(function(){
+ if(window.__webV290LastCompleteScreenInstalled)return;window.__webV290LastCompleteScreenInstalled=true;
+ const DB='psu_web_visual_snapshot_v290',STORE='kv',KEY='latest-v1',MAX_AGE=7*24*60*60*1000;
+ let frameWrap=null,saveTimer=0,saveBusy=false,lastSaveAt=0,restored=false,dbPromise=null;
+ function dbOpen(){if(dbPromise)return dbPromise;dbPromise=new Promise((resolve,reject)=>{if(!window.indexedDB)return reject(new Error('no indexedDB'));const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('indexedDB open failed'))});return dbPromise}
+ async function dbGet(){try{const db=await dbOpen();return await new Promise(resolve=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).get(KEY);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>resolve(null)})}catch(_e){return null}}
+ async function dbPut(v){try{const db=await dbOpen();await new Promise(resolve=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(v,KEY);tx.oncomplete=resolve;tx.onerror=resolve;tx.onabort=resolve})}catch(_e){}}
+ async function dbDelete(){try{const db=await dbOpen();await new Promise(resolve=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(KEY);tx.oncomplete=resolve;tx.onerror=resolve;tx.onabort=resolve})}catch(_e){}}
+ function safeCloneApp(){const app=document.querySelector('.app');if(!app)return'';const c=app.cloneNode(true);c.querySelectorAll('script,iframe,object,embed').forEach(x=>x.remove());c.querySelectorAll('*').forEach(el=>{[...el.attributes].forEach(a=>{if(/^on/i.test(a.name))el.removeAttribute(a.name)});if('disabled' in el)try{el.disabled=true}catch(_e){}});return c.outerHTML}
+ function currentView(){let vd='';try{vd=(typeof viewDate!=='undefined'&&viewDate instanceof Date&&!isNaN(viewDate))?`${viewDate.getFullYear()}-${String(viewDate.getMonth()+1).padStart(2,'0')}-01`:''}catch(_e){}return {tab:window.main?String(main.dataset.tab||''):'',viewDate:vd,area:window.area?String(area.value||''):'',task:window.task?String(task.value||''):'',search:window.search?String(search.value||''):'',scrollX:window.scrollX||0,scrollY:window.scrollY||0,bodyClass:document.body?String(document.body.className||''):''}}
+ function cssText(){try{return [...document.querySelectorAll('style')].map(x=>x.textContent||'').join('\n')}catch(_e){return''}}
+ function canCapture(){if(!document.body||document.documentElement.classList.contains('psu-web-boot-v247'))return false;const live=window.__psuCanonicalReadyStateV287||{};return !!(live.schedule&&live.progress)}
+ async function capture(force=false){clearTimeout(saveTimer);if(saveBusy||!canCapture())return false;if(!force&&Date.now()-lastSaveAt<2500)return false;const html=safeCloneApp();if(!html)return false;const v=currentView(),payload={schema:1,at:Date.now(),appHtml:html,css:cssText(),...v};saveBusy=true;try{await dbPut(payload);lastSaveAt=Date.now();try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(_e){}return true}finally{saveBusy=false}}
+ function scheduleCapture(delay=1200){clearTimeout(saveTimer);saveTimer=setTimeout(()=>capture(false),delay)}
+ function applyView(x){try{if(x&&/^\d{4}-\d{2}-01$/.test(String(x.viewDate||''))&&typeof viewDate!=='undefined')viewDate=new Date(String(x.viewDate)+'T00:00:00')}catch(_e){}try{if(window.main&&(x.tab==='calendar'||x.tab==='progress')){main.dataset.tab=x.tab;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===x.tab))}}catch(_e){}try{if(window.area&&x.area)area.value=x.area;if(window.task&&x.task)task.value=x.task;if(window.search)search.value=String(x.search||'')}catch(_e){}}
+ function snapshotDoc(x){const bodyClass=String(x.bodyClass||'').replace(/\bpsu[^\s]*boot[^\s]*\b/g,'').trim();return '<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>'+String(x.css||'')+'\nhtml,body{margin:0!important;min-height:100%!important}*{animation:none!important;transition:none!important}.modalback,.toast,#psuBootV247{display:none!important}</style></head><body class="'+bodyClass.replace(/"/g,'&quot;')+'">'+String(x.appHtml||'')+'</body></html>'}
+ function showSnapshot(x){if(frameWrap||!x||!x.appHtml)return false;applyView(x);const wrap=document.createElement('div');wrap.id='psuVisualSnapshotV290';wrap.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#f5f7fb;opacity:1;transition:opacity .12s ease;';const f=document.createElement('iframe');f.setAttribute('aria-label','최근 화면');f.style.cssText='display:block;width:100%;height:100%;border:0;background:#f5f7fb;';const badge=document.createElement('div');badge.textContent='최근 화면 · 최신 정보 확인 중';badge.style.cssText='position:absolute;right:10px;bottom:10px;z-index:2;padding:5px 8px;border-radius:999px;background:rgba(31,41,55,.82);color:#fff;font:700 10px/1.2 "Malgun Gothic",sans-serif;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.16)';wrap.appendChild(f);wrap.appendChild(badge);document.body.appendChild(wrap);frameWrap=wrap;f.onload=()=>{try{f.contentWindow.scrollTo(Number(x.scrollX||0),Number(x.scrollY||0))}catch(_e){}};f.srcdoc=snapshotDoc(x);restored=true;window.__psuVisualSnapshotRestoredV290=true;return true}
+ async function restore(){const x=await dbGet();if(!x||x.schema!==1||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>MAX_AGE||!x.appHtml){if(x)dbDelete();return false}return showSnapshot(x)}
+ function liveReady(){if(frameWrap){const old=frameWrap;frameWrap=null;requestAnimationFrame(()=>requestAnimationFrame(()=>{old.style.opacity='0';setTimeout(()=>{try{old.remove()}catch(_e){}},140)}))}setTimeout(()=>capture(true),900);setTimeout(()=>capture(true),2600)}
+ window.__psuVisualSnapshotLiveReadyV290=liveReady;window.__psuVisualSnapshotCaptureV290=()=>capture(true);window.__psuVisualSnapshotClearV290=dbDelete;
+ const oldRender=window.render;if(typeof oldRender==='function')window.render=render=function(){const r=oldRender.apply(this,arguments);scheduleCapture(1400);return r};
+ addEventListener('scroll',()=>scheduleCapture(1800),{passive:true});document.addEventListener('change',()=>scheduleCapture(900),true);document.addEventListener('click',e=>{try{if(e.target&&e.target.closest&&e.target.closest('.tab,#prev,#next,#today'))scheduleCapture(900)}catch(_e){}},true);
+ const clsObs=new MutationObserver(()=>{if(!document.documentElement.classList.contains('psu-web-boot-v247'))scheduleCapture(900)});clsObs.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')capture(true)});addEventListener('pagehide',()=>capture(true));
+ restore().catch(()=>{});setTimeout(()=>{if(frameWrap){try{const b=frameWrap.querySelector('div');if(b)b.textContent='실시간 연결 확인 중 · 최근 화면'}catch(_e){}}},7000);setTimeout(()=>{if(frameWrap)liveReady()},10000);
+})();
+</script>
+
 <script id="web-v287-fast-indexeddb-snapshot-script">
 (function(){
  if(window.__webV287FastSnapshotInstalled)return;window.__webV287FastSnapshotInstalled=true;
@@ -1601,7 +1630,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  if(window.__webV270CanonicalSyncInstalled)return;window.__webV270CanonicalSyncInstalled=true;
  const ready={schedule:false,progress:false,progressInfo:false};window.__psuCanonicalReadyStateV287=ready;let bootDone=false,notify=false;
  function status(){if(window.sync)sync.innerHTML=`실시간 동기화 <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}
- function finishBoot(statusText='실시간 동기화'){if(bootDone)return;bootDone=true;try{if(typeof render==='function')render();if(firstLoad){firstLoad=false;beginInitialTodayAnchorV196()}else if(typeof shouldInitialTodayAnchorV196==='function'&&shouldInitialTodayAnchorV196())scheduleInitialTodayAnchorV196()}catch(_e){}if(statusText==='실시간 동기화')status();else{if(window.sync)sync.innerHTML=`${statusText} <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}if(window.__psuBootV247)window.__psuBootV247.data();if(notify){notify=false;toastMsg(statusText==='실시간 동기화'?'실시간 데이터가 최신 상태입니다.':'일부 실시간 데이터 연결이 지연되고 있습니다.')}}
+ function finishBoot(statusText='실시간 동기화'){if(bootDone)return;bootDone=true;try{if(typeof render==='function')render();if(firstLoad){firstLoad=false;beginInitialTodayAnchorV196()}else if(typeof shouldInitialTodayAnchorV196==='function'&&shouldInitialTodayAnchorV196())scheduleInitialTodayAnchorV196()}catch(_e){}if(statusText==='실시간 동기화')status();else{if(window.sync)sync.innerHTML=`${statusText} <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}if(window.__psuBootV247)window.__psuBootV247.data();try{if(window.__psuVisualSnapshotLiveReadyV290)setTimeout(()=>window.__psuVisualSnapshotLiveReadyV290(),280)}catch(_e){}if(notify){notify=false;toastMsg(statusText==='실시간 동기화'?'실시간 데이터가 최신 상태입니다.':'일부 실시간 데이터 연결이 지연되고 있습니다.')}}
  function finalize(force=false){if(bootDone)return;if(!ready.schedule||!ready.progress||(!force&&!ready.progressInfo))return;finishBoot('실시간 동기화')}
  window.__psuCanonicalReadyV270=function(kind){if(Object.prototype.hasOwnProperty.call(ready,kind))ready[kind]=true;if(ready.schedule&&ready.progress&&window.__psuFastSnapshotScheduleSaveV287)window.__psuFastSnapshotScheduleSaveV287();finalize(false)};
  window.__psuCanonicalLoadV270=async function(silent=false){if(window.refresh)refresh.disabled=true;if(window.sync)sync.textContent=bootDone?'실시간 데이터 확인 중...':'실시간 동기화 연결 중...';if(!silent)notify=true;try{if(window.__fbDirectV187)await window.__fbDirectV187.auth();if(bootDone){if(typeof render==='function')render();status();if(!silent){notify=false;toastMsg('실시간 데이터가 최신 상태입니다.')}}else finalize(false)}catch(e){if(window.sync)sync.textContent='연결 오류';if(window.refresh)refresh.disabled=false;if(!silent)psuAlert(e&&e.message?e.message:String(e))}return null};
