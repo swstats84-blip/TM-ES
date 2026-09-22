@@ -92,8 +92,8 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.84";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.84-mobile-home-install";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.85";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.85-android-external-install";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
@@ -2316,12 +2316,13 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
 @media(min-width:821px){#homeInstallBtnV284,#homeGuideBackV284{display:none!important}}
 @media(max-width:820px){.web-actions-v131{flex-wrap:wrap}}
 </style>
-<script id="web-v284-home-install-script">
+<script id="web-v285-home-install-script">
 (function(){
- if(window.__webV284HomeInstallInstalled)return;window.__webV284HomeInstallInstalled=true;
+ if(window.__webV285HomeInstallInstalled)return;window.__webV285HomeInstallInstalled=true;
  const ua=String(navigator.userAgent||''),platform=String(navigator.platform||'');
  const isAndroid=/Android/i.test(ua),isIOS=/iPhone|iPod|iPad/i.test(ua)||(platform==='MacIntel'&&Number(navigator.maxTouchPoints||0)>1);
  const inAndroidApp=/PSUAdminApp\//.test(ua)||/[?&]app=android(?:&|$)/.test(location.search||'');
+ const androidInApp=isAndroid&&!inAndroidApp&&(/KAKAOTALK|NAVER|FBAN|FBAV|Instagram|Line\//i.test(ua)||/;\s*wv\)/i.test(ua));
  const standalone=()=>{try{return window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(_e){return false}};
  let installPrompt=null;
  function ensureGuide(){
@@ -2338,6 +2339,21 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
    if(img&&!img.src)img.src='./아이폰홈화면등록방법.png';
    back.classList.add('show');back.setAttribute('aria-hidden','false');
  }
+ function externalTarget(){
+   try{const u=new URL(location.href);u.searchParams.set('psuInstall','1');u.hash='';return u}catch(_e){return null}
+ }
+ function openAndroidExternalBrowser(){
+   const u=externalTarget();if(!u)return false;
+   const intent='intent://'+u.host+u.pathname+u.search+'#Intent;scheme='+u.protocol.replace(':','')+';action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end';
+   try{location.href=intent;return true}catch(_e){return false}
+ }
+ function showAndroidExternalHelp(){
+   const msg='현재 카카오톡/앱 내부 브라우저에서는 홈 화면 설치창을 직접 띄울 수 없습니다.\n\n우측 하단 메뉴(⋮)에서 “다른 브라우저로 열기”를 선택한 뒤, PSU 화면의 “홈 화면 추가”를 다시 눌러 주세요.';
+   if(typeof psuAlert==='function')psuAlert(msg,'외부 브라우저에서 열기');else alert(msg);
+ }
+ function waitInstallPrompt(ms){
+   return new Promise(resolve=>{if(installPrompt){resolve(true);return}const t0=Date.now();const t=setInterval(()=>{if(installPrompt){clearInterval(t);resolve(true)}else if(Date.now()-t0>=ms){clearInterval(t);resolve(false)}},100)});
+ }
  function ensureButton(){
    if(inAndroidApp||standalone()||(!isAndroid&&!isIOS))return null;
    const box=document.getElementById('webActionsV131');if(!box)return null;
@@ -2348,12 +2364,19 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
      b.onclick=async()=>{
        if(isIOS){openIOSGuide();return}
        if(standalone()){b.hidden=true;return}
+       if(androidInApp){
+         if(!openAndroidExternalBrowser())showAndroidExternalHelp();
+         setTimeout(()=>showAndroidExternalHelp(),1400);
+         return;
+       }
+       if(!installPrompt)await waitInstallPrompt(1800);
        if(installPrompt){
          const ev=installPrompt;installPrompt=null;
          try{const r=await ev.prompt();if(r&&r.outcome==='accepted'){b.hidden=true;return}}catch(_e){}
        }
-       if(typeof psuAlert==='function')psuAlert('브라우저의 메뉴(⋮)에서 “홈 화면에 추가” 또는 “앱 설치”를 선택해 주세요.','홈 화면 추가');
-       else alert('브라우저 메뉴에서 “홈 화면에 추가” 또는 “앱 설치”를 선택해 주세요.');
+       const browser=/SamsungBrowser\//i.test(ua)?'삼성 인터넷':(/Chrome\//i.test(ua)?'Chrome':'브라우저');
+       const msg=browser==='삼성 인터넷'?'삼성 인터넷 메뉴에서 “현재 페이지 추가” → “홈 화면”을 선택해 주세요.':'브라우저 메뉴(⋮)에서 “앱 설치” 또는 “홈 화면에 추가”를 선택해 주세요.';
+       if(typeof psuAlert==='function')psuAlert(msg,'홈 화면 추가');else alert(msg);
      };
    }
    b.textContent=isIOS?'홈 화면 등록 안내':'홈 화면 추가';b.hidden=false;return b;
