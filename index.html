@@ -92,8 +92,8 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.87";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.87-fast-indexeddb-snapshot";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.88";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.88-fast-cache-first-paint";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
@@ -105,7 +105,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   window.__psuBootV247={
     mode(admin){if(st.released)return;st.mode=admin?'admin':'general';st.data=st.cached===true;if(!st.cached)st.anchor=false;maybe()},
     auth(admin){if(st.released)return;st.auth=true;st.mode=admin?'admin':'general';maybe()},
-    cache(){if(st.released)return;st.cached=true;st.data=true;maybe()},
+    cache(){if(st.released)return;st.cached=true;st.data=true;if(st.auth){maybe();return}requestAnimationFrame(()=>requestAnimationFrame(()=>{if(!st.released&&st.cached)reveal()}))},
     data(){if(st.released)return;st.data=true;maybe()},
     anchor(){if(st.released)return;st.anchor=true;maybe()},
     isActive(){return !st.released},
@@ -1564,8 +1564,8 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
      if(!applied)return false;
      window.__psuFastSnapshotRestoredV287=true;
      try{if(typeof render==='function')render()}catch(_e){}
-     try{if(window.__psuBootV247&&typeof window.__psuBootV247.cache==='function')window.__psuBootV247.cache()}catch(_e){}
      try{if(typeof beginInitialTodayAnchorV196==='function')beginInitialTodayAnchorV196()}catch(_e){}
+     try{if(window.__psuBootV247&&typeof window.__psuBootV247.cache==='function')window.__psuBootV247.cache()}catch(_e){}
      try{if(window.sync)sync.innerHTML='최근 화면 먼저 표시 · 최신 데이터 확인 중...'}catch(_e){}
      return true;
    })();
