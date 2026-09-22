@@ -91,8 +91,8 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.70";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.70-canonical-sync-low-traffic";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.71";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.71-direct-download-drive-image";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
@@ -793,7 +793,8 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    function fitWidth(){recomputeFits();apply(st.fitWidth);requestAnimationFrame(()=>{vp.scrollLeft=0;vp.scrollTop=0})}
    function fitAll(){recomputeFits();apply(st.fitAll);requestAnimationFrame(()=>{vp.scrollLeft=0;vp.scrollTop=0})}
    img.onload=()=>{st.nw=img.naturalWidth||1;st.nh=img.naturalHeight||1;recomputeFits();fitWidth()};
-   img.src=`data:${r.mime||'image/jpeg'};base64,${r.base64||''}`;
+   img.onerror=()=>{if(weeklyStateV132===st){vp.innerHTML='<div class="weekly-loading-v132">스케줄 이미지를 직접 불러오지 못했습니다. Google Drive 공유 상태를 확인해 주세요.</div>';weeklyStateV132=null}};
+   img.src=String(r&&r.directUrl||'')+(r&&r.updatedAt?'&v='+encodeURIComponent(r.updatedAt):'');
    document.getElementById('weeklyMinusV132').onclick=()=>apply(st.scale/1.25);document.getElementById('weeklyPlusV132').onclick=()=>apply(st.scale*1.25);document.getElementById('weeklyFitWidthV132').onclick=fitWidth;document.getElementById('weeklyFitAllV132').onclick=fitAll;document.getElementById('weeklyOriginalV132').onclick=()=>apply(1);
    img.ondblclick=e=>{e.preventDefault();recomputeFits();apply(Math.abs(st.scale-1)<.04?st.fitWidth:1,e.clientX,e.clientY)};
    vp.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();apply(st.scale*(e.deltaY<0?1.12:.89),e.clientX,e.clientY)},{passive:false});
@@ -804,21 +805,24 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    vp.addEventListener('pointerup',endPointer);vp.addEventListener('pointercancel',endPointer);
    window.addEventListener('resize',()=>{if(weeklyStateV132===st)recomputeFits()},{once:true});
  }
- function openWeeklySlotV150(slot){
+ function openWeeklySlotV150(slot,meta){
    const label=slot==='next'?'다음주':'이번주';
    buildWeeklyViewerV132(label);
-   google.script.run.withSuccessHandler(r=>{const vp=document.getElementById('weeklyViewportV132');if(!vp)return;if(!r||r.ok===false){vp.innerHTML=`<div class="weekly-loading-v132">${esc(r&&r.message?r.message:'스케줄을 불러오지 못했습니다.')}</div>`;return}if(!r.found){vp.innerHTML=`<div class="weekly-loading-v132">${esc(r.message||`등록된 ${label} 스케줄이 없습니다.`)}</div>`;return}installWeeklyImageV132(r)}).withFailureHandler(e=>{const vp=document.getElementById('weeklyViewportV132');if(vp)vp.innerHTML=`<div class="weekly-loading-v132">${esc(e&&e.message?e.message:String(e))}</div>`}).getWeeklyScheduleImageV131(slot);
+   const vp=document.getElementById('weeklyViewportV132');if(!vp)return;
+   if(!meta||!meta.found){vp.innerHTML=`<div class="weekly-loading-v132">등록된 ${esc(label)} 스케줄이 없습니다.</div>`;return}
+   if(!meta.directUrl){vp.innerHTML='<div class="weekly-loading-v132">스케줄 직접 주소를 확인하지 못했습니다. Apps Script 최신 버전을 적용해 주세요.</div>';return}
+   installWeeklyImageV132(Object.assign({label:label,slot:slot},meta));
  }
  function openWeekly(){
    mtitle.textContent='스케줄';mbody.innerHTML='<div class="empty">스케줄 정보를 확인하는 중...</div>';modalback.classList.add('show');
    google.script.run.withSuccessHandler(r=>{
      if(!r||r.ok===false){mbody.innerHTML=`<div class="empty">${esc(r&&r.message?r.message:'스케줄 정보를 불러오지 못했습니다.')}</div>`;return}
      const cur=r.current||{found:false,weekStart:r.currentWeek||''},nxt=r.next||{found:false,weekStart:r.nextWeek||''};
-     if(!nxt.found){closeM();openWeeklySlotV150('current');return}
+     if(!nxt.found){closeM();openWeeklySlotV150('current',cur);return}
      const curDisabled=cur.found?'':' disabled';
      mbody.innerHTML=`<div class="admin-reg-note-v131">다음주 스케줄이 등록되어 있어 선택할 수 있습니다.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn primary" id="weeklyCurrentPickV150"${curDisabled} style="padding:18px 8px"><b style="font-size:16px">이번주</b><br><span style="font-size:11px;font-weight:500">${esc(cur.weekStart||'')}</span>${cur.found?'':'<br><span style="font-size:10px">등록 없음</span>'}</button><button class="btn primary" id="weeklyNextPickV150" style="padding:18px 8px"><b style="font-size:16px">다음주</b><br><span style="font-size:11px;font-weight:500">${esc(nxt.weekStart||'')}</span></button></div>`;
      const a=document.getElementById('weeklyCurrentPickV150'),b=document.getElementById('weeklyNextPickV150');
-     if(a)a.onclick=()=>{closeM();openWeeklySlotV150('current')};if(b)b.onclick=()=>{closeM();openWeeklySlotV150('next')};
+     if(a)a.onclick=()=>{closeM();openWeeklySlotV150('current',cur)};if(b)b.onclick=()=>{closeM();openWeeklySlotV150('next',nxt)};
    }).withFailureHandler(e=>{mbody.innerHTML=`<div class="empty">${esc(e&&e.message?e.message:String(e))}</div>`}).getWeeklyScheduleStatusV150();
  }
  function addHeaderButtons(){
@@ -1482,6 +1486,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
 <script id="web-v174-pc-download-script">
 (function(){
  if(window.__webV174PcDownloadInstalled)return;window.__webV174PcDownloadInstalled=true;
+ const PC_VIEWER_RAW_URL='https://raw.githubusercontent.com/swstats84-blip/TM-ES/main/SEC%20PSU%20%EC%9E%91%EC%97%85%20%ED%98%84%ED%99%A9.exe';
  const env=()=>window.__psuClientEnvV174||{device:'PC',isPc:true,label:'PC'};
  const token=()=>{try{return typeof window.__webAuthTokenV136==='function'?window.__webAuthTokenV136():(localStorage.getItem('psuWebAdminSessionV131')||'')}catch(e){return ''}};
  function ensure(){
@@ -1499,26 +1504,24 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    const admin=!!(document.body.classList.contains('admin-mode')&&window.__webAuthInfoV136);
    b.hidden=!(admin&&env().isPc);
  }
- function gsMeta(t){return new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).getPcViewerDownloadMetaV197(t)})}
- function gsChunk(t,ticket,offset,length){return new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).getPcViewerDownloadChunkV197(t,ticket,offset,length)})}
- function decodeChunk(b64){const bin=atob(String(b64||'')),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u}
- async function download(){
-   const b=ensure();if(!b||b.disabled)return;if(!env().isPc)return;
-   const t=token();if(!t){sync();return psuAlert('관리자 로그인이 필요합니다.');}
-   const old=b.textContent;b.disabled=true;b.textContent='다운로드 준비 중...';let objectUrl='';
+ function logDownload(){
    try{
-     const meta=await gsMeta(t);if(!meta||meta.ok===false||!meta.size||!meta.ticket)throw new Error(meta&&meta.message?meta.message:'PC뷰어 다운로드 파일을 찾지 못했습니다.');
-     const parts=[];let offset=0,idx=0,total=Math.max(1,Number(meta.totalChunks)||Math.ceil(Number(meta.size)/Number(meta.chunkSize||1048576)));
-     while(offset<Number(meta.size)){
-       idx++;b.textContent=`다운로드 준비 ${Math.min(99,Math.round((idx-1)/total*100))}%`;
-       const r=await gsChunk(t,meta.ticket,offset,Number(meta.chunkSize)||1048576);if(!r||r.ok===false||!r.base64)throw new Error(r&&r.message?r.message:'파일 데이터를 받지 못했습니다.');
-       parts.push(decodeChunk(r.base64));const next=Number(r.nextOffset);if(!(next>offset))throw new Error('다운로드 진행값이 올바르지 않습니다.');offset=next;
-     }
-     b.textContent='파일 저장 중...';const blob=new Blob(parts,{type:'application/vnd.microsoft.portable-executable'});objectUrl=URL.createObjectURL(blob);
-     const a=document.createElement('a');a.href=objectUrl;a.download=meta.fileName||'SEC PSU 작업 현황.exe';document.body.appendChild(a);a.click();a.remove();
-     setTimeout(()=>{try{URL.revokeObjectURL(objectUrl)}catch(e){}},5000);toastMsg('PC뷰어 다운로드를 시작했습니다.');
-   }catch(e){if(objectUrl)try{URL.revokeObjectURL(objectUrl)}catch(_e){};psuAlert(e&&e.message?e.message:String(e||'다운로드 준비에 실패했습니다.'))}
-   finally{b.disabled=false;b.textContent=old}
+     if(!window.firebase||!firebase.database)return;
+     const info=window.__webAuthInfoV136||{},actor=String(info.displayName||info.username||'').trim(),role=String(info.role||'admin').trim();
+     const id='pc_download_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),now=new Date().toISOString();
+     firebase.database().ref('activityLog/'+id).set({id:id,at:now,eventType:'activity',actorName:actor,sourceKind:'web',clientId:'',sessionId:'',action:'PC뷰어 다운로드',unit:'',detail:'SEC PSU 작업 현황.exe',role:role,version:window.__PSU_WEB_VERSION||''})
+       .then(()=>firebase.database().ref('meta/revisions/activity').set(String(Date.now())+'-'+Math.random().toString(36).slice(2,8))).catch(()=>{});
+   }catch(_e){}
+ }
+ function download(){
+   const b=ensure();if(!b||b.disabled)return;if(!env().isPc)return;
+   if(!token()){sync();return psuAlert('관리자 로그인이 필요합니다.');}
+   const old=b.textContent;b.disabled=true;b.textContent='다운로드 준비 중...';
+   try{
+     const a=document.createElement('a');a.href=PC_VIEWER_RAW_URL;a.download='SEC PSU 작업 현황.exe';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();
+     logDownload();toastMsg('PC뷰어 다운로드를 시작했습니다.');
+   }catch(e){psuAlert(e&&e.message?e.message:String(e||'다운로드를 시작하지 못했습니다.'))}
+   finally{setTimeout(()=>{b.disabled=false;b.textContent=old},300)}
  }
 
  const obs=new MutationObserver(sync);obs.observe(document.body,{attributes:true,attributeFilter:['class']});
@@ -1639,7 +1642,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  async function update(path,v){await auth();return firebase.database().ref(path).update(v)}
  async function del(path){await auth();return firebase.database().ref(path).remove()}
  window.__fbDirectV187={auth,bump,read,set,update,del,b64key,isAdmin,isMaster};
- // v2.70: 조회/구독은 각 canonical listener가 단독 소유한다. 이 블록은 공통 Firebase CRUD helper와 마스터 쓰기만 제공한다.
+ // v2.71: 조회/구독은 각 canonical listener가 단독 소유한다. 이 블록은 공통 Firebase CRUD helper와 마스터 쓰기만 제공한다.
 
  // 마스터 직접 수정 도우미
  function manual(e,f,val){e.manualBase=e.manualBase||{};e.manualFields=Array.isArray(e.manualFields)?e.manualFields:[];if(!e.manualFields.includes(f))e.manualBase[f]=(e[f]??'');e[f]=val;const b=e.manualBase[f]??'';if(String(val??'')===String(b)){e.manualFields=e.manualFields.filter(x=>x!==f);delete e.manualBase[f]}else if(!e.manualFields.includes(f))e.manualFields.push(f);if(e.manualFields.length)e.manualEditedAt=new Date().toISOString();else{delete e.manualFields;delete e.manualBase;delete e.manualEditedAt}}
@@ -1753,7 +1756,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  function normalizeProgressActionsV219(){document.querySelectorAll('#plist .pitem[data-unit]').forEach(card=>{const head=card.querySelector('.phead');if(!head)return;let row=card.querySelector(':scope > .progress-actions-v219');if(!row){row=document.createElement('div');row.className='progress-actions-v219';head.insertAdjacentElement('afterend',row)}const detail=head.querySelector('.detail-btn-v162')||row.querySelector('.detail-btn-v162'),pi=head.querySelector('.progress-info-chip-v164')||row.querySelector('.progress-info-chip-v164'),pending=head.querySelector('.pending-btn-v138')||row.querySelector('.pending-btn-v138'),memo=head.querySelector('.sharedbtn-v15')||row.querySelector('.sharedbtn-v15'),want=[detail,pi,pending,memo].filter(Boolean),cur=[...row.children].filter(x=>want.includes(x));if(cur.length!==want.length||cur.some((x,i)=>x!==want[i]))want.forEach(x=>row.appendChild(x));if(memo){const u=card.dataset.unit||'';memo.onclick=e=>{e.preventDefault();e.stopPropagation();window.openSharedMemoV15&&window.openSharedMemoV15(u,'')}}})}
  function setScheduleMemoChipV219(el){if(!memoCountsReadyV226)return;const u=el.dataset.unit||'',d=el.dataset.date||'',n=Number(byDate[u]&&byDate[u][d]||0);let box=el.querySelector('.calendar-status-v160'),x=box&&box.querySelector('.memo');if(!n){if(x)x.remove();if(box&&!box.children.length)box.remove();return}if(!box){box=document.createElement('div');box.className='calendar-status-v160';el.appendChild(box)}if(x&&x.dataset.v219Date===d&&x.dataset.v219Count===String(n))return;if(x)x.remove();x=document.createElement('span');x.className='memo';x.dataset.v219Date=d;x.dataset.v219Count=String(n);x.textContent=`메모 ${n}건`;x.onclick=e=>{e.preventDefault();e.stopPropagation();window.openSharedMemoV15&&window.openSharedMemoV15(u,d)};box.appendChild(x)}
  function decorateScheduleV219(){document.querySelectorAll('.event[data-unit][data-date],.mcard[data-unit][data-date]').forEach(setScheduleMemoChipV219)}
- window.refreshMemoCountsV110=async function(){if(typeof window.__psuMemoGetRawV256!=='function')return null;try{const raw=await window.__psuMemoGetRawV256(false);totals=Object.create(null);byDate=Object.create(null);Object.keys(raw||{}).forEach(k=>{const m=raw[k];if(!m||m.deleted)return;const unit=String(m.unit||'').trim();if(!unit)return;const d=effectiveDateV219(m);totals[unit]=(totals[unit]||0)+1;if(!byDate[unit])byDate[unit]=Object.create(null);byDate[unit][d]=(byDate[unit][d]||0)+1});memoCountsReadyV226=true;window.__calendarMemoCountsV160=totals;document.querySelectorAll('#plist .pitem[data-unit]').forEach(card=>{const u=card.dataset.unit||'',b=card.querySelector('.sharedbtn-v15'),n=Number(totals[u]||0);if(b){b.textContent=n?`메모 ${n}건`:'메모';b.title=b.textContent;b.classList.toggle('has-count-v146',!!n)}});normalizeProgressActionsV219();decorateScheduleV219();return {ok:true,counts:totals,countsByDate:byDate,storage:'firebase-canonical'}}catch(e){console.warn('v2.70 메모 건수 캐시 적용 실패',e);return null}};
+ window.refreshMemoCountsV110=async function(){if(typeof window.__psuMemoGetRawV256!=='function')return null;try{const raw=await window.__psuMemoGetRawV256(false);totals=Object.create(null);byDate=Object.create(null);Object.keys(raw||{}).forEach(k=>{const m=raw[k];if(!m||m.deleted)return;const unit=String(m.unit||'').trim();if(!unit)return;const d=effectiveDateV219(m);totals[unit]=(totals[unit]||0)+1;if(!byDate[unit])byDate[unit]=Object.create(null);byDate[unit][d]=(byDate[unit][d]||0)+1});memoCountsReadyV226=true;window.__calendarMemoCountsV160=totals;document.querySelectorAll('#plist .pitem[data-unit]').forEach(card=>{const u=card.dataset.unit||'',b=card.querySelector('.sharedbtn-v15'),n=Number(totals[u]||0);if(b){b.textContent=n?`메모 ${n}건`:'메모';b.title=b.textContent;b.classList.toggle('has-count-v146',!!n)}});normalizeProgressActionsV219();decorateScheduleV219();return {ok:true,counts:totals,countsByDate:byDate,storage:'firebase-canonical'}}catch(e){console.warn('v2.71 메모 건수 캐시 적용 실패',e);return null}};
  const oldFlags=window.__decorateCalendarFlagsV160;if(typeof oldFlags==='function')window.__decorateCalendarFlagsV160=function(){const r=oldFlags.apply(this,arguments);decorateScheduleV219();return r};const oldRP=window.renderProgress;if(typeof oldRP==='function')window.renderProgress=renderProgress=function(){const r=oldRP.apply(this,arguments);setTimeout(normalizeProgressActionsV219,0);return r};const oldRC=window.renderCalendar;if(typeof oldRC==='function')window.renderCalendar=renderCalendar=function(){const r=oldRC.apply(this,arguments);decorateScheduleV219();return r};const oldRM=window.renderMobile;if(typeof oldRM==='function')window.renderMobile=renderMobile=function(){const r=oldRM.apply(this,arguments);decorateScheduleV219();return r};setTimeout(normalizeProgressActionsV219,300);
 })();
 </script>
@@ -2202,7 +2205,7 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
 <script id="web-v268-live-version-sync-script">
 (function(){
  if(window.__webV268LiveVersionInstalled)return;window.__webV268LiveVersionInstalled=true;
- const CURRENT='2.70',IS_TEST=/\/TM--ES(?:\/|$)/i.test(location.pathname),PATH=IS_TEST?'appVersions/webTest':'appVersions/web',GUARD='psuWebReloadGuardV270';let watchRef=null,watchUid='';
+ const CURRENT='2.71',IS_TEST=/\/TM--ES(?:\/|$)/i.test(location.pathname),PATH=IS_TEST?'appVersions/webTest':'appVersions/web',GUARD='psuWebReloadGuardV271';let watchRef=null,watchUid='';
  const num=v=>{const m=String(v||'').match(/(\d+)\.(\d+)/);return m?(Number(m[1])*10000+Number(m[2])):-1};
  const readVersion=v=>String(v&&typeof v==='object'?(v.version||''):v||'').replace(/^웹\s*v?/i,'').trim();
  function guard(){try{return JSON.parse(sessionStorage.getItem(GUARD)||'{}')||{}}catch(_e){return {}}}
