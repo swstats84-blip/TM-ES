@@ -92,19 +92,20 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.86";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.86-schedule-delta-mobile-home";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.87";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.87-fast-indexeddb-snapshot";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
   if(window.__psuBootV247)return;
-  const st={auth:false,data:false,anchor:false,mode:'unknown',released:false};
+  const st={auth:false,data:false,anchor:false,mode:'unknown',released:false,cached:false};
   function needsAnchor(){try{return matchMedia('(max-width:820px)').matches&&st.mode==='admin'&&window.main&&main.dataset.tab==='calendar'&&Array.isArray(window.state||state&&state.scheduleEvents)&&((window.state||state).scheduleEvents||[]).length>0}catch(e){try{return matchMedia('(max-width:820px)').matches&&st.mode==='admin'&&window.main&&main.dataset.tab==='calendar'&&Array.isArray(state.scheduleEvents)&&state.scheduleEvents.length>0}catch(_e){return false}}}
   function reveal(){if(st.released)return;st.released=true;requestAnimationFrame(()=>requestAnimationFrame(()=>{document.documentElement.classList.remove('psu-web-boot-v247');const el=document.getElementById('psuBootV247');if(el)el.setAttribute('aria-hidden','true')}))}
   function maybe(){if(!st.auth||!st.data)return;if(needsAnchor()&&!st.anchor)return;reveal()}
   window.__psuBootV247={
-    mode(admin){if(st.released)return;st.mode=admin?'admin':'general';st.data=false;st.anchor=false},
+    mode(admin){if(st.released)return;st.mode=admin?'admin':'general';st.data=st.cached===true;if(!st.cached)st.anchor=false;maybe()},
     auth(admin){if(st.released)return;st.auth=true;st.mode=admin?'admin':'general';maybe()},
+    cache(){if(st.released)return;st.cached=true;st.data=true;maybe()},
     data(){if(st.released)return;st.data=true;maybe()},
     anchor(){if(st.released)return;st.anchor=true;maybe()},
     isActive(){return !st.released},
@@ -1534,6 +1535,53 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
 
 
 
+<script id="web-v287-fast-indexeddb-snapshot-script">
+(function(){
+ if(window.__webV287FastSnapshotInstalled)return;window.__webV287FastSnapshotInstalled=true;
+ const DB='psu_web_fast_snapshot_v287',STORE='kv',KEY='latest-v1',MAX_AGE=7*24*60*60*1000;
+ let saveTimer=0,saveBusy=false,restorePromise=null;
+ function dbOpen(){return new Promise((resolve,reject)=>{if(!window.indexedDB)return reject(new Error('no indexedDB'));const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('indexedDB open failed'))})}
+ async function dbGet(){try{const db=await dbOpen();return await new Promise(resolve=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).get(KEY);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>resolve(null);tx.oncomplete=()=>{try{db.close()}catch(_e){}}})}catch(_e){return null}}
+ async function dbPut(v){try{const db=await dbOpen();await new Promise(resolve=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(v,KEY);tx.oncomplete=resolve;tx.onerror=resolve;tx.onabort=resolve});try{db.close()}catch(_e){}}catch(_e){}}
+ async function dbDelete(){try{const db=await dbOpen();await new Promise(resolve=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(KEY);tx.oncomplete=resolve;tx.onerror=resolve;tx.onabort=resolve});try{db.close()}catch(_e){}}catch(_e){}}
+ function copy(v,fallback){try{return JSON.parse(JSON.stringify(v))}catch(_e){return fallback}}
+ function hasUseful(x){return !!(x&&typeof x==='object'&&((Array.isArray(x.scheduleEvents)&&x.scheduleEvents.length)||(Array.isArray(x.progress)&&x.progress.length)||(Array.isArray(x.progressVisibleUnitsV445)&&x.progressVisibleUnitsV445.length)))}
+ async function restore(){
+   if(restorePromise)return restorePromise;
+   restorePromise=(async()=>{
+     const x=await dbGet();
+     if(!x||x.schema!==1||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>MAX_AGE||!hasUseful(x)){if(x)dbDelete();return false}
+     if(!window.state||typeof state!=='object')return false;
+     const live=window.__psuCanonicalReadyStateV287||{};let applied=false;
+     if(!live.schedule&&Array.isArray(x.scheduleEvents)&&x.scheduleEvents.length){state.scheduleEvents=copy(x.scheduleEvents,[]);applied=true}
+     if(!live.progress){
+       if(Array.isArray(x.progress)&&x.progress.length){state.progress=copy(x.progress,[]);applied=true}
+       if(Array.isArray(x.progressVisibleUnitsV445)){state.progressVisibleUnitsV445=x.progressVisibleUnitsV445.map(v=>String(v||'')).filter(Boolean);applied=true}
+       if(typeof x.progressListInitializedV558==='boolean')state.progressListInitializedV558=x.progressListInitializedV558;
+       if(x.progressManualIncludeUnits&&typeof x.progressManualIncludeUnits==='object')state.progressManualIncludeUnits=copy(x.progressManualIncludeUnits,{});
+       if(x.deletedProgressUnits&&typeof x.deletedProgressUnits==='object')state.deletedProgressUnits=copy(x.deletedProgressUnits,{});
+     }
+     if(!applied)return false;
+     window.__psuFastSnapshotRestoredV287=true;
+     try{if(typeof render==='function')render()}catch(_e){}
+     try{if(window.__psuBootV247&&typeof window.__psuBootV247.cache==='function')window.__psuBootV247.cache()}catch(_e){}
+     try{if(typeof beginInitialTodayAnchorV196==='function')beginInitialTodayAnchorV196()}catch(_e){}
+     try{if(window.sync)sync.innerHTML='최근 화면 먼저 표시 · 최신 데이터 확인 중...'}catch(_e){}
+     return true;
+   })();
+   return restorePromise;
+ }
+ async function save(){
+   if(saveBusy||!window.state||typeof state!=='object')return;const live=window.__psuCanonicalReadyStateV287||{};if(!live.schedule||!live.progress)return;
+   const payload={schema:1,at:Date.now(),scheduleEvents:copy(state.scheduleEvents,[]),progress:copy(state.progress,[]),progressVisibleUnitsV445:copy(state.progressVisibleUnitsV445,[]),progressListInitializedV558:state.progressListInitializedV558===true,progressManualIncludeUnits:copy(state.progressManualIncludeUnits,{}),deletedProgressUnits:copy(state.deletedProgressUnits,{})};
+   if(!hasUseful(payload))return;saveBusy=true;try{await dbPut(payload);try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(_e){}}finally{saveBusy=false}
+ }
+ function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(save,500)}
+ window.__psuFastSnapshotRestoreV287=restore;window.__psuFastSnapshotScheduleSaveV287=scheduleSave;window.__psuFastSnapshotClearV287=dbDelete;
+ restore().catch(()=>{});
+})();
+</script>
+
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
@@ -1551,11 +1599,11 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
 <script id="web-v270-canonical-sync-script">
 (function(){
  if(window.__webV270CanonicalSyncInstalled)return;window.__webV270CanonicalSyncInstalled=true;
- const ready={schedule:false,progress:false,progressInfo:false};let bootDone=false,notify=false;
+ const ready={schedule:false,progress:false,progressInfo:false};window.__psuCanonicalReadyStateV287=ready;let bootDone=false,notify=false;
  function status(){if(window.sync)sync.innerHTML=`실시간 동기화 <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}
  function finishBoot(statusText='실시간 동기화'){if(bootDone)return;bootDone=true;try{if(typeof render==='function')render();if(firstLoad){firstLoad=false;beginInitialTodayAnchorV196()}else if(typeof shouldInitialTodayAnchorV196==='function'&&shouldInitialTodayAnchorV196())scheduleInitialTodayAnchorV196()}catch(_e){}if(statusText==='실시간 동기화')status();else{if(window.sync)sync.innerHTML=`${statusText} <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}if(window.__psuBootV247)window.__psuBootV247.data();if(notify){notify=false;toastMsg(statusText==='실시간 동기화'?'실시간 데이터가 최신 상태입니다.':'일부 실시간 데이터 연결이 지연되고 있습니다.')}}
  function finalize(force=false){if(bootDone)return;if(!ready.schedule||!ready.progress||(!force&&!ready.progressInfo))return;finishBoot('실시간 동기화')}
- window.__psuCanonicalReadyV270=function(kind){if(Object.prototype.hasOwnProperty.call(ready,kind))ready[kind]=true;finalize(false)};
+ window.__psuCanonicalReadyV270=function(kind){if(Object.prototype.hasOwnProperty.call(ready,kind))ready[kind]=true;if(ready.schedule&&ready.progress&&window.__psuFastSnapshotScheduleSaveV287)window.__psuFastSnapshotScheduleSaveV287();finalize(false)};
  window.__psuCanonicalLoadV270=async function(silent=false){if(window.refresh)refresh.disabled=true;if(window.sync)sync.textContent=bootDone?'실시간 데이터 확인 중...':'실시간 동기화 연결 중...';if(!silent)notify=true;try{if(window.__fbDirectV187)await window.__fbDirectV187.auth();if(bootDone){if(typeof render==='function')render();status();if(!silent){notify=false;toastMsg('실시간 데이터가 최신 상태입니다.')}}else finalize(false)}catch(e){if(window.sync)sync.textContent='연결 오류';if(window.refresh)refresh.disabled=false;if(!silent)psuAlert(e&&e.message?e.message:String(e))}return null};
  window.load=load=function(silent=false){return window.__psuCanonicalLoadV270(silent)};
  setTimeout(()=>finalize(true),4500);
@@ -1643,7 +1691,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  const isMaster=()=>!!(window.__webAuthInfoV136&&window.__webAuthInfoV136.role==='master');
  async function auth(){if(!window.firebase)throw new Error('Firebase SDK 준비 중');if(firebase.auth().currentUser)return firebase.auth().currentUser;const c=await firebase.auth().signInAnonymously();return c.user}
  async function bump(kind){await auth();await firebase.database().ref('meta/revisions/'+kind).set(nowRev())}
- async function bumpScheduleDeltaV286(upserts=[],deletedIds=[],patches={}){await auth();const rev=nowRev(),change={revision:rev,writer:'web-master-v2.86',updatedAt:new Date().toISOString()},um={};(Array.isArray(upserts)?upserts:[]).forEach(src=>{if(!src||typeof src!=='object')return;const id=String(src.eventId||'').trim();if(!id)return;const e=JSON.parse(JSON.stringify(src));stripScheduleNoteV199(e);e.eventId=id;um[id]=e});if(Object.keys(um).length)change.upserts=um;const dm={};(Array.isArray(deletedIds)?deletedIds:[]).forEach(x=>{const id=String(x||'').trim();if(id)dm[id]=true});if(Object.keys(dm).length)change.deletes=dm;if(patches&&typeof patches==='object'&&Object.keys(patches).length)change.patches=patches;await firebase.database().ref('meta/revisions').update({schedule:rev,scheduleChange:change});return rev}
+ async function bumpScheduleDeltaV286(upserts=[],deletedIds=[],patches={}){await auth();const rev=nowRev(),change={revision:rev,writer:'web-master-v2.87',updatedAt:new Date().toISOString()},um={};(Array.isArray(upserts)?upserts:[]).forEach(src=>{if(!src||typeof src!=='object')return;const id=String(src.eventId||'').trim();if(!id)return;const e=JSON.parse(JSON.stringify(src));stripScheduleNoteV199(e);e.eventId=id;um[id]=e});if(Object.keys(um).length)change.upserts=um;const dm={};(Array.isArray(deletedIds)?deletedIds:[]).forEach(x=>{const id=String(x||'').trim();if(id)dm[id]=true});if(Object.keys(dm).length)change.deletes=dm;if(patches&&typeof patches==='object'&&Object.keys(patches).length)change.patches=patches;await firebase.database().ref('meta/revisions').update({schedule:rev,scheduleChange:change});return rev}
  async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(s||'')));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
  function b64key(s){return btoa(unescape(encodeURIComponent(String(s||'').trim()))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
  function cleanArr(v){return Array.isArray(v)?v.map(x=>String(x||'').trim()).filter(Boolean):typeof v==='string'?v.split(/[\n,;]+/).map(x=>x.trim()).filter(Boolean):[]}
