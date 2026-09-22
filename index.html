@@ -91,8 +91,8 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.71";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.71-weekly-direct-pc-exe";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.72";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.72-same-repo-weekly-pc-exe";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
@@ -774,13 +774,13 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    document.getElementById('weeklyCloseV132').onclick=closeWeeklyV132;ov.addEventListener('click',e=>{if(e.target===ov)closeWeeklyV132()});
    return ov;
  }
- const WEEKLY_GITHUB_BASE_V271='https://raw.githubusercontent.com/swstats84-blip/TM-ES/main/';
+ const WEEKLY_GITHUB_BASE_V272='./';
  function weeklyIsoV271(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
  function weeklyMondayV271(d){const x=new Date(d);x.setHours(12,0,0,0);const n=(x.getDay()+6)%7;x.setDate(x.getDate()-n);return x}
  function weeklyInfoV271(slot){
    const mon=weeklyMondayV271(new Date());if(slot==='next')mon.setDate(mon.getDate()+7);
    const weekStart=weeklyIsoV271(mon),label=slot==='next'?'다음주':'이번주',name=`PSU_주간스케줄_${weekStart}.jpg`;
-   return {ok:true,found:true,slot,label,weekStart,name,mime:'image/jpeg',url:WEEKLY_GITHUB_BASE_V271+encodeURIComponent(name)};
+   return {ok:true,found:true,slot,label,weekStart,name,mime:'image/jpeg',url:WEEKLY_GITHUB_BASE_V272+encodeURIComponent(name)};
  }
  async function weeklyExistsV271(info){
    const u=info.url+(info.url.includes('?')?'&':'?')+'psu_check='+Date.now();
@@ -806,7 +806,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    function fitWidth(){recomputeFits();apply(st.fitWidth);requestAnimationFrame(()=>{vp.scrollLeft=0;vp.scrollTop=0})}
    function fitAll(){recomputeFits();apply(st.fitAll);requestAnimationFrame(()=>{vp.scrollLeft=0;vp.scrollTop=0})}
    img.onload=()=>{st.nw=img.naturalWidth||1;st.nh=img.naturalHeight||1;recomputeFits();fitWidth()};
-   img.onerror=()=>{vp.innerHTML=`<div class="weekly-loading-v132">${esc(`GitHub에서 ${r.name||label+' 스케줄'} 이미지를 불러오지 못했습니다.`)}</div>`};
+   img.onerror=()=>{vp.innerHTML=`<div class="weekly-loading-v132">${esc(`${r.name||label+' 스케줄'} 이미지를 불러오지 못했습니다.`)}</div>`};
    img.src=r.url?(r.url+(r.url.includes('?')?'&':'?')+'psu_img='+Date.now()):`data:${r.mime||'image/jpeg'};base64,${r.base64||''}`;
    document.getElementById('weeklyMinusV132').onclick=()=>apply(st.scale/1.25);document.getElementById('weeklyPlusV132').onclick=()=>apply(st.scale*1.25);document.getElementById('weeklyFitWidthV132').onclick=fitWidth;document.getElementById('weeklyFitAllV132').onclick=fitAll;document.getElementById('weeklyOriginalV132').onclick=()=>apply(1);
    img.ondblclick=e=>{e.preventDefault();recomputeFits();apply(Math.abs(st.scale-1)<.04?st.fitWidth:1,e.clientX,e.clientY)};
@@ -825,7 +825,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    catch(e){vp.innerHTML=`<div class="weekly-loading-v132">${esc(e&&e.message?e.message:String(e||'스케줄을 불러오지 못했습니다.'))}</div>`}
  }
  async function openWeekly(){
-   mtitle.textContent='스케줄';mbody.innerHTML='<div class="empty">GitHub 스케줄 정보를 확인하는 중...</div>';modalback.classList.add('show');
+   mtitle.textContent='스케줄';mbody.innerHTML='<div class="empty">스케줄 정보를 확인하는 중...</div>';modalback.classList.add('show');
    try{
      const cur=weeklyInfoV271('current'),nxt=weeklyInfoV271('next');
      const found=await Promise.all([weeklyExistsV271(cur),weeklyExistsV271(nxt)]);cur.found=found[0];nxt.found=found[1];
