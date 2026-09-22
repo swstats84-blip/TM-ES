@@ -91,8 +91,8 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.70";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.70-canonical-sync-low-traffic";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.71";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.71-weekly-direct-pc-exe";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
@@ -774,6 +774,19 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    document.getElementById('weeklyCloseV132').onclick=closeWeeklyV132;ov.addEventListener('click',e=>{if(e.target===ov)closeWeeklyV132()});
    return ov;
  }
+ const WEEKLY_GITHUB_BASE_V271='https://raw.githubusercontent.com/swstats84-blip/TM-ES/main/';
+ function weeklyIsoV271(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+ function weeklyMondayV271(d){const x=new Date(d);x.setHours(12,0,0,0);const n=(x.getDay()+6)%7;x.setDate(x.getDate()-n);return x}
+ function weeklyInfoV271(slot){
+   const mon=weeklyMondayV271(new Date());if(slot==='next')mon.setDate(mon.getDate()+7);
+   const weekStart=weeklyIsoV271(mon),label=slot==='next'?'다음주':'이번주',name=`PSU_주간스케줄_${weekStart}.jpg`;
+   return {ok:true,found:true,slot,label,weekStart,name,mime:'image/jpeg',url:WEEKLY_GITHUB_BASE_V271+encodeURIComponent(name)};
+ }
+ async function weeklyExistsV271(info){
+   const u=info.url+(info.url.includes('?')?'&':'?')+'psu_check='+Date.now();
+   try{const r=await fetch(u,{method:'HEAD',cache:'no-store'});if(r.ok)return true;if(r.status===404)return false}catch(_e){}
+   return await new Promise(resolve=>{const im=new Image(),done=v=>{im.onload=null;im.onerror=null;resolve(v)};const t=setTimeout(()=>done(false),5000);im.onload=()=>{clearTimeout(t);done(true)};im.onerror=()=>{clearTimeout(t);done(false)};im.src=u});
+ }
  function installWeeklyImageV132(r){
    const vp=document.getElementById('weeklyViewportV132'),meta=document.getElementById('weeklyMetaV132');if(!vp)return;
    const label=r&&r.label?r.label:(r&&r.slot==='next'?'다음주':'이번주');
@@ -793,7 +806,8 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    function fitWidth(){recomputeFits();apply(st.fitWidth);requestAnimationFrame(()=>{vp.scrollLeft=0;vp.scrollTop=0})}
    function fitAll(){recomputeFits();apply(st.fitAll);requestAnimationFrame(()=>{vp.scrollLeft=0;vp.scrollTop=0})}
    img.onload=()=>{st.nw=img.naturalWidth||1;st.nh=img.naturalHeight||1;recomputeFits();fitWidth()};
-   img.src=`data:${r.mime||'image/jpeg'};base64,${r.base64||''}`;
+   img.onerror=()=>{vp.innerHTML=`<div class="weekly-loading-v132">${esc(`GitHub에서 ${r.name||label+' 스케줄'} 이미지를 불러오지 못했습니다.`)}</div>`};
+   img.src=r.url?(r.url+(r.url.includes('?')?'&':'?')+'psu_img='+Date.now()):`data:${r.mime||'image/jpeg'};base64,${r.base64||''}`;
    document.getElementById('weeklyMinusV132').onclick=()=>apply(st.scale/1.25);document.getElementById('weeklyPlusV132').onclick=()=>apply(st.scale*1.25);document.getElementById('weeklyFitWidthV132').onclick=fitWidth;document.getElementById('weeklyFitAllV132').onclick=fitAll;document.getElementById('weeklyOriginalV132').onclick=()=>apply(1);
    img.ondblclick=e=>{e.preventDefault();recomputeFits();apply(Math.abs(st.scale-1)<.04?st.fitWidth:1,e.clientX,e.clientY)};
    vp.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();apply(st.scale*(e.deltaY<0?1.12:.89),e.clientX,e.clientY)},{passive:false});
@@ -804,22 +818,22 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    vp.addEventListener('pointerup',endPointer);vp.addEventListener('pointercancel',endPointer);
    window.addEventListener('resize',()=>{if(weeklyStateV132===st)recomputeFits()},{once:true});
  }
- function openWeeklySlotV150(slot){
-   const label=slot==='next'?'다음주':'이번주';
-   buildWeeklyViewerV132(label);
-   google.script.run.withSuccessHandler(r=>{const vp=document.getElementById('weeklyViewportV132');if(!vp)return;if(!r||r.ok===false){vp.innerHTML=`<div class="weekly-loading-v132">${esc(r&&r.message?r.message:'스케줄을 불러오지 못했습니다.')}</div>`;return}if(!r.found){vp.innerHTML=`<div class="weekly-loading-v132">${esc(r.message||`등록된 ${label} 스케줄이 없습니다.`)}</div>`;return}installWeeklyImageV132(r)}).withFailureHandler(e=>{const vp=document.getElementById('weeklyViewportV132');if(vp)vp.innerHTML=`<div class="weekly-loading-v132">${esc(e&&e.message?e.message:String(e))}</div>`}).getWeeklyScheduleImageV131(slot);
+ async function openWeeklySlotV150(slot){
+   const info=weeklyInfoV271(slot),label=info.label;buildWeeklyViewerV132(label);
+   const vp=document.getElementById('weeklyViewportV132');if(!vp)return;
+   try{if(!await weeklyExistsV271(info)){vp.innerHTML=`<div class="weekly-loading-v132">등록된 ${esc(label)} 스케줄이 없습니다.<br><small>${esc(info.name)}</small></div>`;return}installWeeklyImageV132(info)}
+   catch(e){vp.innerHTML=`<div class="weekly-loading-v132">${esc(e&&e.message?e.message:String(e||'스케줄을 불러오지 못했습니다.'))}</div>`}
  }
- function openWeekly(){
-   mtitle.textContent='스케줄';mbody.innerHTML='<div class="empty">스케줄 정보를 확인하는 중...</div>';modalback.classList.add('show');
-   google.script.run.withSuccessHandler(r=>{
-     if(!r||r.ok===false){mbody.innerHTML=`<div class="empty">${esc(r&&r.message?r.message:'스케줄 정보를 불러오지 못했습니다.')}</div>`;return}
-     const cur=r.current||{found:false,weekStart:r.currentWeek||''},nxt=r.next||{found:false,weekStart:r.nextWeek||''};
+ async function openWeekly(){
+   mtitle.textContent='스케줄';mbody.innerHTML='<div class="empty">GitHub 스케줄 정보를 확인하는 중...</div>';modalback.classList.add('show');
+   try{
+     const cur=weeklyInfoV271('current'),nxt=weeklyInfoV271('next');
+     const found=await Promise.all([weeklyExistsV271(cur),weeklyExistsV271(nxt)]);cur.found=found[0];nxt.found=found[1];
      if(!nxt.found){closeM();openWeeklySlotV150('current');return}
      const curDisabled=cur.found?'':' disabled';
-     mbody.innerHTML=`<div class="admin-reg-note-v131">다음주 스케줄이 등록되어 있어 선택할 수 있습니다.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn primary" id="weeklyCurrentPickV150"${curDisabled} style="padding:18px 8px"><b style="font-size:16px">이번주</b><br><span style="font-size:11px;font-weight:500">${esc(cur.weekStart||'')}</span>${cur.found?'':'<br><span style="font-size:10px">등록 없음</span>'}</button><button class="btn primary" id="weeklyNextPickV150" style="padding:18px 8px"><b style="font-size:16px">다음주</b><br><span style="font-size:11px;font-weight:500">${esc(nxt.weekStart||'')}</span></button></div>`;
-     const a=document.getElementById('weeklyCurrentPickV150'),b=document.getElementById('weeklyNextPickV150');
-     if(a)a.onclick=()=>{closeM();openWeeklySlotV150('current')};if(b)b.onclick=()=>{closeM();openWeeklySlotV150('next')};
-   }).withFailureHandler(e=>{mbody.innerHTML=`<div class="empty">${esc(e&&e.message?e.message:String(e))}</div>`}).getWeeklyScheduleStatusV150();
+     mbody.innerHTML=`<div class="admin-reg-note-v131">다음주 스케줄이 등록되어 있어 선택할 수 있습니다.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn primary" id="weeklyCurrentPickV150"${curDisabled} style="padding:18px 8px"><b style="font-size:16px">이번주</b><br><span style="font-size:11px;font-weight:500">${esc(cur.weekStart)}</span>${cur.found?'':'<br><span style="font-size:10px">등록 없음</span>'}</button><button class="btn primary" id="weeklyNextPickV150" style="padding:18px 8px"><b style="font-size:16px">다음주</b><br><span style="font-size:11px;font-weight:500">${esc(nxt.weekStart)}</span></button></div>`;
+     const a=document.getElementById('weeklyCurrentPickV150'),b=document.getElementById('weeklyNextPickV150');if(a)a.onclick=()=>{closeM();openWeeklySlotV150('current')};if(b)b.onclick=()=>{closeM();openWeeklySlotV150('next')};
+   }catch(e){mbody.innerHTML=`<div class="empty">${esc(e&&e.message?e.message:String(e||'스케줄 정보를 불러오지 못했습니다.'))}</div>`}
  }
  function addHeaderButtons(){
    const h=document.querySelector('header'),refresh=document.getElementById('refresh');if(!h||document.getElementById('webActionsV131'))return;
@@ -1484,6 +1498,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  if(window.__webV174PcDownloadInstalled)return;window.__webV174PcDownloadInstalled=true;
  const env=()=>window.__psuClientEnvV174||{device:'PC',isPc:true,label:'PC'};
  const token=()=>{try{return typeof window.__webAuthTokenV136==='function'?window.__webAuthTokenV136():(localStorage.getItem('psuWebAdminSessionV131')||'')}catch(e){return ''}};
+ const PC_VIEWER_DOWNLOAD_URL_V271='https://raw.githubusercontent.com/swstats84-blip/TM-ES/main/SEC%20PSU%20%EC%9E%91%EC%97%85%20%ED%98%84%ED%99%A9.exe';
  function ensure(){
    const box=document.getElementById('webActionsV131');if(!box)return null;
    let b=document.getElementById('pcViewerDownloadBtnV174');
@@ -1499,28 +1514,44 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    const admin=!!(document.body.classList.contains('admin-mode')&&window.__webAuthInfoV136);
    b.hidden=!(admin&&env().isPc);
  }
- function gsMeta(t){return new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).getPcViewerDownloadMetaV197(t)})}
- function gsChunk(t,ticket,offset,length){return new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).getPcViewerDownloadChunkV197(t,ticket,offset,length)})}
- function decodeChunk(b64){const bin=atob(String(b64||'')),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u}
  async function download(){
    const b=ensure();if(!b||b.disabled)return;if(!env().isPc)return;
    const t=token();if(!t){sync();return psuAlert('관리자 로그인이 필요합니다.');}
-   const old=b.textContent;b.disabled=true;b.textContent='다운로드 준비 중...';let objectUrl='';
+   const old=b.textContent;b.disabled=true;b.textContent='다운로드중...';let objectUrl='';
    try{
-     const meta=await gsMeta(t);if(!meta||meta.ok===false||!meta.size||!meta.ticket)throw new Error(meta&&meta.message?meta.message:'PC뷰어 다운로드 파일을 찾지 못했습니다.');
-     const parts=[];let offset=0,idx=0,total=Math.max(1,Number(meta.totalChunks)||Math.ceil(Number(meta.size)/Number(meta.chunkSize||1048576)));
-     while(offset<Number(meta.size)){
-       idx++;b.textContent=`다운로드 준비 ${Math.min(99,Math.round((idx-1)/total*100))}%`;
-       const r=await gsChunk(t,meta.ticket,offset,Number(meta.chunkSize)||1048576);if(!r||r.ok===false||!r.base64)throw new Error(r&&r.message?r.message:'파일 데이터를 받지 못했습니다.');
-       parts.push(decodeChunk(r.base64));const next=Number(r.nextOffset);if(!(next>offset))throw new Error('다운로드 진행값이 올바르지 않습니다.');offset=next;
+     const url=PC_VIEWER_DOWNLOAD_URL_V271+'?psu_dl='+Date.now();
+     const r=await fetch(url,{cache:'no-store'});
+     if(!r.ok)throw new Error(`다운로드 실패 (${r.status})`);
+     const blob=await r.blob();
+     if(!blob||blob.size<1024)throw new Error('PC뷰어 파일 데이터가 올바르지 않습니다.');
+     objectUrl=URL.createObjectURL(blob);
+     const a=document.createElement('a');
+     a.href=objectUrl;
+     a.download='SEC PSU 작업 현황.exe';
+     document.body.appendChild(a);
+     a.click();
+     a.remove();
+     setTimeout(()=>{try{URL.revokeObjectURL(objectUrl)}catch(_e){}},10000);
+     toastMsg('PC뷰어 다운로드를 시작했습니다.');
+   }catch(e){
+     if(objectUrl)try{URL.revokeObjectURL(objectUrl)}catch(_e){}
+     try{
+       const a=document.createElement('a');
+       a.href=PC_VIEWER_DOWNLOAD_URL_V271+'?psu_dl='+Date.now();
+       a.target='_blank';
+       a.rel='noopener';
+       document.body.appendChild(a);
+       a.click();
+       a.remove();
+       toastMsg('PC뷰어 다운로드를 시작했습니다.');
+     }catch(_e){
+       psuAlert(e&&e.message?e.message:String(e||'다운로드에 실패했습니다.'));
      }
-     b.textContent='파일 저장 중...';const blob=new Blob(parts,{type:'application/vnd.microsoft.portable-executable'});objectUrl=URL.createObjectURL(blob);
-     const a=document.createElement('a');a.href=objectUrl;a.download=meta.fileName||'SEC PSU 작업 현황.exe';document.body.appendChild(a);a.click();a.remove();
-     setTimeout(()=>{try{URL.revokeObjectURL(objectUrl)}catch(e){}},5000);toastMsg('PC뷰어 다운로드를 시작했습니다.');
-   }catch(e){if(objectUrl)try{URL.revokeObjectURL(objectUrl)}catch(_e){};psuAlert(e&&e.message?e.message:String(e||'다운로드 준비에 실패했습니다.'))}
-   finally{b.disabled=false;b.textContent=old}
+   }finally{
+     b.disabled=false;
+     b.textContent=old;
+   }
  }
-
  const obs=new MutationObserver(sync);obs.observe(document.body,{attributes:true,attributeFilter:['class']});
  setTimeout(sync,0);setTimeout(sync,300);setInterval(sync,3000);
 })();
