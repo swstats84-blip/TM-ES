@@ -92,8 +92,8 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.94";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.94-team-picker-cancel-auth-stable-swap";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.93";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.93-auth-stable-swap-when-live-ready";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
@@ -2485,16 +2485,4 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
 })();
 </script>
 
-
-<script id="web-v294-team-picker-auto-close">
-(function(){
- if(window.__webV294TeamPickerCloseInstalled)return;window.__webV294TeamPickerCloseInstalled=true;
- function closeTeamPickerV294(){document.querySelectorAll('.vendor-picker-v186,.vendor-quick-v168').forEach(x=>x.remove())}
- // 실제 팀 버튼을 누른 경우에만 기존 setv()가 저장한다. 선택창 밖의 다른 액션은 창만 닫는다.
- document.addEventListener('pointerdown',ev=>{const p=document.querySelector('.vendor-picker-v186');if(!p)return;const t=ev.target;if(p.contains(t))return;if(t&&t.closest&&t.closest('.vendor-edge-v169'))return;closeTeamPickerV294()},true);
- document.addEventListener('keydown',ev=>{if(ev.key==='Escape')closeTeamPickerV294()},true);
- window.addEventListener('popstate',closeTeamPickerV294);window.addEventListener('pagehide',closeTeamPickerV294);
- window.closeTeamPickerV294=closeTeamPickerV294;
-})();
-</script>
 </body></html>
