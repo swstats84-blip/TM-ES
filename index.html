@@ -92,8 +92,8 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.92";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.92-nonblocking-last-screen";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.93";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.93-auth-stable-swap-when-live-ready";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
@@ -1559,17 +1559,25 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  function snapshotDoc(x){const bodyClass=String(x.bodyClass||'').replace(/\bpsu[^\s]*boot[^\s]*\b/g,'').trim();return '<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>'+String(x.css||'')+'\nhtml,body{margin:0!important;min-height:100%!important}*{animation:none!important;transition:none!important}.modalback,.toast,#psuBootV247{display:none!important}</style></head><body class="'+bodyClass.replace(/"/g,'&quot;')+'">'+String(x.appHtml||'')+'</body></html>'}
  function showSnapshot(x){if(frameWrap||!x||!x.appHtml)return false;applyView(x);const wrap=document.createElement('div');wrap.id='psuVisualSnapshotV290';wrap.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#f5f7fb;opacity:1;transition:opacity .12s ease;';const f=document.createElement('iframe');f.setAttribute('aria-label','최근 화면');f.style.cssText='display:block;width:100%;height:100%;border:0;background:#f5f7fb;';const badge=document.createElement('div');badge.textContent='최근 화면 · 최신 정보 확인 중';badge.style.cssText='position:absolute;right:10px;bottom:10px;z-index:2;padding:5px 8px;border-radius:999px;background:rgba(31,41,55,.82);color:#fff;font:700 10px/1.2 "Malgun Gothic",sans-serif;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.16)';wrap.appendChild(f);wrap.appendChild(badge);document.body.appendChild(wrap);frameWrap=wrap;f.onload=()=>{try{f.contentWindow.scrollTo(Number(x.scrollX||0),Number(x.scrollY||0))}catch(_e){}};f.srcdoc=snapshotDoc(x);restored=true;window.__psuVisualSnapshotRestoredV290=true;return true}
  async function restore(){const x=await dbGet();if(!x||x.schema!==1||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>MAX_AGE||!x.appHtml){if(x)dbDelete();return false}return showSnapshot(x)}
- let liveReadyPendingV291=false;
+ let liveReadySeenV293=false,captureAfterAuthV293=false;
  function authPendingV291(){try{return !!(window.__psuAuthTokenSyncV212&&window.__psuAuthTokenSyncV212())&&window.__psuAuthRestoreSettledV291!==true}catch(_e){return false}}
- function hideSnapshotV292(){if(!frameWrap)return;const old=frameWrap;frameWrap=null;requestAnimationFrame(()=>requestAnimationFrame(()=>{old.style.opacity='0';setTimeout(()=>{try{old.remove()}catch(_e){}},140)}))}
- function scheduleCaptureV292(){setTimeout(()=>capture(true),900);setTimeout(()=>capture(true),2600)}
- function liveReady(){/* v2.92: 최근 화면 iframe은 표시용이다. 라이브/캐시 DOM이 준비되면 인증 복원 중이어도 즉시 걷어내 조작을 막지 않는다. 새 스냅샷 저장만 인증 완료 뒤로 미룬다. */hideSnapshotV292();if(authPendingV291()){liveReadyPendingV291=true;return}liveReadyPendingV291=false;scheduleCaptureV292()}
- window.__psuVisualSnapshotLiveReadyV290=liveReady;window.__psuVisualSnapshotAuthReadyV291=function(){if(liveReadyPendingV291){liveReadyPendingV291=false;scheduleCaptureV292()}};window.__psuVisualSnapshotCaptureV290=()=>capture(true);window.__psuVisualSnapshotClearV290=dbDelete;
+ function captureLiveV293(){if(authPendingV291()){captureAfterAuthV293=true;return}captureAfterAuthV293=false;setTimeout(()=>capture(true),900);setTimeout(()=>capture(true),2600)}
+ function liveReady(){
+   // v2.93: 최근 화면은 고정 시간으로 치우지 않는다. canonical 일정+진행현황+진행정보가
+   // 실제 준비되어 finishBoot에서 이 신호를 보낸 순간에만 라이브 화면으로 한 번 교체한다.
+   // 관리자 세션 복원은 화면 교체를 막지 않고, 새 스냅샷 저장만 인증 완료 뒤로 미룬다.
+   liveReadySeenV293=true;
+   if(frameWrap){const old=frameWrap;frameWrap=null;requestAnimationFrame(()=>requestAnimationFrame(()=>{old.style.opacity='0';setTimeout(()=>{try{old.remove()}catch(_e){}},140)}))}
+   captureLiveV293();
+ }
+ window.__psuVisualSnapshotLiveReadyV290=liveReady;
+ window.__psuVisualSnapshotAuthReadyV291=function(){if(captureAfterAuthV293&&liveReadySeenV293)captureLiveV293()};
+ window.__psuVisualSnapshotCaptureV290=()=>capture(true);window.__psuVisualSnapshotClearV290=dbDelete;
  const oldRender=window.render;if(typeof oldRender==='function')window.render=render=function(){const r=oldRender.apply(this,arguments);scheduleCapture(1400);return r};
  addEventListener('scroll',()=>scheduleCapture(1800),{passive:true});document.addEventListener('change',()=>scheduleCapture(900),true);document.addEventListener('click',e=>{try{if(e.target&&e.target.closest&&e.target.closest('.tab,#prev,#next,#today'))scheduleCapture(900)}catch(_e){}},true);
  const clsObs=new MutationObserver(()=>{if(!document.documentElement.classList.contains('psu-web-boot-v247'))scheduleCapture(900)});clsObs.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')capture(true)});addEventListener('pagehide',()=>capture(true));
- restore().catch(()=>{});setTimeout(()=>{if(frameWrap){try{const b=frameWrap.querySelector('div');if(b)b.textContent='최근 화면 · 최신 정보 연결 중'}catch(_e){}}},900);/* v2.92: 정적 최근 화면이 입력을 오래 가로막지 않도록 최대 2.4초만 유지한다. */setTimeout(()=>{if(frameWrap)liveReady()},2400);
+ restore().catch(()=>{});setTimeout(()=>{if(frameWrap){try{const b=frameWrap.querySelector('div');if(b)b.textContent='실시간 연결 확인 중 · 최근 화면'}catch(_e){}}},7000);
 })();
 </script>
 
@@ -1604,7 +1612,6 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
      try{if(typeof render==='function')render()}catch(_e){}
      try{if(typeof beginInitialTodayAnchorV196==='function')beginInitialTodayAnchorV196()}catch(_e){}
      try{if(window.__psuBootV247&&typeof window.__psuBootV247.cache==='function')window.__psuBootV247.cache()}catch(_e){}
-     try{if(window.__psuVisualSnapshotLiveReadyV290)setTimeout(()=>window.__psuVisualSnapshotLiveReadyV290(),80)}catch(_e){}
      try{if(window.sync)sync.innerHTML='최근 화면 먼저 표시 · 최신 데이터 확인 중...'}catch(_e){}
      return true;
    })();
