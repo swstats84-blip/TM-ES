@@ -92,8 +92,8 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.95";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.95-general-schedule-view-team-picker-cancel";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.94";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.94-team-picker-cancel-auth-stable-swap";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
@@ -2497,24 +2497,4 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
  window.closeTeamPickerV294=closeTeamPickerV294;
 })();
 </script>
-<style id="web-v295-general-schedule-style">
-.event.general-manual-v295,.mcard.general-manual-v295{background:#f7f5ff!important;border-color:#c4b5fd!important}
-.event.general-manual-v295 .loc,.mcard.general-manual-v295 .loc{background:#ede9fe!important;color:#6d28d9!important;border-color:#c4b5fd!important}
-.event.general-manual-v295 .etype,.event.general-manual-v295 .sn,.mcard.general-manual-v295 .etype,.mcard.general-manual-v295 .sn{display:none!important}
-</style>
-<script id="web-v295-general-schedule-script">
-(function(){
- if(window.__webV295GeneralScheduleInstalled)return;window.__webV295GeneralScheduleInstalled=true;
- const clean=v=>String(v??'').trim(),safe=v=>typeof esc==='function'?esc(String(v??'')):String(v??'');
- function manual(unit,date){return (state.scheduleEvents||[]).find(e=>e&&e.eventType==='manual'&&clean(e.unit)===clean(unit)&&clean(e.date)===clean(date))||null}
- function show(e){const names=Array.isArray(e.participants)?e.participants.map(clean).filter(Boolean):[];mtitle.textContent=`${clean(e.place||e.displayUnit||e.line)||'일반 일정'} 상세`;mbody.innerHTML=`<div class="detail"><div class="label">날짜</div><b>${safe(e.date||'')}</b><div class="label">장소</div><span>${safe(e.place||e.displayUnit||e.line||'-')}</span><div class="label">일정 내용</div><span>${safe(e.task||e.content||'-')}</span><div class="label">참여 인원</div><span>${safe(names.length?names.join(', '):'지정 없음')}</span></div>`;modalback.classList.add('show')}
- function decorate(){
-   document.querySelectorAll('#calendar .event[data-unit][data-date],#mobileList .mcard[data-unit][data-date]').forEach(c=>{const e=manual(c.dataset.unit,c.dataset.date);if(!e)return;c.classList.add('general-manual-v295');const loc=c.querySelector('.loc');if(loc)loc.textContent='일반';const u=c.querySelector('.unit');if(u)u.textContent=clean(e.place||e.displayUnit||e.line)||'일반 일정';const et=c.querySelector('.etype');if(et)et.textContent='';const task=c.querySelector('.task,.mtask');if(task)task.textContent=`${clean(e.task||e.content||'일반 일정')}${Array.isArray(e.participants)&&e.participants.length?` · ${e.participants.length}명`:''}`;c.onclick=ev=>{ev.preventDefault();ev.stopPropagation();show(e)}})
- }
- const rc=window.renderCalendar;if(typeof rc==='function')window.renderCalendar=renderCalendar=function(){const r=rc.apply(this,arguments);decorate();return r};
- const rm=window.renderMobile;if(typeof rm==='function')window.renderMobile=renderMobile=function(){const r=rm.apply(this,arguments);decorate();return r};
- setTimeout(decorate,400);
-})();
-</script>
-
 </body></html>
