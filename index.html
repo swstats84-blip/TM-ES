@@ -92,8 +92,8 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.91";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.91-auth-stable-last-screen";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.92";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.92-nonblocking-last-screen";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
@@ -1561,13 +1561,15 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  async function restore(){const x=await dbGet();if(!x||x.schema!==1||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>MAX_AGE||!x.appHtml){if(x)dbDelete();return false}return showSnapshot(x)}
  let liveReadyPendingV291=false;
  function authPendingV291(){try{return !!(window.__psuAuthTokenSyncV212&&window.__psuAuthTokenSyncV212())&&window.__psuAuthRestoreSettledV291!==true}catch(_e){return false}}
- function liveReady(){if(authPendingV291()){liveReadyPendingV291=true;return}liveReadyPendingV291=false;if(frameWrap){const old=frameWrap;frameWrap=null;requestAnimationFrame(()=>requestAnimationFrame(()=>{old.style.opacity='0';setTimeout(()=>{try{old.remove()}catch(_e){}},140)}))}setTimeout(()=>capture(true),900);setTimeout(()=>capture(true),2600)}
- window.__psuVisualSnapshotLiveReadyV290=liveReady;window.__psuVisualSnapshotAuthReadyV291=function(){if(liveReadyPendingV291)liveReady()};window.__psuVisualSnapshotCaptureV290=()=>capture(true);window.__psuVisualSnapshotClearV290=dbDelete;
+ function hideSnapshotV292(){if(!frameWrap)return;const old=frameWrap;frameWrap=null;requestAnimationFrame(()=>requestAnimationFrame(()=>{old.style.opacity='0';setTimeout(()=>{try{old.remove()}catch(_e){}},140)}))}
+ function scheduleCaptureV292(){setTimeout(()=>capture(true),900);setTimeout(()=>capture(true),2600)}
+ function liveReady(){/* v2.92: 최근 화면 iframe은 표시용이다. 라이브/캐시 DOM이 준비되면 인증 복원 중이어도 즉시 걷어내 조작을 막지 않는다. 새 스냅샷 저장만 인증 완료 뒤로 미룬다. */hideSnapshotV292();if(authPendingV291()){liveReadyPendingV291=true;return}liveReadyPendingV291=false;scheduleCaptureV292()}
+ window.__psuVisualSnapshotLiveReadyV290=liveReady;window.__psuVisualSnapshotAuthReadyV291=function(){if(liveReadyPendingV291){liveReadyPendingV291=false;scheduleCaptureV292()}};window.__psuVisualSnapshotCaptureV290=()=>capture(true);window.__psuVisualSnapshotClearV290=dbDelete;
  const oldRender=window.render;if(typeof oldRender==='function')window.render=render=function(){const r=oldRender.apply(this,arguments);scheduleCapture(1400);return r};
  addEventListener('scroll',()=>scheduleCapture(1800),{passive:true});document.addEventListener('change',()=>scheduleCapture(900),true);document.addEventListener('click',e=>{try{if(e.target&&e.target.closest&&e.target.closest('.tab,#prev,#next,#today'))scheduleCapture(900)}catch(_e){}},true);
  const clsObs=new MutationObserver(()=>{if(!document.documentElement.classList.contains('psu-web-boot-v247'))scheduleCapture(900)});clsObs.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')capture(true)});addEventListener('pagehide',()=>capture(true));
- restore().catch(()=>{});setTimeout(()=>{if(frameWrap){try{const b=frameWrap.querySelector('div');if(b)b.textContent='실시간 연결 확인 중 · 최근 화면'}catch(_e){}}},7000);setTimeout(()=>{if(frameWrap)liveReady()},10000);
+ restore().catch(()=>{});setTimeout(()=>{if(frameWrap){try{const b=frameWrap.querySelector('div');if(b)b.textContent='최근 화면 · 최신 정보 연결 중'}catch(_e){}}},900);/* v2.92: 정적 최근 화면이 입력을 오래 가로막지 않도록 최대 2.4초만 유지한다. */setTimeout(()=>{if(frameWrap)liveReady()},2400);
 })();
 </script>
 
@@ -1602,6 +1604,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
      try{if(typeof render==='function')render()}catch(_e){}
      try{if(typeof beginInitialTodayAnchorV196==='function')beginInitialTodayAnchorV196()}catch(_e){}
      try{if(window.__psuBootV247&&typeof window.__psuBootV247.cache==='function')window.__psuBootV247.cache()}catch(_e){}
+     try{if(window.__psuVisualSnapshotLiveReadyV290)setTimeout(()=>window.__psuVisualSnapshotLiveReadyV290(),80)}catch(_e){}
      try{if(window.sync)sync.innerHTML='최근 화면 먼저 표시 · 최신 데이터 확인 중...'}catch(_e){}
      return true;
    })();
