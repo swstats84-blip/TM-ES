@@ -92,8 +92,8 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.90";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.90-last-complete-screen";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.91";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.91-auth-stable-last-screen";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
@@ -844,21 +844,26 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  }
  function stripGeneralDetail(){if(adminInfoV131)return;[...mbody.querySelectorAll('.section')].forEach(sec=>{const h=sec.querySelector('h4');if(h&&h.textContent.trim()==='스케줄 이력')sec.remove()})}
  const oldDetail=window.showDetail;if(typeof oldDetail==='function')window.showDetail=function(unit,date=''){const r=oldDetail(unit,date);setTimeout(stripGeneralDetail,0);setTimeout(stripGeneralDetail,160);return r};
- addHeaderButtons();setMode(false,null);
+ addHeaderButtons();
+ let initialSavedTokenV291='';try{initialSavedTokenV291=token()}catch(_e){}
+ window.__psuAuthRestoreSettledV291=!initialSavedTokenV291;
+ if(!initialSavedTokenV291)setMode(false,null);else window.__psuAuthRestorePendingV291=true;
+ function authSettledV291(){window.__psuAuthRestorePendingV291=false;window.__psuAuthRestoreSettledV291=true;try{if(window.__psuVisualSnapshotAuthReadyV291)window.__psuVisualSnapshotAuthReadyV291()}catch(_e){}}
  async function verifySavedSessionV131(reloadOnSuccess){
    let t=token();if(!t&&window.__psuAuthTokenRestoreV212)try{t=await window.__psuAuthTokenRestoreV212()}catch(_e){}
-   const finishGeneral=async()=>{setMode(false,null,false);if(window.__psuBootV247)window.__psuBootV247.auth(false);if(window.__psuEnsureNameBeforeLoadV252)await window.__psuEnsureNameBeforeLoadV252();if(reloadOnSuccess)load(false)};
+   window.__psuAuthRestorePendingV291=!!t;window.__psuAuthRestoreSettledV291=!t;
+   const finishGeneral=async()=>{setMode(false,null,false);if(window.__psuBootV247)window.__psuBootV247.auth(false);authSettledV291();if(window.__psuEnsureNameBeforeLoadV252)await window.__psuEnsureNameBeforeLoadV252();if(reloadOnSuccess)load(false)};
    // v2.53: 저장된 관리자 토큰이 전혀 없는 일반 사용자는 관리자 복원 대기(최대 1.8초)를 건너뛴다.
    if(!t){finishGeneral();return}
    // v2.47: 저장된 관리자 세션 판정을 끝낸다.
    try{
      if(window.__firebaseFastWebRestoreV186){
        const fr=await window.__firebaseFastWebRestoreV186();
-       if(fr&&fr.ok){if(fr.token&&window.__psuAuthTokenSaveV212)window.__psuAuthTokenSaveV212(fr.token);const keepView=!!adminInfoV131;setMode(true,fr,keepView);if(window.__psuBootV247)window.__psuBootV247.auth(true);if(reloadOnSuccess)load(false);return}
+       if(fr&&fr.ok){if(fr.token&&window.__psuAuthTokenSaveV212)window.__psuAuthTokenSaveV212(fr.token);const keepView=!!adminInfoV131;setMode(true,fr,keepView);if(window.__psuBootV247)window.__psuBootV247.auth(true);authSettledV291();if(reloadOnSuccess)load(false);return}
      }
    }catch(_e){}
    google.script.run.withSuccessHandler(r=>{
-     if(r&&r.admin){if(r.token&&window.__psuAuthTokenSaveV212)window.__psuAuthTokenSaveV212(r.token);const keepView=!!adminInfoV131;setMode(true,r,keepView);if(window.__psuBootV247)window.__psuBootV247.auth(true);if(reloadOnSuccess)load(false)}
+     if(r&&r.admin){if(r.token&&window.__psuAuthTokenSaveV212)window.__psuAuthTokenSaveV212(r.token);const keepView=!!adminInfoV131;setMode(true,r,keepView);if(window.__psuBootV247)window.__psuBootV247.auth(true);authSettledV291();if(reloadOnSuccess)load(false)}
      else{if(window.__psuAuthTokenClearV212)window.__psuAuthTokenClearV212();else localStorage.removeItem(TOKEN_KEY);finishGeneral()}
    }).withFailureHandler(()=>{finishGeneral()}).verifyWebAdminSessionV131(t)
  }
@@ -1554,8 +1559,10 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  function snapshotDoc(x){const bodyClass=String(x.bodyClass||'').replace(/\bpsu[^\s]*boot[^\s]*\b/g,'').trim();return '<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>'+String(x.css||'')+'\nhtml,body{margin:0!important;min-height:100%!important}*{animation:none!important;transition:none!important}.modalback,.toast,#psuBootV247{display:none!important}</style></head><body class="'+bodyClass.replace(/"/g,'&quot;')+'">'+String(x.appHtml||'')+'</body></html>'}
  function showSnapshot(x){if(frameWrap||!x||!x.appHtml)return false;applyView(x);const wrap=document.createElement('div');wrap.id='psuVisualSnapshotV290';wrap.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#f5f7fb;opacity:1;transition:opacity .12s ease;';const f=document.createElement('iframe');f.setAttribute('aria-label','최근 화면');f.style.cssText='display:block;width:100%;height:100%;border:0;background:#f5f7fb;';const badge=document.createElement('div');badge.textContent='최근 화면 · 최신 정보 확인 중';badge.style.cssText='position:absolute;right:10px;bottom:10px;z-index:2;padding:5px 8px;border-radius:999px;background:rgba(31,41,55,.82);color:#fff;font:700 10px/1.2 "Malgun Gothic",sans-serif;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.16)';wrap.appendChild(f);wrap.appendChild(badge);document.body.appendChild(wrap);frameWrap=wrap;f.onload=()=>{try{f.contentWindow.scrollTo(Number(x.scrollX||0),Number(x.scrollY||0))}catch(_e){}};f.srcdoc=snapshotDoc(x);restored=true;window.__psuVisualSnapshotRestoredV290=true;return true}
  async function restore(){const x=await dbGet();if(!x||x.schema!==1||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>MAX_AGE||!x.appHtml){if(x)dbDelete();return false}return showSnapshot(x)}
- function liveReady(){if(frameWrap){const old=frameWrap;frameWrap=null;requestAnimationFrame(()=>requestAnimationFrame(()=>{old.style.opacity='0';setTimeout(()=>{try{old.remove()}catch(_e){}},140)}))}setTimeout(()=>capture(true),900);setTimeout(()=>capture(true),2600)}
- window.__psuVisualSnapshotLiveReadyV290=liveReady;window.__psuVisualSnapshotCaptureV290=()=>capture(true);window.__psuVisualSnapshotClearV290=dbDelete;
+ let liveReadyPendingV291=false;
+ function authPendingV291(){try{return !!(window.__psuAuthTokenSyncV212&&window.__psuAuthTokenSyncV212())&&window.__psuAuthRestoreSettledV291!==true}catch(_e){return false}}
+ function liveReady(){if(authPendingV291()){liveReadyPendingV291=true;return}liveReadyPendingV291=false;if(frameWrap){const old=frameWrap;frameWrap=null;requestAnimationFrame(()=>requestAnimationFrame(()=>{old.style.opacity='0';setTimeout(()=>{try{old.remove()}catch(_e){}},140)}))}setTimeout(()=>capture(true),900);setTimeout(()=>capture(true),2600)}
+ window.__psuVisualSnapshotLiveReadyV290=liveReady;window.__psuVisualSnapshotAuthReadyV291=function(){if(liveReadyPendingV291)liveReady()};window.__psuVisualSnapshotCaptureV290=()=>capture(true);window.__psuVisualSnapshotClearV290=dbDelete;
  const oldRender=window.render;if(typeof oldRender==='function')window.render=render=function(){const r=oldRender.apply(this,arguments);scheduleCapture(1400);return r};
  addEventListener('scroll',()=>scheduleCapture(1800),{passive:true});document.addEventListener('change',()=>scheduleCapture(900),true);document.addEventListener('click',e=>{try{if(e.target&&e.target.closest&&e.target.closest('.tab,#prev,#next,#today'))scheduleCapture(900)}catch(_e){}},true);
  const clsObs=new MutationObserver(()=>{if(!document.documentElement.classList.contains('psu-web-boot-v247'))scheduleCapture(900)});clsObs.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
@@ -1669,7 +1676,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  function child(s,remove){retryV280=0;const k=String(s&&s.key||'');if(!k)return;if(remove)delete store[k];else store[k]=s.val();queueCommit();readySoon()}
  function retryScheduleV280(){clearTimeout(retryTimerV280);if(retryV280>=5)return;const delay=[1800,4000,9000,20000,45000][retryV280++]||45000;retryTimerV280=setTimeout(connect,delay)} function attach(){if(ref)return;store=Object.create(null);ref=firebase.database().ref('scheduleV2/events');const err=e=>{window.__webScheduleRealtimeHealthyV184=false;console.warn('일정 실시간 구독 실패',e);disconnect();retryScheduleV280()};handlers={child_added:s=>child(s,false),child_changed:s=>child(s,false),child_removed:s=>child(s,true)};Object.entries(handlers).forEach(([ev,fn])=>ref.on(ev,fn,err));readySoon()}
  function disconnect(){window.__webScheduleRealtimeHealthyV184=false;clearTimeout(commitTimer);clearTimeout(readyTimer);if(ref&&handlers){for(const [ev,fn] of Object.entries(handlers))try{ref.off(ev,fn)}catch(e){}}ref=null;handlers=null;connecting=false}
- async function connect(){if(ref||connecting)return;connecting=true;try{let cu=firebase.auth().currentUser;if(!cu){if(tok()&&window.__firebaseFastWebRestoreV186){try{cu=await window.__firebaseFastWebRestoreV186()}catch(_e){}}if(!firebase.auth().currentUser)await firebase.auth().signInAnonymously()}attach()}catch(e){window.__webScheduleRealtimeHealthyV184=false;console.warn('일정 실시간 연결 실패',e)}finally{connecting=false}}
+ async function connect(){if(ref||connecting)return;connecting=true;try{let cu=firebase.auth().currentUser,saved=tok();if(!cu||cu.isAnonymous){if(saved){try{if(window.__ensureAdminFirebaseV264)cu=await window.__ensureAdminFirebaseV264();else if(window.__firebaseFastWebRestoreV186)cu=await window.__firebaseFastWebRestoreV186()}catch(_e){}cu=firebase.auth().currentUser;if(!cu||cu.isAnonymous){window.__webScheduleRealtimeHealthyV184=false;retryScheduleV280();return}}else if(!cu){await firebase.auth().signInAnonymously();cu=firebase.auth().currentUser}}attach()}catch(e){window.__webScheduleRealtimeHealthyV184=false;console.warn('일정 실시간 연결 실패',e);retryScheduleV280()}finally{connecting=false}}
  setTimeout(connect,900);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!ref){retryV280=0;setTimeout(connect,160)}});try{firebase.auth().onAuthStateChanged(u=>{if(u&&!ref){retryV280=0;connect()}})}catch(_e){}window.__connectScheduleRealtimeV184=connect;window.__disconnectScheduleRealtimeV184=disconnect;
 })();
 </script>
