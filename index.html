@@ -92,26 +92,43 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.96";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.96-auth-first-stable-first-paint";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.97";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.97-auth-cache-fast-first-paint";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
   if(window.__psuBootV247)return;
-  const st={auth:false,data:false,anchor:false,mode:'unknown',released:false,cached:false};
+  const st={auth:false,data:false,anchor:false,mode:'unknown',released:false,cached:false,fastPrepared:false,fastReleased:false};
   function needsAnchor(){try{return matchMedia('(max-width:820px)').matches&&st.mode==='admin'&&window.main&&main.dataset.tab==='calendar'&&Array.isArray(window.state||state&&state.scheduleEvents)&&((window.state||state).scheduleEvents||[]).length>0}catch(e){try{return matchMedia('(max-width:820px)').matches&&st.mode==='admin'&&window.main&&main.dataset.tab==='calendar'&&Array.isArray(state.scheduleEvents)&&state.scheduleEvents.length>0}catch(_e){return false}}}
-  function reveal(){if(st.released)return;st.released=true;requestAnimationFrame(()=>requestAnimationFrame(()=>{document.documentElement.classList.remove('psu-web-boot-v247');const el=document.getElementById('psuBootV247');if(el)el.setAttribute('aria-hidden','true')}))}
-  function maybe(){if(!st.auth||!st.data)return;if(needsAnchor()&&!st.anchor)return;reveal()}
+  function reveal(fast){if(st.released)return;st.released=true;st.fastReleased=!!fast;requestAnimationFrame(()=>requestAnimationFrame(()=>{document.documentElement.classList.remove('psu-web-boot-v247');const el=document.getElementById('psuBootV247');if(el)el.setAttribute('aria-hidden','true')}))}
+  function prepareCached(){
+    if(st.fastPrepared||!st.auth||!st.cached||st.released)return false;
+    st.fastPrepared=true;
+    try{if(typeof render==='function')render()}catch(_e){}
+    try{if(typeof firstLoad!=='undefined')firstLoad=false}catch(_e){}
+    if(needsAnchor()){
+      st.anchor=false;
+      try{if(typeof beginInitialTodayAnchorV196==='function'){beginInitialTodayAnchorV196();return true}}catch(_e){}
+    }
+    st.anchor=true;reveal(true);return true;
+  }
+  function maybe(){
+    if(st.released)return;
+    // v2.97: 인증/권한이 확정되고 IndexedDB 캐시가 있으면 Firebase 전체 초기 snapshot을 기다리지 않고 즉시 첫 화면을 만든다.
+    if(st.auth&&st.cached){prepareCached();if(!st.released&&(!needsAnchor()||st.anchor))reveal(true);return}
+    // 캐시가 없는 최초 접속만 기존처럼 canonical 실시간 데이터 준비를 기다린다.
+    if(!st.auth||!st.data)return;if(needsAnchor()&&!st.anchor)return;reveal(false)
+  }
   window.__psuBootV247={
-    mode(admin){if(st.released)return;st.mode=admin?'admin':'general';/* v2.96: 캐시 보유 여부를 실시간 data-ready로 승격하지 않는다. */if(!st.cached)st.anchor=false;maybe()},
+    mode(admin){if(st.released)return;st.mode=admin?'admin':'general';if(!st.cached)st.anchor=false;maybe()},
     auth(admin){if(st.released)return;st.auth=true;st.mode=admin?'admin':'general';maybe()},
-    cache(){if(st.released)return;st.cached=true;/* v2.96: 캐시는 화면 준비용일 뿐, 인증/실시간 준비 전에 본 화면을 공개하지 않는다. */maybe()},
+    cache(){if(st.released)return;st.cached=true;maybe()},
     data(){if(st.released)return;st.data=true;maybe()},
     anchor(){if(st.released)return;st.anchor=true;maybe()},
     isActive(){return !st.released},
-    release:reveal
+    wasFastReleased(){return !!st.fastReleased},
+    release:()=>reveal(false)
   };
-  // v2.96: 느린 연결에서도 인증/실시간 준비 전에 강제 공개하지 않는다. canonical 쪽 9초 fallback이 data 신호를 보낸 뒤 maybe()가 공개한다.
   setTimeout(()=>{if(!st.released&&st.auth&&st.data)maybe()},12000);
 })();
 </script>
@@ -200,7 +217,7 @@ function runInitialTodayAnchorV196(){
   if(viewDate.getFullYear()!==focus.getFullYear()||viewDate.getMonth()!==focus.getMonth()){viewDate=new Date(focus.getFullYear(),focus.getMonth(),1);render()}
   const ds=iso(focus),groups=[...mobileList.querySelectorAll('.dategroup[data-date]')],el=mobileList.querySelector(`.dategroup[data-date="${ds}"]`)||groups.find(g=>g.dataset.date>=ds)||groups[groups.length-1];
   if(!el||el.getClientRects().length===0)return false;
-  scrollToToday(false);initialTodayAnchorSucceededV196=true;initialTodayAnchorActiveV196=false;if(window.__psuBootV247)window.__psuBootV247.anchor();clearTimeout(initialTodayAnchorTimerV196);window.__webInitialAnchorLockV226=true;clearTimeout(window.__webInitialAnchorUnlockTimerV226);window.__webInitialAnchorUnlockTimerV226=setTimeout(()=>{window.__webInitialAnchorLockV226=false;if(window.__releaseMobileBootV226)window.__releaseMobileBootV226()},700);return true
+  scrollToToday(false);initialTodayAnchorSucceededV196=true;initialTodayAnchorActiveV196=false;if(window.__psuBootV247)window.__psuBootV247.anchor();clearTimeout(initialTodayAnchorTimerV196);window.__webInitialAnchorLockV226=true;/* v2.97: 포커스가 잡힌 뒤 모바일 목록은 즉시 공개하고, 초기 실시간 반영 동안 위치 고정만 잠깐 유지한다. */if(window.__releaseMobileBootV226)window.__releaseMobileBootV226();clearTimeout(window.__webInitialAnchorUnlockTimerV226);window.__webInitialAnchorUnlockTimerV226=setTimeout(()=>{window.__webInitialAnchorLockV226=false},700);return true
 }
 function scheduleInitialTodayAnchorV196(){
   if(!shouldInitialTodayAnchorV196())return;
@@ -871,7 +888,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    }).withFailureHandler(()=>{finishGeneral()}).verifyWebAdminSessionV131(t)
  }
  window.__verifySavedSessionV131=verifySavedSessionV131;
- setTimeout(()=>verifySavedSessionV131(true),350);
+ const kickAuthRestoreV297=()=>verifySavedSessionV131(true);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',kickAuthRestoreV297,{once:true});else setTimeout(kickAuthRestoreV297,0);
  setTimeout(checkPendingApprovalV132,1200);
  // v1.87: 승인/중지/권한 변경은 authUsers 실시간 이벤트로 처리한다.
  setTimeout(()=>{try{let ref=null;firebase.auth().onAuthStateChanged(u=>{if(ref){try{ref.off()}catch(_e){}ref=null}if(!u||u.isAnonymous)return;ref=firebase.database().ref('authUsers/'+u.uid);ref.on('value',snap=>{const p=snap.val()||{};const pending=localStorage.getItem(PENDING_KEY)||'';if(pending&&(p.status==='approved'||p.status==='disabled'))showApprovalResultV132({ok:true,status:p.status,role:p.role||'admin',username:p.username||'',displayName:p.displayName||p.username||'',approvedAt:p.approvedAt||'',disabledAt:p.disabledAt||''});if(adminInfoV131&&p.status&&p.status!=='approved'){if(window.__psuAuthTokenClearV212)window.__psuAuthTokenClearV212();else localStorage.removeItem(TOKEN_KEY);adminInfoV131=null;try{firebase.auth().signOut().then(()=>firebase.auth().signInAnonymously()).catch(()=>{})}catch(_e){}setMode(false,null,false);load(false);toastMsg('관리자 사용 상태가 변경되어 로그아웃되었습니다.')}else if(adminInfoV131&&p.status==='approved'&&window.__firebaseFastWebRestoreV186){window.__firebaseFastWebRestoreV186().then(r=>{if(r&&r.ok)setMode(true,r,true)}).catch(()=>{})}})})}catch(_e){}},900);
@@ -1613,11 +1630,11 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
      }
      if(!applied)return false;
      window.__psuFastSnapshotRestoredV287=true;
-     // v2.96: 캐시는 state에만 먼저 복원한다. 인증/권한 확정 전에 render/날짜 포커스/화면 공개를 하지 않는다.
+     // v2.97: 캐시는 state에 먼저 복원하고, 인증/권한 확정 직후 이 캐시로 첫 화면을 즉시 구성한다.
      const bootActiveV296=!!(window.__psuBootV247&&window.__psuBootV247.isActive&&window.__psuBootV247.isActive());
      if(!bootActiveV296){try{if(typeof render==='function')render()}catch(_e){};try{if(typeof beginInitialTodayAnchorV196==='function')beginInitialTodayAnchorV196()}catch(_e){}}
      try{if(window.__psuBootV247&&typeof window.__psuBootV247.cache==='function')window.__psuBootV247.cache()}catch(_e){}
-     try{if(window.sync)sync.innerHTML=bootActiveV296?'최신 데이터 확인 중...':'최근 데이터 복원 · 최신 데이터 확인 중...'}catch(_e){}
+     try{if(window.sync)sync.innerHTML=bootActiveV296?'최근 데이터 준비 중...':'최근 데이터 복원 · 최신 데이터 확인 중...'}catch(_e){}
      return true;
    })();
    return restorePromise;
@@ -1652,7 +1669,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  if(window.__webV270CanonicalSyncInstalled)return;window.__webV270CanonicalSyncInstalled=true;
  const ready={schedule:false,progress:false,progressInfo:false};window.__psuCanonicalReadyStateV287=ready;let bootDone=false,notify=false;
  function status(){if(window.sync)sync.innerHTML=`실시간 동기화 <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}
- function finishBoot(statusText='실시간 동기화'){if(bootDone)return;bootDone=true;try{if(typeof render==='function')render();if(firstLoad){firstLoad=false;beginInitialTodayAnchorV196()}else if(typeof shouldInitialTodayAnchorV196==='function'&&shouldInitialTodayAnchorV196())scheduleInitialTodayAnchorV196()}catch(_e){}if(statusText==='실시간 동기화')status();else{if(window.sync)sync.innerHTML=`${statusText} <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}if(window.__psuBootV247)window.__psuBootV247.data();try{if(window.__psuVisualSnapshotLiveReadyV290)setTimeout(()=>window.__psuVisualSnapshotLiveReadyV290(),280)}catch(_e){}if(notify){notify=false;toastMsg(statusText==='실시간 동기화'?'실시간 데이터가 최신 상태입니다.':'일부 실시간 데이터 연결이 지연되고 있습니다.')}}
+ function finishBoot(statusText='실시간 동기화'){if(bootDone)return;bootDone=true;const fastShown=!!(window.__psuBootV247&&window.__psuBootV247.wasFastReleased&&window.__psuBootV247.wasFastReleased());try{/* v2.97: 캐시 첫 화면을 이미 공개한 경우 canonical 완료 시 불필요한 전체 재렌더/재포커스를 반복하지 않는다. 각 실시간 listener가 변경분을 이미 반영한다. */if(!fastShown&&typeof render==='function')render();if(!fastShown&&firstLoad){firstLoad=false;beginInitialTodayAnchorV196()}else if(!fastShown&&typeof shouldInitialTodayAnchorV196==='function'&&shouldInitialTodayAnchorV196())scheduleInitialTodayAnchorV196()}catch(_e){}if(statusText==='실시간 동기화')status();else{if(window.sync)sync.innerHTML=`${statusText} <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}if(window.__psuBootV247)window.__psuBootV247.data();try{if(window.__psuVisualSnapshotLiveReadyV290)setTimeout(()=>window.__psuVisualSnapshotLiveReadyV290(),fastShown?60:280)}catch(_e){}if(notify){notify=false;toastMsg(statusText==='실시간 동기화'?'실시간 데이터가 최신 상태입니다.':'일부 실시간 데이터 연결이 지연되고 있습니다.')}}
  function finalize(force=false){if(bootDone)return;if(!ready.schedule||!ready.progress||(!force&&!ready.progressInfo))return;finishBoot('실시간 동기화')}
  window.__psuCanonicalReadyV270=function(kind){if(Object.prototype.hasOwnProperty.call(ready,kind))ready[kind]=true;if(ready.schedule&&ready.progress&&window.__psuFastSnapshotScheduleSaveV287)window.__psuFastSnapshotScheduleSaveV287();finalize(false)};
  window.__psuCanonicalLoadV270=async function(silent=false){if(window.refresh)refresh.disabled=true;if(window.sync)sync.textContent=bootDone?'실시간 데이터 확인 중...':'실시간 동기화 연결 중...';if(!silent)notify=true;try{if(window.__fbDirectV187)await window.__fbDirectV187.auth();if(bootDone){if(typeof render==='function')render();status();if(!silent){notify=false;toastMsg('실시간 데이터가 최신 상태입니다.')}}else finalize(false)}catch(e){if(window.sync)sync.textContent='연결 오류';if(window.refresh)refresh.disabled=false;if(!silent)psuAlert(e&&e.message?e.message:String(e))}return null};
