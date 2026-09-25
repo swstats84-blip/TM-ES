@@ -13,6 +13,13 @@
 <link rel="icon" type="image/png" sizes="192x192" href="./temaat_icon_192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="./temaat_icon_512.png">
 <link rel="manifest" href="./manifest.webmanifest">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://tm-es-psu-6981d-default-rtdb.asia-southeast1.firebasedatabase.app" crossorigin>
+<link rel="dns-prefetch" href="//www.gstatic.com">
+<link rel="dns-prefetch" href="//tm-es-psu-6981d-default-rtdb.asia-southeast1.firebasedatabase.app">
+<link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js">
+<link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js">
+<link rel="preload" as="script" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js">
 <title>PSU 작업현황</title>
 <style>
 :root{--bg:#f5f7fb;--panel:#fff;--line:#e2e8f0;--text:#172033;--muted:#6b7280;--primary:#315ea8;--red:#c84343;--green:#2f7d59;--amber:#a96c14}
@@ -92,15 +99,15 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.97";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.97-auth-cache-fast-first-paint";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.98";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.98-parallel-auth-cache-boot";</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
   if(window.__psuBootV247)return;
   const st={auth:false,data:false,anchor:false,mode:'unknown',released:false,cached:false,fastPrepared:false,fastReleased:false};
   function needsAnchor(){try{return matchMedia('(max-width:820px)').matches&&st.mode==='admin'&&window.main&&main.dataset.tab==='calendar'&&Array.isArray(window.state||state&&state.scheduleEvents)&&((window.state||state).scheduleEvents||[]).length>0}catch(e){try{return matchMedia('(max-width:820px)').matches&&st.mode==='admin'&&window.main&&main.dataset.tab==='calendar'&&Array.isArray(state.scheduleEvents)&&state.scheduleEvents.length>0}catch(_e){return false}}}
-  function reveal(fast){if(st.released)return;st.released=true;st.fastReleased=!!fast;requestAnimationFrame(()=>requestAnimationFrame(()=>{document.documentElement.classList.remove('psu-web-boot-v247');const el=document.getElementById('psuBootV247');if(el)el.setAttribute('aria-hidden','true')}))}
+  function reveal(fast){if(st.released)return;st.released=true;st.fastReleased=!!fast;requestAnimationFrame(()=>requestAnimationFrame(()=>{document.documentElement.classList.remove('psu-web-boot-v247');const el=document.getElementById('psuBootV247');if(el)el.setAttribute('aria-hidden','true');try{if(window.__releaseMobileBootV226)window.__releaseMobileBootV226()}catch(_e){}}))}
   function prepareCached(){
     if(st.fastPrepared||!st.auth||!st.cached||st.released)return false;
     st.fastPrepared=true;
@@ -132,8 +139,32 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   setTimeout(()=>{if(!st.released&&st.auth&&st.data)maybe()},12000);
 })();
 </script>
+
+<script id="web-v298-early-cache-prefetch-script">
+(function(){
+  if(window.__psuFastSnapshotPrefetchV298)return;
+  window.__psuFastSnapshotPrefetchV298=(async()=>{
+    try{
+      if(!window.indexedDB)return null;
+      const db=await new Promise((resolve,reject)=>{
+        const r=indexedDB.open('psu_web_fast_snapshot_v287',1);
+        r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('kv'))r.result.createObjectStore('kv')};
+        r.onsuccess=()=>resolve(r.result);
+        r.onerror=()=>reject(r.error||new Error('snapshot prefetch open failed'));
+      });
+      return await new Promise(resolve=>{
+        const tx=db.transaction('kv','readonly'),r=tx.objectStore('kv').get('latest-v1');
+        r.onsuccess=()=>resolve(r.result||null);
+        r.onerror=()=>resolve(null);
+        tx.oncomplete=()=>{try{db.close()}catch(_e){}};
+        tx.onabort=()=>{try{db.close()}catch(_e){}};
+      });
+    }catch(_e){return null}
+  })();
+})();
+</script>
 <script id="web-v226-mobile-boot-scroll-script">
-(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual'}catch(e){}if(window.matchMedia&&window.matchMedia('(max-width:820px)').matches){document.documentElement.classList.add('psu-mobile-boot-v226');window.__webInitialAnchorLockV226=true;window.__releaseMobileBootV226=function(){document.documentElement.classList.remove('psu-mobile-boot-v226');window.__webInitialAnchorLockV226=false};setTimeout(()=>{if(window.__releaseMobileBootV226)window.__releaseMobileBootV226()},2200)}})();
+(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual'}catch(e){}if(window.matchMedia&&window.matchMedia('(max-width:820px)').matches){document.documentElement.classList.add('psu-mobile-boot-v226');window.__webInitialAnchorLockV226=true;window.__releaseMobileBootV226=function(){document.documentElement.classList.remove('psu-mobile-boot-v226');window.__webInitialAnchorLockV226=false};setTimeout(()=>{if(window.__releaseMobileBootV226)window.__releaseMobileBootV226()},1200)}})();
 </script>
 <style id="web-v226-mobile-boot-style">@media(max-width:820px){html.psu-mobile-boot-v226 .mobile-list{visibility:hidden!important}}</style>
 <!-- v5.44 / PC v1.90 / 웹 v1.86: 브라우저 기본 alert/confirm/prompt 대신 자체 팝업 -->
@@ -217,7 +248,7 @@ function runInitialTodayAnchorV196(){
   if(viewDate.getFullYear()!==focus.getFullYear()||viewDate.getMonth()!==focus.getMonth()){viewDate=new Date(focus.getFullYear(),focus.getMonth(),1);render()}
   const ds=iso(focus),groups=[...mobileList.querySelectorAll('.dategroup[data-date]')],el=mobileList.querySelector(`.dategroup[data-date="${ds}"]`)||groups.find(g=>g.dataset.date>=ds)||groups[groups.length-1];
   if(!el||el.getClientRects().length===0)return false;
-  scrollToToday(false);initialTodayAnchorSucceededV196=true;initialTodayAnchorActiveV196=false;if(window.__psuBootV247)window.__psuBootV247.anchor();clearTimeout(initialTodayAnchorTimerV196);window.__webInitialAnchorLockV226=true;/* v2.97: 포커스가 잡힌 뒤 모바일 목록은 즉시 공개하고, 초기 실시간 반영 동안 위치 고정만 잠깐 유지한다. */if(window.__releaseMobileBootV226)window.__releaseMobileBootV226();clearTimeout(window.__webInitialAnchorUnlockTimerV226);window.__webInitialAnchorUnlockTimerV226=setTimeout(()=>{window.__webInitialAnchorLockV226=false},700);return true
+  scrollToToday(false);initialTodayAnchorSucceededV196=true;initialTodayAnchorActiveV196=false;if(window.__psuBootV247)window.__psuBootV247.anchor();clearTimeout(initialTodayAnchorTimerV196);window.__webInitialAnchorLockV226=true;/* v2.98: 포커스가 잡히는 즉시 부트 잠금과 모바일 목록 잠금을 함께 해제하고, 위치 고정만 잠깐 유지한다. */if(window.__releaseMobileBootV226)window.__releaseMobileBootV226();clearTimeout(window.__webInitialAnchorUnlockTimerV226);window.__webInitialAnchorUnlockTimerV226=setTimeout(()=>{window.__webInitialAnchorLockV226=false},700);return true
 }
 function scheduleInitialTodayAnchorV196(){
   if(!shouldInitialTodayAnchorV196())return;
@@ -242,6 +273,55 @@ function scrollProgressTop(smooth=true){if(!window.matchMedia('(max-width:820px)
 function goToday(smooth=true){const focus=scheduleFocusDateV233();viewDate=new Date(focus.getFullYear(),focus.getMonth(),1);if(main.dataset.tab!=='calendar'){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab==='calendar'));main.dataset.tab='calendar'}render();requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToToday(smooth)))}
 function switchTab(tabName){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tabName));main.dataset.tab=tabName;if(tabName==='progress'){requestAnimationFrame(()=>scrollProgressTop(false));return}const focus=scheduleFocusDateV233();viewDate=new Date(focus.getFullYear(),focus.getMonth(),1);render();requestAnimationFrame(()=>requestAnimationFrame(()=>scrollToToday(false)))}
 prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1,1);render();window.scrollTo({top:0,behavior:'smooth'})};next.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()+1,1);render();window.scrollTo({top:0,behavior:'smooth'})};today.onclick=()=>goToday(true);refresh.onclick=()=>load(false);area.onchange=render;task.onchange=render;search.oninput=render;mclose.onclick=()=>modalback.classList.remove('show');modalback.onclick=e=>{if(e.target===modalback)modalback.classList.remove('show')};document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));if(!window.__psuBootV247)setTimeout(()=>load(false),0);setInterval(()=>load(true),21600000);
+</script>
+
+<script id="web-v287-fast-indexeddb-snapshot-script">
+(function(){
+ if(window.__webV287FastSnapshotInstalled)return;window.__webV287FastSnapshotInstalled=true;
+ const DB='psu_web_fast_snapshot_v287',STORE='kv',KEY='latest-v1',MAX_AGE=7*24*60*60*1000;
+ let saveTimer=0,saveBusy=false,restorePromise=null;
+ function dbOpen(){return new Promise((resolve,reject)=>{if(!window.indexedDB)return reject(new Error('no indexedDB'));const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('indexedDB open failed'))})}
+ let prefetchUsedV298=false;
+ async function dbGet(){try{if(!prefetchUsedV298&&window.__psuFastSnapshotPrefetchV298){prefetchUsedV298=true;return await window.__psuFastSnapshotPrefetchV298}const db=await dbOpen();return await new Promise(resolve=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).get(KEY);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>resolve(null);tx.oncomplete=()=>{try{db.close()}catch(_e){}}})}catch(_e){return null}}
+ async function dbPut(v){try{const db=await dbOpen();await new Promise(resolve=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(v,KEY);tx.oncomplete=resolve;tx.onerror=resolve;tx.onabort=resolve});try{db.close()}catch(_e){}}catch(_e){}}
+ async function dbDelete(){try{const db=await dbOpen();await new Promise(resolve=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(KEY);tx.oncomplete=resolve;tx.onerror=resolve;tx.onabort=resolve});try{db.close()}catch(_e){}}catch(_e){}}
+ function copy(v,fallback){try{return JSON.parse(JSON.stringify(v))}catch(_e){return fallback}}
+ function hasUseful(x){return !!(x&&typeof x==='object'&&((Array.isArray(x.scheduleEvents)&&x.scheduleEvents.length)||(Array.isArray(x.progress)&&x.progress.length)||(Array.isArray(x.progressVisibleUnitsV445)&&x.progressVisibleUnitsV445.length)))}
+ async function restore(){
+   if(restorePromise)return restorePromise;
+   restorePromise=(async()=>{
+     const x=await dbGet();
+     if(!x||x.schema!==1||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>MAX_AGE||!hasUseful(x)){if(x)dbDelete();return false}
+     if(typeof state!=='object'||!state)return false;
+     const live=window.__psuCanonicalReadyStateV287||{};let applied=false;
+     if(!live.schedule&&Array.isArray(x.scheduleEvents)&&x.scheduleEvents.length){state.scheduleEvents=copy(x.scheduleEvents,[]);applied=true}
+     if(!live.progress){
+       if(Array.isArray(x.progress)&&x.progress.length){state.progress=copy(x.progress,[]);applied=true}
+       if(Array.isArray(x.progressVisibleUnitsV445)){state.progressVisibleUnitsV445=x.progressVisibleUnitsV445.map(v=>String(v||'')).filter(Boolean);applied=true}
+       if(typeof x.progressListInitializedV558==='boolean')state.progressListInitializedV558=x.progressListInitializedV558;
+       if(x.progressManualIncludeUnits&&typeof x.progressManualIncludeUnits==='object')state.progressManualIncludeUnits=copy(x.progressManualIncludeUnits,{});
+       if(x.deletedProgressUnits&&typeof x.deletedProgressUnits==='object')state.deletedProgressUnits=copy(x.deletedProgressUnits,{});
+     }
+     if(!applied)return false;
+     window.__psuFastSnapshotRestoredV287=true;
+     // v2.98: IndexedDB read는 페이지 파싱 초기에 미리 시작하고, state 준비 즉시 적용한다.
+     const bootActiveV296=!!(window.__psuBootV247&&window.__psuBootV247.isActive&&window.__psuBootV247.isActive());
+     if(!bootActiveV296){try{if(typeof render==='function')render()}catch(_e){};try{if(typeof beginInitialTodayAnchorV196==='function')beginInitialTodayAnchorV196()}catch(_e){}}
+     try{if(window.__psuBootV247&&typeof window.__psuBootV247.cache==='function')window.__psuBootV247.cache()}catch(_e){}
+     try{if(window.sync)sync.innerHTML=bootActiveV296?'최근 데이터 준비 중...':'최근 데이터 복원 · 최신 데이터 확인 중...'}catch(_e){}
+     return true;
+   })();
+   return restorePromise;
+ }
+ async function save(){
+   if(saveBusy||typeof state!=='object'||!state)return;const live=window.__psuCanonicalReadyStateV287||{};if(!live.schedule||!live.progress)return;
+   const payload={schema:1,at:Date.now(),scheduleEvents:copy(state.scheduleEvents,[]),progress:copy(state.progress,[]),progressVisibleUnitsV445:copy(state.progressVisibleUnitsV445,[]),progressListInitializedV558:state.progressListInitializedV558===true,progressManualIncludeUnits:copy(state.progressManualIncludeUnits,{}),deletedProgressUnits:copy(state.deletedProgressUnits,{})};
+   if(!hasUseful(payload))return;saveBusy=true;try{await dbPut(payload);try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(_e){}}finally{saveBusy=false}
+ }
+ function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(save,500)}
+ window.__psuFastSnapshotRestoreV287=restore;window.__psuFastSnapshotScheduleSaveV287=scheduleSave;window.__psuFastSnapshotClearV287=dbDelete;
+ restore().catch(()=>{});
+})();
 </script>
 
 <style id="web-v15-shared-style">.sharedbtn-v15{margin-left:auto;border:1px solid #8bb8a3;background:#f1fbf6;color:#176b48;border-radius:7px;padding:5px 8px;font-size:11px;font-weight:800}.shareditem-v15{border:1px solid #dfe7e3;border-radius:9px;padding:10px;margin:8px 0;background:#fbfdfc}.sharedmeta-v15{font-size:11px;color:#64748b;margin-bottom:5px}.sharedtext-v15{white-space:pre-wrap;line-height:1.5}.sharedinput-v15{width:100%;border:1px solid #ccd4df;border-radius:8px;padding:10px;font:inherit;margin-top:8px}.sharedtextarea-v15{min-height:95px;resize:vertical}</style>
@@ -458,6 +538,53 @@ prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1
 })();
 </script>
 
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script id="web-v176-firebase-realtime-script">
+(function(){
+ if(window.__webV176FirebaseInstalled)return;window.__webV176FirebaseInstalled=true;
+ const cfg={apiKey:'AIzaSyD95LEbX8fJt621FapB-oM2iY3zbWY70dE',authDomain:'tm-es-psu-6981d.firebaseapp.com',databaseURL:'https://tm-es-psu-6981d-default-rtdb.asia-southeast1.firebasedatabase.app',projectId:'tm-es-psu-6981d',storageBucket:'tm-es-psu-6981d.firebasestorage.app',messagingSenderId:'668350567112',appId:'1:668350567112:web:ee63dd3d4bde2e90908bfd'};
+ try{
+   if(!firebase.apps.length)firebase.initializeApp(cfg);
+   // v2.80 traffic: meta/revisions 전체 value listener는 실제 소비자가 없어 제거했다.
+   // 각 canonical collection listener가 변경 데이터를 직접 반영하며 인증도 __fbDirectV187.auth()가 단독 소유한다.
+ }catch(e){console.warn('Firebase 초기화 실패',e)}
+})();
+</script>
+<script id="web-v186-firebase-fast-login-script">
+(function(){
+ if(window.__webV186FastLoginInstalled)return;window.__webV186FastLoginInstalled=true;
+ const cfg={apiKey:'AIzaSyD95LEbX8fJt621FapB-oM2iY3zbWY70dE',authDomain:'tm-es-psu-6981d.firebaseapp.com',databaseURL:'https://tm-es-psu-6981d-default-rtdb.asia-southeast1.firebasedatabase.app',projectId:'tm-es-psu-6981d',storageBucket:'tm-es-psu-6981d.firebasestorage.app',messagingSenderId:'668350567112',appId:'1:668350567112:web:ee63dd3d4bde2e90908bfd'};
+ async function hex(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(s||'')));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+ async function emailOf(u){return 'psu.'+(await hex(String(u||'').trim().toLowerCase())).slice(0,48)+'@tm-es-psu.local'}
+ function init(){if(!window.firebase)throw new Error('Firebase SDK 준비 중');if(!firebase.apps.length)firebase.initializeApp(cfg)}
+ async function profileOf(u,fallbackName){if(!u||u.isAnonymous)throw new Error('Firebase 관리자 세션 없음');const s=await firebase.database().ref('authUsers/'+u.uid).once('value'),p=s.val()||{};if(String(p.status||'')!=='approved')throw new Error(String(p.status||'')==='pending'?'관리자 승인 대기 중입니다.':'사용이 중지된 관리자 계정입니다.');if(!p.legacyToken)throw new Error('기존 세션 이전이 아직 완료되지 않았습니다.');return {ok:true,status:'approved',token:String(p.legacyToken),username:String(p.username||fallbackName||''),displayName:String(p.displayName||p.username||fallbackName||''),role:String(p.role||'admin'),firebaseFast:true}}
+ window.__firebaseFastWebLoginV186=async function(username,password){
+   init();try{await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)}catch(_e){}const email=await emailOf(username),hp='PSU#'+(await hex(String(username||'').trim().toLowerCase()+'|'+String(password||''))).slice(0,56),cred=await firebase.auth().signInWithEmailAndPassword(email,hp),u=cred&&cred.user;if(!u)throw new Error('Firebase 로그인 실패');return profileOf(u,username)
+ };
+ window.__firebaseFastWebRestoreV186=async function(){
+   init();try{await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)}catch(_e){}
+   const u=await new Promise(resolve=>{let done=false,unsub=null;const finish=x=>{if(done)return;done=true;try{if(unsub)unsub()}catch(_e){}clearTimeout(timer);resolve(x)};const timer=setTimeout(()=>finish(firebase.auth().currentUser),1800);unsub=firebase.auth().onAuthStateChanged(x=>{if(x)finish(x)})});
+   if(!u||u.isAnonymous)throw new Error('Firebase 관리자 세션 없음');return profileOf(u,'')
+ };
+ window.__firebaseFastLogoutV186=function(){try{firebase.auth().signOut().then(()=>firebase.auth().signInAnonymously()).catch(()=>{})}catch(e){}};
+})();
+</script>
+
+<script id="web-v298-auth-prewarm-script">
+(function(){
+  if(window.__psuAuthPrewarmStartedV298)return;
+  let t='';try{t=window.__psuAuthTokenSyncV212?window.__psuAuthTokenSyncV212():''}catch(_e){}
+  if(!t||!window.__firebaseFastWebRestoreV186)return;
+  window.__psuAuthPrewarmStartedV298=true;
+  window.__firebaseFastWebRestoreWarmV298=Promise.resolve().then(()=>window.__firebaseFastWebRestoreV186()).then(
+    value=>({settled:true,ok:true,value:value}),
+    error=>({settled:true,ok:false,error:error})
+  );
+})();
+</script>
+
 <script id="web-v213-ios-server-hint-persist">
 (function(){
  if(window.__webV213ServerHintInstalled)return;window.__webV213ServerHintInstalled=true;
@@ -544,8 +671,9 @@ prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1
     if(!isAndroidApp||!window.firebase)return;
     try{if(!firebase.auth().currentUser)await firebase.auth().signInAnonymously();await firebase.database().ref('presence/'+clientId).remove()}catch(e){}
   }
+  function adminRestorePendingV298(){try{const t=window.__psuAuthTokenSyncV212?window.__psuAuthTokenSyncV212():'';return !!t&&window.__psuAuthRestoreSettledV291!==true}catch(_e){return false}}
   async function ping(){
-    if(isAndroidApp||window.__PSU_ANDROID_APP)return;
+    if(isAndroidApp||window.__PSU_ANDROID_APP||adminRestorePendingV298())return;
     const name=currentName();if(!name||!window.firebase)return;
     const a=window.__webAuthInfoV136||null,role=a&&a.role||'';
     try{
@@ -878,7 +1006,9 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    // v2.47: 저장된 관리자 세션 판정을 끝낸다.
    try{
      if(window.__firebaseFastWebRestoreV186){
-       const fr=await window.__firebaseFastWebRestoreV186();
+       const warmV298=window.__firebaseFastWebRestoreWarmV298?await window.__firebaseFastWebRestoreWarmV298:null;
+       if(warmV298&&warmV298.settled&&!warmV298.ok)throw warmV298.error;
+       const fr=warmV298&&warmV298.settled?warmV298.value:await window.__firebaseFastWebRestoreV186();
        if(fr&&fr.ok){if(fr.token&&window.__psuAuthTokenSaveV212)window.__psuAuthTokenSaveV212(fr.token);const keepView=!!adminInfoV131;setMode(true,fr,keepView);if(window.__psuBootV247)window.__psuBootV247.auth(true);authSettledV291();if(reloadOnSuccess)load(false);return}
      }
    }catch(_e){}
@@ -888,7 +1018,13 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    }).withFailureHandler(()=>{finishGeneral()}).verifyWebAdminSessionV131(t)
  }
  window.__verifySavedSessionV131=verifySavedSessionV131;
- const kickAuthRestoreV297=()=>verifySavedSessionV131(true);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',kickAuthRestoreV297,{once:true});else setTimeout(kickAuthRestoreV297,0);
+ let authKickStartedV298=false;
+ const kickAuthRestoreV298=()=>{if(authKickStartedV298)return;authKickStartedV298=true;verifySavedSessionV131(true)};
+ window.__kickAuthRestoreV298=kickAuthRestoreV298;
+ // v2.98: Firebase/Auth helper와 캐시 준비가 끝날 때까지 DOMContentLoaded를 기다리지 않는다.
+ if(window.__firebaseFastWebRestoreV186)Promise.resolve().then(kickAuthRestoreV298);
+ else if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',kickAuthRestoreV298,{once:true});
+ else setTimeout(kickAuthRestoreV298,0);
  setTimeout(checkPendingApprovalV132,1200);
  // v1.87: 승인/중지/권한 변경은 authUsers 실시간 이벤트로 처리한다.
  setTimeout(()=>{try{let ref=null;firebase.auth().onAuthStateChanged(u=>{if(ref){try{ref.off()}catch(_e){}ref=null}if(!u||u.isAnonymous)return;ref=firebase.database().ref('authUsers/'+u.uid);ref.on('value',snap=>{const p=snap.val()||{};const pending=localStorage.getItem(PENDING_KEY)||'';if(pending&&(p.status==='approved'||p.status==='disabled'))showApprovalResultV132({ok:true,status:p.status,role:p.role||'admin',username:p.username||'',displayName:p.displayName||p.username||'',approvedAt:p.approvedAt||'',disabledAt:p.disabledAt||''});if(adminInfoV131&&p.status&&p.status!=='approved'){if(window.__psuAuthTokenClearV212)window.__psuAuthTokenClearV212();else localStorage.removeItem(TOKEN_KEY);adminInfoV131=null;try{firebase.auth().signOut().then(()=>firebase.auth().signInAnonymously()).catch(()=>{})}catch(_e){}setMode(false,null,false);load(false);toastMsg('관리자 사용 상태가 변경되어 로그아웃되었습니다.')}else if(adminInfoV131&&p.status==='approved'&&window.__firebaseFastWebRestoreV186){window.__firebaseFastWebRestoreV186().then(r=>{if(r&&r.ok)setMode(true,r,true)}).catch(()=>{})}})})}catch(_e){}},900);
@@ -1602,74 +1738,16 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
 })();
 </script>
 
-<script id="web-v287-fast-indexeddb-snapshot-script">
-(function(){
- if(window.__webV287FastSnapshotInstalled)return;window.__webV287FastSnapshotInstalled=true;
- const DB='psu_web_fast_snapshot_v287',STORE='kv',KEY='latest-v1',MAX_AGE=7*24*60*60*1000;
- let saveTimer=0,saveBusy=false,restorePromise=null;
- function dbOpen(){return new Promise((resolve,reject)=>{if(!window.indexedDB)return reject(new Error('no indexedDB'));const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('indexedDB open failed'))})}
- async function dbGet(){try{const db=await dbOpen();return await new Promise(resolve=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).get(KEY);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>resolve(null);tx.oncomplete=()=>{try{db.close()}catch(_e){}}})}catch(_e){return null}}
- async function dbPut(v){try{const db=await dbOpen();await new Promise(resolve=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(v,KEY);tx.oncomplete=resolve;tx.onerror=resolve;tx.onabort=resolve});try{db.close()}catch(_e){}}catch(_e){}}
- async function dbDelete(){try{const db=await dbOpen();await new Promise(resolve=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(KEY);tx.oncomplete=resolve;tx.onerror=resolve;tx.onabort=resolve});try{db.close()}catch(_e){}}catch(_e){}}
- function copy(v,fallback){try{return JSON.parse(JSON.stringify(v))}catch(_e){return fallback}}
- function hasUseful(x){return !!(x&&typeof x==='object'&&((Array.isArray(x.scheduleEvents)&&x.scheduleEvents.length)||(Array.isArray(x.progress)&&x.progress.length)||(Array.isArray(x.progressVisibleUnitsV445)&&x.progressVisibleUnitsV445.length)))}
- async function restore(){
-   if(restorePromise)return restorePromise;
-   restorePromise=(async()=>{
-     const x=await dbGet();
-     if(!x||x.schema!==1||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>MAX_AGE||!hasUseful(x)){if(x)dbDelete();return false}
-     if(typeof state!=='object'||!state)return false;
-     const live=window.__psuCanonicalReadyStateV287||{};let applied=false;
-     if(!live.schedule&&Array.isArray(x.scheduleEvents)&&x.scheduleEvents.length){state.scheduleEvents=copy(x.scheduleEvents,[]);applied=true}
-     if(!live.progress){
-       if(Array.isArray(x.progress)&&x.progress.length){state.progress=copy(x.progress,[]);applied=true}
-       if(Array.isArray(x.progressVisibleUnitsV445)){state.progressVisibleUnitsV445=x.progressVisibleUnitsV445.map(v=>String(v||'')).filter(Boolean);applied=true}
-       if(typeof x.progressListInitializedV558==='boolean')state.progressListInitializedV558=x.progressListInitializedV558;
-       if(x.progressManualIncludeUnits&&typeof x.progressManualIncludeUnits==='object')state.progressManualIncludeUnits=copy(x.progressManualIncludeUnits,{});
-       if(x.deletedProgressUnits&&typeof x.deletedProgressUnits==='object')state.deletedProgressUnits=copy(x.deletedProgressUnits,{});
-     }
-     if(!applied)return false;
-     window.__psuFastSnapshotRestoredV287=true;
-     // v2.97: 캐시는 state에 먼저 복원하고, 인증/권한 확정 직후 이 캐시로 첫 화면을 즉시 구성한다.
-     const bootActiveV296=!!(window.__psuBootV247&&window.__psuBootV247.isActive&&window.__psuBootV247.isActive());
-     if(!bootActiveV296){try{if(typeof render==='function')render()}catch(_e){};try{if(typeof beginInitialTodayAnchorV196==='function')beginInitialTodayAnchorV196()}catch(_e){}}
-     try{if(window.__psuBootV247&&typeof window.__psuBootV247.cache==='function')window.__psuBootV247.cache()}catch(_e){}
-     try{if(window.sync)sync.innerHTML=bootActiveV296?'최근 데이터 준비 중...':'최근 데이터 복원 · 최신 데이터 확인 중...'}catch(_e){}
-     return true;
-   })();
-   return restorePromise;
- }
- async function save(){
-   if(saveBusy||typeof state!=='object'||!state)return;const live=window.__psuCanonicalReadyStateV287||{};if(!live.schedule||!live.progress)return;
-   const payload={schema:1,at:Date.now(),scheduleEvents:copy(state.scheduleEvents,[]),progress:copy(state.progress,[]),progressVisibleUnitsV445:copy(state.progressVisibleUnitsV445,[]),progressListInitializedV558:state.progressListInitializedV558===true,progressManualIncludeUnits:copy(state.progressManualIncludeUnits,{}),deletedProgressUnits:copy(state.deletedProgressUnits,{})};
-   if(!hasUseful(payload))return;saveBusy=true;try{await dbPut(payload);try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(_e){}}finally{saveBusy=false}
- }
- function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(save,500)}
- window.__psuFastSnapshotRestoreV287=restore;window.__psuFastSnapshotScheduleSaveV287=scheduleSave;window.__psuFastSnapshotClearV287=dbDelete;
- restore().catch(()=>{});
-})();
-</script>
 
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-<script id="web-v176-firebase-realtime-script">
-(function(){
- if(window.__webV176FirebaseInstalled)return;window.__webV176FirebaseInstalled=true;
- const cfg={apiKey:'AIzaSyD95LEbX8fJt621FapB-oM2iY3zbWY70dE',authDomain:'tm-es-psu-6981d.firebaseapp.com',databaseURL:'https://tm-es-psu-6981d-default-rtdb.asia-southeast1.firebasedatabase.app',projectId:'tm-es-psu-6981d',storageBucket:'tm-es-psu-6981d.firebasestorage.app',messagingSenderId:'668350567112',appId:'1:668350567112:web:ee63dd3d4bde2e90908bfd'};
- try{
-   if(!firebase.apps.length)firebase.initializeApp(cfg);
-   // v2.80 traffic: meta/revisions 전체 value listener는 실제 소비자가 없어 제거했다.
-   // 각 canonical collection listener가 변경 데이터를 직접 반영하며 인증도 __fbDirectV187.auth()가 단독 소유한다.
- }catch(e){console.warn('Firebase 초기화 실패',e)}
-})();
-</script>
+
+
+
 <script id="web-v270-canonical-sync-script">
 (function(){
  if(window.__webV270CanonicalSyncInstalled)return;window.__webV270CanonicalSyncInstalled=true;
  const ready={schedule:false,progress:false,progressInfo:false};window.__psuCanonicalReadyStateV287=ready;let bootDone=false,notify=false;
  function status(){if(window.sync)sync.innerHTML=`실시간 동기화 <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}
- function finishBoot(statusText='실시간 동기화'){if(bootDone)return;bootDone=true;const fastShown=!!(window.__psuBootV247&&window.__psuBootV247.wasFastReleased&&window.__psuBootV247.wasFastReleased());try{/* v2.97: 캐시 첫 화면을 이미 공개한 경우 canonical 완료 시 불필요한 전체 재렌더/재포커스를 반복하지 않는다. 각 실시간 listener가 변경분을 이미 반영한다. */if(!fastShown&&typeof render==='function')render();if(!fastShown&&firstLoad){firstLoad=false;beginInitialTodayAnchorV196()}else if(!fastShown&&typeof shouldInitialTodayAnchorV196==='function'&&shouldInitialTodayAnchorV196())scheduleInitialTodayAnchorV196()}catch(_e){}if(statusText==='실시간 동기화')status();else{if(window.sync)sync.innerHTML=`${statusText} <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}if(window.__psuBootV247)window.__psuBootV247.data();try{if(window.__psuVisualSnapshotLiveReadyV290)setTimeout(()=>window.__psuVisualSnapshotLiveReadyV290(),fastShown?60:280)}catch(_e){}if(notify){notify=false;toastMsg(statusText==='실시간 동기화'?'실시간 데이터가 최신 상태입니다.':'일부 실시간 데이터 연결이 지연되고 있습니다.')}}
+ function finishBoot(statusText='실시간 동기화'){if(bootDone)return;bootDone=true;const fastShown=!!(window.__psuBootV247&&window.__psuBootV247.wasFastReleased&&window.__psuBootV247.wasFastReleased());try{/* v2.98: 캐시 첫 화면을 이미 공개한 경우 canonical 완료 시 불필요한 전체 재렌더/재포커스를 반복하지 않는다. 각 실시간 listener가 변경분을 이미 반영한다. */if(!fastShown&&typeof render==='function')render();if(!fastShown&&firstLoad){firstLoad=false;beginInitialTodayAnchorV196()}else if(!fastShown&&typeof shouldInitialTodayAnchorV196==='function'&&shouldInitialTodayAnchorV196())scheduleInitialTodayAnchorV196()}catch(_e){}if(statusText==='실시간 동기화')status();else{if(window.sync)sync.innerHTML=`${statusText} <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}if(window.__psuBootV247)window.__psuBootV247.data();try{if(window.__psuVisualSnapshotLiveReadyV290)setTimeout(()=>window.__psuVisualSnapshotLiveReadyV290(),fastShown?60:280)}catch(_e){}if(notify){notify=false;toastMsg(statusText==='실시간 동기화'?'실시간 데이터가 최신 상태입니다.':'일부 실시간 데이터 연결이 지연되고 있습니다.')}}
  function finalize(force=false){if(bootDone)return;if(!ready.schedule||!ready.progress||(!force&&!ready.progressInfo))return;finishBoot('실시간 동기화')}
  window.__psuCanonicalReadyV270=function(kind){if(Object.prototype.hasOwnProperty.call(ready,kind))ready[kind]=true;if(ready.schedule&&ready.progress&&window.__psuFastSnapshotScheduleSaveV287)window.__psuFastSnapshotScheduleSaveV287();finalize(false)};
  window.__psuCanonicalLoadV270=async function(silent=false){if(window.refresh)refresh.disabled=true;if(window.sync)sync.textContent=bootDone?'실시간 데이터 확인 중...':'실시간 동기화 연결 중...';if(!silent)notify=true;try{if(window.__fbDirectV187)await window.__fbDirectV187.auth();if(bootDone){if(typeof render==='function')render();status();if(!silent){notify=false;toastMsg('실시간 데이터가 최신 상태입니다.')}}else finalize(false)}catch(e){if(window.sync)sync.textContent='연결 오류';if(window.refresh)refresh.disabled=false;if(!silent)psuAlert(e&&e.message?e.message:String(e))}return null};
@@ -1730,25 +1808,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
 </script>
 
 
-<script id="web-v186-firebase-fast-login-script">
-(function(){
- if(window.__webV186FastLoginInstalled)return;window.__webV186FastLoginInstalled=true;
- const cfg={apiKey:'AIzaSyD95LEbX8fJt621FapB-oM2iY3zbWY70dE',authDomain:'tm-es-psu-6981d.firebaseapp.com',databaseURL:'https://tm-es-psu-6981d-default-rtdb.asia-southeast1.firebasedatabase.app',projectId:'tm-es-psu-6981d',storageBucket:'tm-es-psu-6981d.firebasestorage.app',messagingSenderId:'668350567112',appId:'1:668350567112:web:ee63dd3d4bde2e90908bfd'};
- async function hex(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(s||'')));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
- async function emailOf(u){return 'psu.'+(await hex(String(u||'').trim().toLowerCase())).slice(0,48)+'@tm-es-psu.local'}
- function init(){if(!window.firebase)throw new Error('Firebase SDK 준비 중');if(!firebase.apps.length)firebase.initializeApp(cfg)}
- async function profileOf(u,fallbackName){if(!u||u.isAnonymous)throw new Error('Firebase 관리자 세션 없음');const s=await firebase.database().ref('authUsers/'+u.uid).once('value'),p=s.val()||{};if(String(p.status||'')!=='approved')throw new Error(String(p.status||'')==='pending'?'관리자 승인 대기 중입니다.':'사용이 중지된 관리자 계정입니다.');if(!p.legacyToken)throw new Error('기존 세션 이전이 아직 완료되지 않았습니다.');return {ok:true,status:'approved',token:String(p.legacyToken),username:String(p.username||fallbackName||''),displayName:String(p.displayName||p.username||fallbackName||''),role:String(p.role||'admin'),firebaseFast:true}}
- window.__firebaseFastWebLoginV186=async function(username,password){
-   init();try{await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)}catch(_e){}const email=await emailOf(username),hp='PSU#'+(await hex(String(username||'').trim().toLowerCase()+'|'+String(password||''))).slice(0,56),cred=await firebase.auth().signInWithEmailAndPassword(email,hp),u=cred&&cred.user;if(!u)throw new Error('Firebase 로그인 실패');return profileOf(u,username)
- };
- window.__firebaseFastWebRestoreV186=async function(){
-   init();try{await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)}catch(_e){}
-   const u=await new Promise(resolve=>{let done=false,unsub=null;const finish=x=>{if(done)return;done=true;try{if(unsub)unsub()}catch(_e){}clearTimeout(timer);resolve(x)};const timer=setTimeout(()=>finish(firebase.auth().currentUser),1800);unsub=firebase.auth().onAuthStateChanged(x=>{if(x)finish(x)})});
-   if(!u||u.isAnonymous)throw new Error('Firebase 관리자 세션 없음');return profileOf(u,'')
- };
- window.__firebaseFastLogoutV186=function(){try{firebase.auth().signOut().then(()=>firebase.auth().signInAnonymously()).catch(()=>{})}catch(e){}};
-})();
-</script>
+
 
 
 <script id="web-v187-firebase-direct-data-script">
