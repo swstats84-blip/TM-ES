@@ -99,17 +99,43 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.98";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v2.98-parallel-auth-cache-boot";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v2.99";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v2.99-instant-cache-shell";</script>
+<script id="web-v299-boot-perf-mode-hint">
+(function(){
+  if(window.__psuBootPerfV299)return;
+  const t0=(window.performance&&performance.now)?performance.now():Date.now(),marks={start:0};
+  window.__psuBootPerfV299={t0,marks,mark(name){try{marks[name]=Math.round((((window.performance&&performance.now)?performance.now():Date.now())-t0)*10)/10}catch(_e){}}};
+  const HINT_KEY='psuWebLastUiHintV299',MAX_AGE=7*24*60*60*1000;
+  function tokenSync(){try{const a=localStorage.getItem('psuWebAdminSessionV131')||'';if(a)return a;const p=document.cookie.split(';').map(x=>x.trim()).find(x=>x.indexOf('psuAdminSessionV212=')===0);return p?decodeURIComponent(p.slice('psuAdminSessionV212='.length)):''}catch(_e){return''}}
+  function localHint(){try{const x=JSON.parse(localStorage.getItem(HINT_KEY)||'null');if(!x||!x.admin||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>MAX_AGE)return null;return {admin:true,role:String(x.role||'admin'),displayName:String(x.displayName||''),username:String(x.username||''),source:'local'}}catch(_e){return null}}
+  async function snapshotHint(){
+    try{
+      if(!window.indexedDB)return null;
+      const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('psu_web_visual_snapshot_v290',1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('snapshot hint open failed'));r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('kv'))r.result.createObjectStore('kv')}});
+      const x=await new Promise(resolve=>{const tx=db.transaction('kv','readonly'),r=tx.objectStore('kv').get('latest-v1');r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>resolve(null);tx.oncomplete=()=>{try{db.close()}catch(_e){}}});
+      if(!x||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>MAX_AGE)return null;
+      const cls=String(x.bodyClass||'');if(!/\badmin-mode\b/.test(cls))return null;
+      let nm='';try{nm=String(localStorage.getItem('psuMyLeaveNameV131')||'')}catch(_e){};return {admin:true,role:/\bmaster-mode\b/.test(cls)?'master':'admin',displayName:nm,username:'',source:'snapshot'};
+    }catch(_e){return null}
+  }
+  window.__psuUiModeHintPromiseV299=(async()=>{
+    if(!tokenSync())return null;
+    const a=localHint();if(a)return a;
+    const b=await snapshotHint();if(b)return b;
+    let nm='';try{nm=String(localStorage.getItem('psuMyLeaveNameV131')||'')}catch(_e){};return {admin:true,role:'admin',displayName:nm,username:'',source:'token'};
+  })();
+})();
+</script>
 <div id="psuBootV247" aria-live="polite"><div class="boot-card-v247"><div class="boot-dot-v247"></div><div class="boot-title-v247">PSU 작업현황</div><div class="boot-sub-v247">최신 정보를 불러오는 중...</div></div></div>
 <script id="web-v247-first-paint-script">
 (function(){
   if(window.__psuBootV247)return;
-  const st={auth:false,data:false,anchor:false,mode:'unknown',released:false,cached:false,fastPrepared:false,fastReleased:false};
+  const st={auth:false,hint:false,data:false,anchor:false,mode:'unknown',released:false,cached:false,fastPrepared:false,fastReleased:false};
   function needsAnchor(){try{return matchMedia('(max-width:820px)').matches&&st.mode==='admin'&&window.main&&main.dataset.tab==='calendar'&&Array.isArray(window.state||state&&state.scheduleEvents)&&((window.state||state).scheduleEvents||[]).length>0}catch(e){try{return matchMedia('(max-width:820px)').matches&&st.mode==='admin'&&window.main&&main.dataset.tab==='calendar'&&Array.isArray(state.scheduleEvents)&&state.scheduleEvents.length>0}catch(_e){return false}}}
-  function reveal(fast){if(st.released)return;st.released=true;st.fastReleased=!!fast;requestAnimationFrame(()=>requestAnimationFrame(()=>{document.documentElement.classList.remove('psu-web-boot-v247');const el=document.getElementById('psuBootV247');if(el)el.setAttribute('aria-hidden','true');try{if(window.__releaseMobileBootV226)window.__releaseMobileBootV226()}catch(_e){}}))}
+  function reveal(fast){if(st.released)return;st.released=true;st.fastReleased=!!fast;try{if(window.__psuBootPerfV299)window.__psuBootPerfV299.mark(fast?'revealFast':'revealCanonical')}catch(_e){};requestAnimationFrame(()=>requestAnimationFrame(()=>{document.documentElement.classList.remove('psu-web-boot-v247');const el=document.getElementById('psuBootV247');if(el)el.setAttribute('aria-hidden','true');try{if(window.__releaseMobileBootV226)window.__releaseMobileBootV226()}catch(_e){}}))}
   function prepareCached(){
-    if(st.fastPrepared||!st.auth||!st.cached||st.released)return false;
+    if(st.fastPrepared||(!st.auth&&!st.hint)||!st.cached||st.released)return false;
     st.fastPrepared=true;
     try{if(typeof render==='function')render()}catch(_e){}
     try{if(typeof firstLoad!=='undefined')firstLoad=false}catch(_e){}
@@ -122,12 +148,13 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   function maybe(){
     if(st.released)return;
     // v2.97: 인증/권한이 확정되고 IndexedDB 캐시가 있으면 Firebase 전체 초기 snapshot을 기다리지 않고 즉시 첫 화면을 만든다.
-    if(st.auth&&st.cached){prepareCached();if(!st.released&&(!needsAnchor()||st.anchor))reveal(true);return}
+    if((st.auth||st.hint)&&st.cached){prepareCached();if(!st.released&&(!needsAnchor()||st.anchor))reveal(true);return}
     // 캐시가 없는 최초 접속만 기존처럼 canonical 실시간 데이터 준비를 기다린다.
     if(!st.auth||!st.data)return;if(needsAnchor()&&!st.anchor)return;reveal(false)
   }
   window.__psuBootV247={
     mode(admin){if(st.released)return;st.mode=admin?'admin':'general';if(!st.cached)st.anchor=false;maybe()},
+    hint(admin){if(st.released)return;st.hint=true;st.mode=admin?'admin':'general';maybe()},
     auth(admin){if(st.released)return;st.auth=true;st.mode=admin?'admin':'general';maybe()},
     cache(){if(st.released)return;st.cached=true;maybe()},
     data(){if(st.released)return;st.data=true;maybe()},
@@ -248,7 +275,7 @@ function runInitialTodayAnchorV196(){
   if(viewDate.getFullYear()!==focus.getFullYear()||viewDate.getMonth()!==focus.getMonth()){viewDate=new Date(focus.getFullYear(),focus.getMonth(),1);render()}
   const ds=iso(focus),groups=[...mobileList.querySelectorAll('.dategroup[data-date]')],el=mobileList.querySelector(`.dategroup[data-date="${ds}"]`)||groups.find(g=>g.dataset.date>=ds)||groups[groups.length-1];
   if(!el||el.getClientRects().length===0)return false;
-  scrollToToday(false);initialTodayAnchorSucceededV196=true;initialTodayAnchorActiveV196=false;if(window.__psuBootV247)window.__psuBootV247.anchor();clearTimeout(initialTodayAnchorTimerV196);window.__webInitialAnchorLockV226=true;/* v2.98: 포커스가 잡히는 즉시 부트 잠금과 모바일 목록 잠금을 함께 해제하고, 위치 고정만 잠깐 유지한다. */if(window.__releaseMobileBootV226)window.__releaseMobileBootV226();clearTimeout(window.__webInitialAnchorUnlockTimerV226);window.__webInitialAnchorUnlockTimerV226=setTimeout(()=>{window.__webInitialAnchorLockV226=false},700);return true
+  scrollToToday(false);initialTodayAnchorSucceededV196=true;initialTodayAnchorActiveV196=false;if(window.__psuBootV247)window.__psuBootV247.anchor();clearTimeout(initialTodayAnchorTimerV196);window.__webInitialAnchorLockV226=true;/* v2.99: 포커스가 잡히는 즉시 부트 잠금과 모바일 목록 잠금을 함께 해제하고, 위치 고정만 잠깐 유지한다. */if(window.__releaseMobileBootV226)window.__releaseMobileBootV226();clearTimeout(window.__webInitialAnchorUnlockTimerV226);window.__webInitialAnchorUnlockTimerV226=setTimeout(()=>{window.__webInitialAnchorLockV226=false},700);return true
 }
 function scheduleInitialTodayAnchorV196(){
   if(!shouldInitialTodayAnchorV196())return;
@@ -303,8 +330,8 @@ prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1
        if(x.deletedProgressUnits&&typeof x.deletedProgressUnits==='object')state.deletedProgressUnits=copy(x.deletedProgressUnits,{});
      }
      if(!applied)return false;
-     window.__psuFastSnapshotRestoredV287=true;
-     // v2.98: IndexedDB read는 페이지 파싱 초기에 미리 시작하고, state 준비 즉시 적용한다.
+     window.__psuFastSnapshotRestoredV287=true;try{if(window.__psuBootPerfV299)window.__psuBootPerfV299.mark('cacheRestored')}catch(_e){};
+     // v2.99: IndexedDB read는 페이지 파싱 초기에 미리 시작하고, state 준비 즉시 적용한다.
      const bootActiveV296=!!(window.__psuBootV247&&window.__psuBootV247.isActive&&window.__psuBootV247.isActive());
      if(!bootActiveV296){try{if(typeof render==='function')render()}catch(_e){};try{if(typeof beginInitialTodayAnchorV196==='function')beginInitialTodayAnchorV196()}catch(_e){}}
      try{if(window.__psuBootV247&&typeof window.__psuBootV247.cache==='function')window.__psuBootV247.cache()}catch(_e){}
@@ -772,22 +799,47 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  if(window.__webV131AuthInstalled)return;window.__webV131AuthInstalled=true;
  const TOKEN_KEY='psuWebAdminSessionV131',PENDING_KEY='psuWebAdminPendingV132',LAST_REQ_ID_KEY='psuWebAdminLastRequestIdV132',NAME_KEY='psuMyLeaveNameV131',COMPANY_KEY='psuMyLeaveCompanyV131';
  let adminInfoV131=null;
+ const UI_HINT_KEY_V299='psuWebLastUiHintV299';
+ let optimisticShellV299=false;
+ function readUiHintV299(){try{const x=JSON.parse(localStorage.getItem(UI_HINT_KEY_V299)||'null');return x&&x.admin?x:null}catch(_e){return null}}
+ function saveUiHintV299(info){try{if(!info||!['admin','master'].includes(String(info.role||'')))return;localStorage.setItem(UI_HINT_KEY_V299,JSON.stringify({admin:true,role:String(info.role||'admin'),displayName:String(info.displayName||''),username:String(info.username||''),at:Date.now()}))}catch(_e){}}
+ function clearUiHintV299(){try{localStorage.removeItem(UI_HINT_KEY_V299)}catch(_e){}}
+ function applyOptimisticShellV299(h){
+   if(optimisticShellV299||!h||!h.admin)return false;
+   optimisticShellV299=true;window.__psuOptimisticShellV299=true;
+   const isMaster=String(h.role||'')==='master',hintInfo={role:isMaster?'master':'admin',displayName:String(h.displayName||''),username:String(h.username||''),__optimisticV299:true};
+   adminInfoV131=hintInfo;window.__webAuthInfoV136=hintInfo;window.__webAuthTokenV136=()=>token();
+   document.body.classList.toggle('admin-mode',true);document.body.classList.toggle('general-mode',false);document.body.classList.toggle('master-mode',isMaster);
+   if(window.main){main.dataset.tab='calendar';document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab==='calendar'))}
+   const b=document.getElementById('adminLoginBtnV131');if(b){b.classList.add('logged');b.textContent=`${isMaster?'마스터':'관리자'} · ${hintInfo.displayName||'확인 중'}`}
+   const ver=document.getElementById('version');if(ver)ver.textContent=`${WEB_VERSION_V197} · ${isMaster?'마스터':'관리자'} 확인 중`;
+   const sub=document.querySelector('.sidesub');if(sub)sub.textContent='최근 데이터 · 최신 정보 확인 중';
+   try{if(window.__psuBootV247){window.__psuBootV247.mode(true);if(window.__psuBootV247.hint)window.__psuBootV247.hint(true)}}catch(_e){}
+   try{if(window.__psuBootPerfV299)window.__psuBootPerfV299.mark('modeHintApplied')}catch(_e){}
+   return true;
+ }
+ function settleOptimisticShellV299(){optimisticShellV299=false;window.__psuOptimisticShellV299=false;try{if(window.__psuBootPerfV299)window.__psuBootPerfV299.mark('authSettled')}catch(_e){}}
+ window.__psuClearUiHintV299=clearUiHintV299;
  function token(){try{return window.__psuAuthTokenSyncV212?window.__psuAuthTokenSyncV212():(localStorage.getItem(TOKEN_KEY)||'')}catch(e){return localStorage.getItem(TOKEN_KEY)||''}}
  function fmtTime(v){try{const d=new Date(v);return isNaN(d)?'':d.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch(e){return ''}}
  function setMode(admin,info,preserveView){
+   const prevOptimistic=!!(adminInfoV131&&adminInfoV131.__optimisticV299),prevRole=String(adminInfoV131&&adminInfoV131.role||'');
    if(window.__psuBootV247)window.__psuBootV247.mode(!!admin);
    const currentTab=(window.main&&String(main.dataset.tab||''))||'';
    adminInfoV131=admin?(info||{}):null;window.__webAuthInfoV136=adminInfoV131;window.__webAuthTokenV136=()=>token();
-   const isMaster=!!(admin&&info&&info.role==='master');document.body.classList.toggle('admin-mode',!!admin);document.body.classList.toggle('general-mode',!admin);document.body.classList.toggle('master-mode',isMaster);
+   const isMaster=!!(admin&&info&&info.role==='master'),sameOptimisticRole=!!(prevOptimistic&&admin&&prevRole===String(info&&info.role||''));document.body.classList.toggle('admin-mode',!!admin);document.body.classList.toggle('general-mode',!admin);document.body.classList.toggle('master-mode',isMaster);
    if(admin){const gate=document.getElementById('userNameGateV138');if(gate)gate.remove()}
    setTimeout(()=>{try{if(window.__psuRefreshUserNameV251)window.__psuRefreshUserNameV251()}catch(_e){}},0);
    if(window.main){const next=(preserveView&&(currentTab==='calendar'||currentTab==='progress'))?currentTab:(admin?'calendar':'progress');main.dataset.tab=next;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===next))}
    const b=document.getElementById('adminLoginBtnV131');if(b){b.classList.toggle('logged',!!admin);b.textContent=admin?`${isMaster?'마스터':'관리자'} · ${info&&info.displayName?info.displayName:(info&&info.username?info.username:'로그인')}`:'관리자 로그인'}
    const ver=document.getElementById('version');if(ver)ver.textContent=admin?`${WEB_VERSION_V197} · ${isMaster?'마스터':'관리자'}`:WEB_VERSION_V197+' · 메모·연차 입력 가능';
    const sub=document.querySelector('.sidesub');if(sub)sub.textContent=admin?'최신 데이터 · 관리자 모드':'장비 정보 · 메모 입력 가능';
+   if(admin&&info&&!info.__optimisticV299)saveUiHintV299(info);
    // v2.96: 최초 부팅 중에는 권한 확정 전/후 화면을 연속 렌더하지 않는다. canonical 최종 준비가 끝날 때 본 화면을 한 번 확정한다.
    const bootActiveV296=!!(window.__psuBootV247&&window.__psuBootV247.isActive&&window.__psuBootV247.isActive());
-   if(!bootActiveV296&&typeof render==='function')render();
+   // v2.99: 로컬 힌트로 이미 같은 관리자/마스터 화면을 캐시 렌더한 경우, 인증 완료 순간 전체 DOM을 다시 만들지 않는다.
+   if(!bootActiveV296&&!sameOptimisticRole&&typeof render==='function')render();
+   if(sameOptimisticRole)try{if(window.__psuBootPerfV299)window.__psuBootPerfV299.mark('authSwapNoRender')}catch(_e){};
    // 모바일 관리자 초기 포커스는 부팅 화면 뒤에서만 준비하고, 실제 화면 공개는 anchor 완료 후 진행한다.
    if(admin&&!preserveView&&window.main&&main.dataset.tab==='calendar'&&typeof beginInitialTodayAnchorV196==='function')setTimeout(beginInitialTodayAnchorV196,0);
  }
@@ -820,7 +872,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    prefillId=(typeof prefillId==='string')?prefillId:'';
    if(adminInfoV131){
      mtitle.textContent='관리자';mbody.innerHTML=`<div class="admin-reg-note-v131"><b>${esc(adminInfoV131.displayName||adminInfoV131.username||'관리자')}</b> · ${adminInfoV131.role==='master'?'마스터':'관리자'} 권한으로 로그인되어 있습니다.</div><div style="text-align:right"><button class="btn danger" id="logoutV131">로그아웃</button></div>`;modalback.classList.add('show');
-     document.getElementById('logoutV131').onclick=()=>{if(window.__psuAuthTokenClearV212)window.__psuAuthTokenClearV212();else localStorage.removeItem(TOKEN_KEY);try{if(window.__firebaseFastLogoutV186)window.__firebaseFastLogoutV186()}catch(e){}adminInfoV131=null;closeM();setMode(false,null);load(false)};return;
+     document.getElementById('logoutV131').onclick=()=>{clearUiHintV299();if(window.__psuAuthTokenClearV212)window.__psuAuthTokenClearV212();else localStorage.removeItem(TOKEN_KEY);try{if(window.__firebaseFastLogoutV186)window.__firebaseFastLogoutV186()}catch(e){}adminInfoV131=null;closeM();setMode(false,null);load(false)};return;
    }
    mtitle.textContent='관리자 로그인';mbody.innerHTML=`<div class="admin-reg-note-v131">승인된 관리자만 전체 일정과 스케줄 이력을 볼 수 있습니다.</div><input class="admin-field-v131" id="adminIdV131" name="psu_admin_login_id_v133" placeholder="아이디" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" readonly data-lpignore="true" data-1p-ignore="true"><input class="admin-field-v131" id="adminPwV131" name="psu_admin_login_pw_v133" type="password" placeholder="비밀번호" autocomplete="new-password" readonly data-lpignore="true" data-1p-ignore="true"><div style="display:flex;align-items:center;justify-content:space-between;margin-top:7px"><button class="admin-link-v131" id="registerAdminV131">관리자 등록</button><button class="btn primary" id="loginAdminV131">로그인</button></div>`;modalback.classList.add('show');
    let savedId=String(prefillId||localStorage.getItem(LAST_REQ_ID_KEY)||'');const idEl=document.getElementById('adminIdV131'),pwEl=document.getElementById('adminPwV131');if(!savedId&&window.__psuRestoreAdminIdV213){window.__psuRestoreAdminIdV213().then(v=>{v=String(v||'').trim();if(v&&idEl&&!idEl.value){savedId=v;idEl.value=v}}).catch(()=>{})}
@@ -993,11 +1045,13 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  function stripGeneralDetail(){if(adminInfoV131)return;[...mbody.querySelectorAll('.section')].forEach(sec=>{const h=sec.querySelector('h4');if(h&&h.textContent.trim()==='스케줄 이력')sec.remove()})}
  const oldDetail=window.showDetail;if(typeof oldDetail==='function')window.showDetail=function(unit,date=''){const r=oldDetail(unit,date);setTimeout(stripGeneralDetail,0);setTimeout(stripGeneralDetail,160);return r};
  addHeaderButtons();
+ try{Promise.resolve(window.__psuUiModeHintPromiseV299).then(h=>{if(h&&token())applyOptimisticShellV299(h)}).catch(()=>{})}catch(_e){}
  let initialSavedTokenV291='';try{initialSavedTokenV291=token()}catch(_e){}
  window.__psuAuthRestoreSettledV291=!initialSavedTokenV291;
  if(!initialSavedTokenV291)setMode(false,null);else window.__psuAuthRestorePendingV291=true;
- function authSettledV291(){window.__psuAuthRestorePendingV291=false;window.__psuAuthRestoreSettledV291=true;try{if(window.__psuVisualSnapshotAuthReadyV291)window.__psuVisualSnapshotAuthReadyV291()}catch(_e){}}
+ function authSettledV291(){window.__psuAuthRestorePendingV291=false;window.__psuAuthRestoreSettledV291=true;settleOptimisticShellV299();try{if(window.__psuVisualSnapshotAuthReadyV291)window.__psuVisualSnapshotAuthReadyV291()}catch(_e){}}
  async function verifySavedSessionV131(reloadOnSuccess){
+   try{if(window.__psuBootPerfV299)window.__psuBootPerfV299.mark('authStart')}catch(_e){}
    let t=token();if(!t&&window.__psuAuthTokenRestoreV212)try{t=await window.__psuAuthTokenRestoreV212()}catch(_e){}
    window.__psuAuthRestorePendingV291=!!t;window.__psuAuthRestoreSettledV291=!t;
    const finishGeneral=async()=>{setMode(false,null,false);if(window.__psuBootV247)window.__psuBootV247.auth(false);authSettledV291();if(window.__psuEnsureNameBeforeLoadV252)await window.__psuEnsureNameBeforeLoadV252();if(reloadOnSuccess)load(false)};
@@ -1014,20 +1068,28 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    }catch(_e){}
    google.script.run.withSuccessHandler(r=>{
      if(r&&r.admin){if(r.token&&window.__psuAuthTokenSaveV212)window.__psuAuthTokenSaveV212(r.token);const keepView=!!adminInfoV131;setMode(true,r,keepView);if(window.__psuBootV247)window.__psuBootV247.auth(true);authSettledV291();if(reloadOnSuccess)load(false)}
-     else{if(window.__psuAuthTokenClearV212)window.__psuAuthTokenClearV212();else localStorage.removeItem(TOKEN_KEY);finishGeneral()}
+     else{clearUiHintV299();if(window.__psuAuthTokenClearV212)window.__psuAuthTokenClearV212();else localStorage.removeItem(TOKEN_KEY);finishGeneral()}
    }).withFailureHandler(()=>{finishGeneral()}).verifyWebAdminSessionV131(t)
  }
  window.__verifySavedSessionV131=verifySavedSessionV131;
  let authKickStartedV298=false;
  const kickAuthRestoreV298=()=>{if(authKickStartedV298)return;authKickStartedV298=true;verifySavedSessionV131(true)};
  window.__kickAuthRestoreV298=kickAuthRestoreV298;
- // v2.98: Firebase/Auth helper와 캐시 준비가 끝날 때까지 DOMContentLoaded를 기다리지 않는다.
+ // v2.99: Firebase/Auth helper와 캐시 준비를 병렬 시작하며, 로컬 모드 힌트+캐시가 있으면 인증 완료 전에도 읽기 화면을 먼저 공개한다.
  if(window.__firebaseFastWebRestoreV186)Promise.resolve().then(kickAuthRestoreV298);
  else if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',kickAuthRestoreV298,{once:true});
  else setTimeout(kickAuthRestoreV298,0);
  setTimeout(checkPendingApprovalV132,1200);
  // v1.87: 승인/중지/권한 변경은 authUsers 실시간 이벤트로 처리한다.
- setTimeout(()=>{try{let ref=null;firebase.auth().onAuthStateChanged(u=>{if(ref){try{ref.off()}catch(_e){}ref=null}if(!u||u.isAnonymous)return;ref=firebase.database().ref('authUsers/'+u.uid);ref.on('value',snap=>{const p=snap.val()||{};const pending=localStorage.getItem(PENDING_KEY)||'';if(pending&&(p.status==='approved'||p.status==='disabled'))showApprovalResultV132({ok:true,status:p.status,role:p.role||'admin',username:p.username||'',displayName:p.displayName||p.username||'',approvedAt:p.approvedAt||'',disabledAt:p.disabledAt||''});if(adminInfoV131&&p.status&&p.status!=='approved'){if(window.__psuAuthTokenClearV212)window.__psuAuthTokenClearV212();else localStorage.removeItem(TOKEN_KEY);adminInfoV131=null;try{firebase.auth().signOut().then(()=>firebase.auth().signInAnonymously()).catch(()=>{})}catch(_e){}setMode(false,null,false);load(false);toastMsg('관리자 사용 상태가 변경되어 로그아웃되었습니다.')}else if(adminInfoV131&&p.status==='approved'&&window.__firebaseFastWebRestoreV186){window.__firebaseFastWebRestoreV186().then(r=>{if(r&&r.ok)setMode(true,r,true)}).catch(()=>{})}})})}catch(_e){}},900);
+ setTimeout(()=>{try{let ref=null;firebase.auth().onAuthStateChanged(u=>{if(ref){try{ref.off()}catch(_e){}ref=null}if(!u||u.isAnonymous)return;ref=firebase.database().ref('authUsers/'+u.uid);ref.on('value',snap=>{const p=snap.val()||{};const pending=localStorage.getItem(PENDING_KEY)||'';if(pending&&(p.status==='approved'||p.status==='disabled'))showApprovalResultV132({ok:true,status:p.status,role:p.role||'admin',username:p.username||'',displayName:p.displayName||p.username||'',approvedAt:p.approvedAt||'',disabledAt:p.disabledAt||''});if(adminInfoV131&&p.status&&p.status!=='approved'){clearUiHintV299();if(window.__psuAuthTokenClearV212)window.__psuAuthTokenClearV212();else localStorage.removeItem(TOKEN_KEY);adminInfoV131=null;try{firebase.auth().signOut().then(()=>firebase.auth().signInAnonymously()).catch(()=>{})}catch(_e){}setMode(false,null,false);load(false);toastMsg('관리자 사용 상태가 변경되어 로그아웃되었습니다.')}else if(adminInfoV131&&p.status==='approved'&&window.__firebaseFastWebRestoreV186){window.__firebaseFastWebRestoreV186().then(r=>{if(r&&r.ok)setMode(true,r,true)}).catch(()=>{})}})})}catch(_e){}},900);
+})();
+</script>
+<script id="web-v299-optimistic-write-guard">
+(function(){
+ if(window.__webV299OptimisticWriteGuard)return;window.__webV299OptimisticWriteGuard=true;
+ function blockedTarget(t){if(!t||!t.closest)return null;return t.closest('button,a,.btn,[role="button"],input[type="checkbox"],input[type="radio"]')}
+ document.addEventListener('click',e=>{if(!window.__psuOptimisticShellV299)return;const t=blockedTarget(e.target);if(!t)return;e.preventDefault();e.stopImmediatePropagation();try{if(typeof toastMsg==='function')toastMsg('로그인 상태 확인 중입니다.')}catch(_e){}},true);
+ document.addEventListener('submit',e=>{if(!window.__psuOptimisticShellV299)return;e.preventDefault();e.stopImmediatePropagation()},true);
 })();
 </script>
 
@@ -1747,7 +1809,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  if(window.__webV270CanonicalSyncInstalled)return;window.__webV270CanonicalSyncInstalled=true;
  const ready={schedule:false,progress:false,progressInfo:false};window.__psuCanonicalReadyStateV287=ready;let bootDone=false,notify=false;
  function status(){if(window.sync)sync.innerHTML=`실시간 동기화 <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}
- function finishBoot(statusText='실시간 동기화'){if(bootDone)return;bootDone=true;const fastShown=!!(window.__psuBootV247&&window.__psuBootV247.wasFastReleased&&window.__psuBootV247.wasFastReleased());try{/* v2.98: 캐시 첫 화면을 이미 공개한 경우 canonical 완료 시 불필요한 전체 재렌더/재포커스를 반복하지 않는다. 각 실시간 listener가 변경분을 이미 반영한다. */if(!fastShown&&typeof render==='function')render();if(!fastShown&&firstLoad){firstLoad=false;beginInitialTodayAnchorV196()}else if(!fastShown&&typeof shouldInitialTodayAnchorV196==='function'&&shouldInitialTodayAnchorV196())scheduleInitialTodayAnchorV196()}catch(_e){}if(statusText==='실시간 동기화')status();else{if(window.sync)sync.innerHTML=`${statusText} <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}if(window.__psuBootV247)window.__psuBootV247.data();try{if(window.__psuVisualSnapshotLiveReadyV290)setTimeout(()=>window.__psuVisualSnapshotLiveReadyV290(),fastShown?60:280)}catch(_e){}if(notify){notify=false;toastMsg(statusText==='실시간 동기화'?'실시간 데이터가 최신 상태입니다.':'일부 실시간 데이터 연결이 지연되고 있습니다.')}}
+ function finishBoot(statusText='실시간 동기화'){if(bootDone)return;bootDone=true;try{if(window.__psuBootPerfV299){window.__psuBootPerfV299.mark('canonicalReady');sessionStorage.setItem('psuBootPerfV299',JSON.stringify(window.__psuBootPerfV299.marks))}}catch(_e){};const fastShown=!!(window.__psuBootV247&&window.__psuBootV247.wasFastReleased&&window.__psuBootV247.wasFastReleased());try{/* v2.99: 캐시 첫 화면을 이미 공개한 경우 canonical 완료 시 불필요한 전체 재렌더/재포커스를 반복하지 않는다. 각 실시간 listener가 변경분을 이미 반영한다. */if(!fastShown&&typeof render==='function')render();if(!fastShown&&firstLoad){firstLoad=false;beginInitialTodayAnchorV196()}else if(!fastShown&&typeof shouldInitialTodayAnchorV196==='function'&&shouldInitialTodayAnchorV196())scheduleInitialTodayAnchorV196()}catch(_e){}if(statusText==='실시간 동기화')status();else{if(window.sync)sync.innerHTML=`${statusText} <b>${new Date().toLocaleTimeString()}</b>`;if(window.refresh)refresh.disabled=false}if(window.__psuBootV247)window.__psuBootV247.data();try{if(window.__psuVisualSnapshotLiveReadyV290)setTimeout(()=>window.__psuVisualSnapshotLiveReadyV290(),fastShown?60:280)}catch(_e){}if(notify){notify=false;toastMsg(statusText==='실시간 동기화'?'실시간 데이터가 최신 상태입니다.':'일부 실시간 데이터 연결이 지연되고 있습니다.')}}
  function finalize(force=false){if(bootDone)return;if(!ready.schedule||!ready.progress||(!force&&!ready.progressInfo))return;finishBoot('실시간 동기화')}
  window.__psuCanonicalReadyV270=function(kind){if(Object.prototype.hasOwnProperty.call(ready,kind))ready[kind]=true;if(ready.schedule&&ready.progress&&window.__psuFastSnapshotScheduleSaveV287)window.__psuFastSnapshotScheduleSaveV287();finalize(false)};
  window.__psuCanonicalLoadV270=async function(silent=false){if(window.refresh)refresh.disabled=true;if(window.sync)sync.textContent=bootDone?'실시간 데이터 확인 중...':'실시간 동기화 연결 중...';if(!silent)notify=true;try{if(window.__fbDirectV187)await window.__fbDirectV187.auth();if(bootDone){if(typeof render==='function')render();status();if(!silent){notify=false;toastMsg('실시간 데이터가 최신 상태입니다.')}}else finalize(false)}catch(e){if(window.sync)sync.textContent='연결 오류';if(window.refresh)refresh.disabled=false;if(!silent)psuAlert(e&&e.message?e.message:String(e))}return null};
