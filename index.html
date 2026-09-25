@@ -99,8 +99,8 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 })();
 </script>
 
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.01";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
-<script>window.__PSU_WEB_TEST_BUILD="v3.01-first-paint-today-lock";</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.02";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script>window.__PSU_WEB_TEST_BUILD="v3.02-header-anchor-stable";</script>
 <script id="web-v299-boot-perf-mode-hint">
 (function(){
   if(window.__psuBootPerfV299)return;
@@ -260,7 +260,9 @@ function render(){monthTitle.textContent=`${viewDate.getFullYear()}년 ${viewDat
 function renderCalendar(){const y=viewDate.getFullYear(),m=viewDate.getMonth(),first=new Date(y,m,1);let d=new Date(first);while(d.getDay()!==1)d.setDate(d.getDate()-1);let html='';for(let i=0;i<30;i++){const cur=new Date(d);cur.setDate(d.getDate()+i);const w=cur.getDay();if(w===0||w===6){i--;d.setDate(d.getDate()+1);continue}const ds=iso(cur),events=activeEvents().filter(e=>e.date===ds&&matchEvent(e)).sort((a,b)=>(vendorOrderV167(a)-vendorOrderV167(b))||(AREA_ORDER[areaOf(a)]||9)-(AREA_ORDER[areaOf(b)]||9)||String(a.unit).localeCompare(String(b.unit),'ko'));const isToday=ds===iso(new Date()),holiday=webHolidayV263(ds);html+=`<div class="day${isToday?' today-day':''}${holiday?' holiday-day-v263':''}" data-date="${ds}"><div class="date"><span>${cur.getDate()}</span>${holiday?`<span class="holiday holiday-v263">${esc(holiday)}</span>`:''}</div>${events.map(eventHTML).join('')}</div>`}calendar.innerHTML=html;bindEvents(calendar)}
 function eventHTML(e){const a=areaOf(e),vc=vendorClassV167(e);return `<div class="event ${vc}" data-unit="${esc(e.unit)}" data-date="${esc(e.date)}"><div class="e1"><span class="loc ${badge(a)}">${esc(a)} ${esc(e.line||'')}</span><span class="unit">${esc(e.unit||'')}</span><span class="etype">${esc(e.type||'')}</span></div><div class="eventline"><span class="sn">${esc(e.sn||'')}</span><span>·</span><span class="task">${esc(e.task||e.workType||'')}</span></div></div>`}
 function renderMobile(){const [s,e]=monthRange(),map={};for(const ev of activeEvents()){const d=fromISO(ev.date);if(d<s||d>e||!matchEvent(ev))continue;(map[ev.date]||(map[ev.date]=[])).push(ev)}const now=new Date(),todayISO=iso(now),focusISO=iso(scheduleFocusDateV233()),startISO=iso(s),endISO=iso(e);if(focusISO>=startISO&&focusISO<=endISO&&!map[focusISO])map[focusISO]=[];const dates=Object.keys(map).sort();mobileList.innerHTML=dates.length?dates.map(ds=>{const d=fromISO(ds),wn=['일','월','화','수','목','금','토'][d.getDay()],isToday=ds===todayISO,holiday=webHolidayV263(ds);map[ds].sort((a,b)=>(vendorOrderV167(a)-vendorOrderV167(b))||(AREA_ORDER[areaOf(a)]||9)-(AREA_ORDER[areaOf(b)]||9)||String(a.unit).localeCompare(String(b.unit),'ko'));const cards=map[ds].length?map[ds].map(ev=>{const a=areaOf(ev);return `<div class="mcard ${vendorClassV167(ev)}" data-unit="${esc(ev.unit)}" data-date="${esc(ev.date)}"><div class="mrow"><span class="loc ${badge(a)}">${esc(a)} ${esc(ev.line||'')}</span><span class="unit">${esc(ev.unit)}</span><span class="etype">${esc(ev.type||'')}</span><span style="margin-left:auto" class="sn">${esc(ev.sn||'')}</span></div><div class="mtask">${esc(ev.task||ev.workType||'-')}</div></div>`}).join(''):`<div class="mnone">${isToday?'오늘 등록된 일정이 없습니다.':'등록된 일정이 없습니다.'}</div>`;return `<div class="dategroup${isToday?' today-group':''}" data-date="${ds}"><h3>${d.getMonth()+1}/${d.getDate()} <span class="weekday">${wn}요일</span>${holiday?`<span class="holiday holiday-v263">${esc(holiday)}</span>`:''}</h3>${cards}</div>`}).join(''):'<div class="empty">이 달에 표시할 일정이 없습니다.</div>';bindEvents(mobileList)}
-function scrollToToday(smooth=true){const ds=iso(scheduleFocusDateV233());if(window.matchMedia('(max-width:820px)').matches){let el=mobileList.querySelector(`.dategroup[data-date="${ds}"]`);if(!el){const groups=[...mobileList.querySelectorAll('.dategroup[data-date]')];el=groups.find(g=>g.dataset.date>=ds)||groups[groups.length-1]}if(!el)return;const topbar=$('topSticky'),offset=(topbar?topbar.offsetHeight:0)+8,r=el.getBoundingClientRect(),avail=Math.max(0,window.innerHeight-offset),desired=offset+Math.max(0,(avail-r.height)/2),y=window.pageYOffset+r.top-desired;window.scrollTo({top:Math.max(0,y),behavior:smooth?'smooth':'auto'});return}const wrap=document.querySelector('.calendar-wrap'),el=calendar.querySelector(`.day[data-date="${ds}"]`);if(!wrap||!el)return;const top=Math.max(0,el.offsetTop-Math.max(0,(wrap.clientHeight-el.offsetHeight)/2));wrap.scrollTo({top,behavior:smooth?'smooth':'auto'})}
+function mobileDateHeaderV302(group){try{return group&&(group.querySelector(':scope > h3')||group.querySelector('h3'))}catch(_e){return group?group.querySelector('h3'):null}}
+function mobileHeaderDesiredTopV302(header){const topbar=$('topSticky'),offset=(topbar?topbar.offsetHeight:0)+8,r=header.getBoundingClientRect(),avail=Math.max(0,window.innerHeight-offset);return offset+Math.max(0,(avail-r.height)/2)}
+function scrollToToday(smooth=true){const ds=iso(scheduleFocusDateV233());if(window.matchMedia('(max-width:820px)').matches){let el=mobileList.querySelector(`.dategroup[data-date="${ds}"]`);if(!el){const groups=[...mobileList.querySelectorAll('.dategroup[data-date]')];el=groups.find(g=>g.dataset.date>=ds)||groups[groups.length-1]}if(!el)return;const header=mobileDateHeaderV302(el)||el,r=header.getBoundingClientRect(),desired=mobileHeaderDesiredTopV302(header),y=window.pageYOffset+r.top-desired;window.scrollTo({top:Math.max(0,y),behavior:smooth?'smooth':'auto'});return}const wrap=document.querySelector('.calendar-wrap'),el=calendar.querySelector(`.day[data-date="${ds}"]`);if(!wrap||!el)return;const top=Math.max(0,el.offsetTop-Math.max(0,(wrap.clientHeight-el.offsetHeight)/2));wrap.scrollTo({top,behavior:smooth?'smooth':'auto'})}
 // v3.00: 캐시 화면 공개 뒤 실시간 데이터가 들어와도 사용자가 보고 있던 날짜의 화면 위치를 유지한다.
 window.__psuInitialAnchorDoneV300=false;window.__psuInitialViewportStableUntilV300=0;
 window.__captureViewportAnchorV300=function(){
@@ -274,9 +276,9 @@ window.__captureViewportAnchorV300=function(){
       if((initialLockV301&&initialLockV301.isActive&&initialLockV301.isActive())||(window.__psuInitialAnchorDoneV300&&Date.now()<Number(window.__psuInitialViewportStableUntilV300||0))){
         const ds=(initialLockV301&&initialLockV301.targetDate&&initialLockV301.targetDate())||iso(scheduleFocusDateV233());el=list.querySelector(`.dategroup[data-date="${ds}"]`);
       }
-      if(!el){let best=Infinity;for(const g of groups){const r=g.getBoundingClientRect();if(r.bottom<offset-4||r.top>window.innerHeight+4)continue;const c=r.top+Math.min(r.height,Math.max(28,window.innerHeight-offset))/2,d=Math.abs(c-center);if(d<best){best=d;el=g}}}
-      if(!el)el=groups.find(g=>g.getBoundingClientRect().bottom>=offset)||groups[0];
-      const r=el.getBoundingClientRect();return {mobile:true,date:String(el.dataset.date||''),top:r.top,x:window.scrollX,y:window.scrollY};
+      if(!el){let best=Infinity;for(const g of groups){const r=g.getBoundingClientRect();if(r.bottom<offset-4||r.top>window.innerHeight+4)continue;const h=mobileDateHeaderV302(g)||g,hr=h.getBoundingClientRect(),c=hr.top+hr.height/2,d=Math.abs(c-center);if(d<best){best=d;el=g}}}
+      if(!el)el=groups.find(g=>{const h=mobileDateHeaderV302(g)||g;return h.getBoundingClientRect().bottom>=offset})||groups[0];
+      const h=mobileDateHeaderV302(el)||el,r=h.getBoundingClientRect();return {mobile:true,date:String(el.dataset.date||''),top:r.top,header:true,x:window.scrollX,y:window.scrollY};
     }
     const wrap=document.querySelector('.calendar-wrap'),days=wrap?[...wrap.querySelectorAll('.day[data-date]')]:[];
     if(!wrap||!days.length)return {mobile:false,scrollTop:wrap?wrap.scrollTop:0,date:'',relTop:0};
@@ -288,23 +290,22 @@ window.__restoreViewportAnchorV300=function(a){
   if(!a)return;try{
     if(a.mobile){
       const list=document.getElementById('mobileList')||document.querySelector('.mobile-list');let el=a.date&&list?list.querySelector(`.dategroup[data-date="${a.date}"]`):null;
-      if(el){const delta=el.getBoundingClientRect().top-Number(a.top||0);if(Math.abs(delta)>0.5)window.scrollBy(0,delta)}else window.scrollTo(a.x||0,a.y||0);return;
+      if(el){const ref=a.header?(mobileDateHeaderV302(el)||el):el,delta=ref.getBoundingClientRect().top-Number(a.top||0);if(Math.abs(delta)>0.5)window.scrollBy(0,delta)}else window.scrollTo(a.x||0,a.y||0);return;
     }
     const wrap=document.querySelector('.calendar-wrap');if(!wrap)return;const el=a.date?wrap.querySelector(`.day[data-date="${a.date}"]`):null;if(el)wrap.scrollTop=Math.max(0,el.offsetTop-Number(a.relTop||0));else wrap.scrollTop=Number(a.scrollTop||0);
   }catch(_e){}
 };
-// v3.01: 캐시 화면을 빠르게 공개한 뒤 canonical 초기 동기화가 들어와도
-// 오늘(주말은 다음 월요일) 날짜가 첫 화면의 같은 위치에 고정되도록 한다.
-// 시간 고정값 대신 DOM 변경/크기 변경을 감시하고 canonical 완료 + 안정 구간 뒤 자동 해제한다.
+// v3.02: 오늘(주말은 다음 월요일) 날짜 헤더 자체를 화면 중앙 기준점으로 사용한다.
+// 카드 개수/높이가 바뀌어도 기준점이 흔들리지 않으며 canonical 완료 뒤 충분한 안정 구간까지 고정한다.
 (function(){
   if(window.__psuInitialViewportLockV301)return;
   let active=false,target='',observer=null,resizeObserver=null,raf=0,settleTimer=0,hardTimer=0,lastMutation=0,canonical=false,canonicalAt=0,pendingCanonical=false;
   const isMobile=()=>!!(window.matchMedia&&window.matchMedia('(max-width:820px)').matches);
   const list=()=>document.getElementById('mobileList')||document.querySelector('.mobile-list');
-  function desiredTop(el){const topbar=document.getElementById('topSticky'),offset=(topbar?topbar.offsetHeight:0)+8,r=el.getBoundingClientRect(),avail=Math.max(0,window.innerHeight-offset);return offset+Math.max(0,(avail-r.height)/2)}
+  function desiredTop(header){return mobileHeaderDesiredTopV302(header)}
   function correct(){
     if(!active||!isMobile())return false;const root=list(),el=root&&target?root.querySelector(`.dategroup[data-date="${target}"]`):null;if(!el||!el.getClientRects().length)return false;
-    const delta=el.getBoundingClientRect().top-desiredTop(el);if(Math.abs(delta)>0.5)window.scrollBy(0,delta);return true;
+    const header=mobileDateHeaderV302(el)||el,delta=header.getBoundingClientRect().top-desiredTop(header);if(Math.abs(delta)>0.5)window.scrollBy(0,delta);return true;
   }
   function schedule(){
     if(!active)return;cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>requestAnimationFrame(()=>{correct();setTimeout(()=>{if(active)correct()},45)}));
@@ -315,7 +316,7 @@ window.__restoreViewportAnchorV300=function(a){
   function stop(){if(!active)return;correct();active=false;cleanup()}
   function planRelease(){
     clearTimeout(settleTimer);if(!active||!canonical)return;settleTimer=setTimeout(()=>{
-      if(!active||!canonical)return;const quiet=Date.now()-lastMutation,elapsed=Date.now()-canonicalAt;if(quiet<320&&elapsed<1800){planRelease();return}correct();requestAnimationFrame(()=>requestAnimationFrame(stop));
+      if(!active||!canonical)return;const quiet=Date.now()-lastMutation,elapsed=Date.now()-canonicalAt;/* v3.02: 최소 1.8초 + DOM 1.1초 무변경을 모두 만족, 최대 5초 */if(elapsed<5000&&(elapsed<1800||quiet<1100)){planRelease();return}correct();requestAnimationFrame(()=>requestAnimationFrame(stop));
     },380);
   }
   function onLayout(){if(!active)return;lastMutation=Date.now();schedule();if(canonical)planRelease()}
@@ -346,7 +347,7 @@ function runInitialTodayAnchorV196(){
   if(viewDate.getFullYear()!==focus.getFullYear()||viewDate.getMonth()!==focus.getMonth()){viewDate=new Date(focus.getFullYear(),focus.getMonth(),1);render()}
   const ds=iso(focus),groups=[...mobileList.querySelectorAll('.dategroup[data-date]')],el=mobileList.querySelector(`.dategroup[data-date="${ds}"]`)||groups.find(g=>g.dataset.date>=ds)||groups[groups.length-1];
   if(!el||el.getClientRects().length===0)return false;
-  scrollToToday(false);initialTodayAnchorSucceededV196=true;initialTodayAnchorActiveV196=false;window.__psuInitialAnchorDoneV300=true;window.__psuInitialViewportStableUntilV300=0;try{if(window.__psuInitialViewportLockV301&&window.__psuInitialViewportLockV301.start)window.__psuInitialViewportLockV301.start(ds)}catch(_e){};if(window.__psuBootV247)window.__psuBootV247.anchor();clearTimeout(initialTodayAnchorTimerV196);window.__webInitialAnchorLockV226=false;/* v3.01: 첫 공개 전에 오늘 위치를 확정하고 canonical 초기 동기화가 끝날 때까지 같은 위치를 DOM 기반으로 고정한다. */if(window.__releaseMobileBootV226)window.__releaseMobileBootV226();clearTimeout(window.__webInitialAnchorUnlockTimerV226);return true
+  scrollToToday(false);initialTodayAnchorSucceededV196=true;initialTodayAnchorActiveV196=false;window.__psuInitialAnchorDoneV300=true;window.__psuInitialViewportStableUntilV300=0;try{if(window.__psuInitialViewportLockV301&&window.__psuInitialViewportLockV301.start)window.__psuInitialViewportLockV301.start(ds)}catch(_e){};if(window.__psuBootV247)window.__psuBootV247.anchor();clearTimeout(initialTodayAnchorTimerV196);window.__webInitialAnchorLockV226=false;/* v3.02: 첫 공개 전에 오늘 날짜 헤더를 중앙에 확정하고 canonical 초기 동기화가 끝날 때까지 헤더 기준으로 고정한다. */if(window.__releaseMobileBootV226)window.__releaseMobileBootV226();clearTimeout(window.__webInitialAnchorUnlockTimerV226);return true
 }
 function scheduleInitialTodayAnchorV196(){
   if(!shouldInitialTodayAnchorV196())return;
