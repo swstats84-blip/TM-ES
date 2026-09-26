@@ -61,6 +61,11 @@ html.psu-web-boot-v247 .app,html.psu-web-boot-v247 .modalback,html.psu-web-boot-
 html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
 @keyframes psuBootSpinV247{to{transform:rotate(360deg)}}
 </style>
+
+<style id="web-v306-auth-write-guard">
+/* 로컬 권한 힌트는 화면 공개용일 뿐, 실제 Firebase 관리자 인증이 복원되기 전에는 쓰기 액션을 누르지 못하게 한다. */
+.auth-pending-v306 .master-action-v136,.auth-pending-v306 .vendor-edge-v169,.auth-pending-v306 [data-me],.auth-pending-v306 [data-md]{pointer-events:none!important;opacity:.48!important}
+</style>
 </head>
 <body class="general-mode">
 <script id="web-v250-static-rpc-shim">
@@ -104,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.05";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.08";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script>window.__PSU_WEB_TEST_BUILD="v3.05-immediate-ready-reveal";</script>
 <script id="web-v299-boot-perf-mode-hint">
 (function(){
@@ -117,7 +122,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   async function snapshotHint(){
     try{
       if(!window.indexedDB)return null;
-      const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('psu_web_visual_snapshot_v290',1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('snapshot hint open failed'));r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('kv'))r.result.createObjectStore('kv')}});
+      const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('psu_web_visual_snapshot',1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('snapshot hint open failed'));r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('kv'))r.result.createObjectStore('kv')}});
       const x=await new Promise(resolve=>{const tx=db.transaction('kv','readonly'),r=tx.objectStore('kv').get('latest-v1');r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>resolve(null);tx.oncomplete=()=>{try{db.close()}catch(_e){}}});
       if(!x||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>MAX_AGE)return null;
       const cls=String(x.bodyClass||'');if(!/\badmin-mode\b/.test(cls))return null;
@@ -179,7 +184,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
     try{
       if(!window.indexedDB)return null;
       const db=await new Promise((resolve,reject)=>{
-        const r=indexedDB.open('psu_web_fast_snapshot_v287',1);
+        const r=indexedDB.open('psu_web_fast_snapshot',1);
         r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('kv'))r.result.createObjectStore('kv')};
         r.onsuccess=()=>resolve(r.result);
         r.onerror=()=>reject(r.error||new Error('snapshot prefetch open failed'));
@@ -388,7 +393,7 @@ prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1
 <script id="web-v287-fast-indexeddb-snapshot-script">
 (function(){
  if(window.__webV287FastSnapshotInstalled)return;window.__webV287FastSnapshotInstalled=true;
- const DB='psu_web_fast_snapshot_v287',STORE='kv',KEY='latest-v1',MAX_AGE=7*24*60*60*1000;
+ const DB='psu_web_fast_snapshot',STORE='kv',KEY='latest-v1',MAX_AGE=7*24*60*60*1000;
  let saveTimer=0,saveBusy=false,restorePromise=null;
  function dbOpen(){return new Promise((resolve,reject)=>{if(!window.indexedDB)return reject(new Error('no indexedDB'));const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('indexedDB open failed'))})}
  let prefetchUsedV298=false;
@@ -892,7 +897,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    optimisticShellV299=true;window.__psuOptimisticShellV299=true;
    const isMaster=String(h.role||'')==='master',hintInfo={role:isMaster?'master':'admin',displayName:String(h.displayName||''),username:String(h.username||''),__optimisticV299:true};
    adminInfoV131=hintInfo;window.__webAuthInfoV136=hintInfo;window.__webAuthTokenV136=()=>token();
-   document.body.classList.toggle('admin-mode',true);document.body.classList.toggle('general-mode',false);document.body.classList.toggle('master-mode',isMaster);
+   document.body.classList.toggle('admin-mode',true);document.body.classList.toggle('general-mode',false);document.body.classList.toggle('master-mode',isMaster);document.body.classList.toggle('auth-pending-v306',true);
    if(window.main){main.dataset.tab='calendar';document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab==='calendar'))}
    const b=document.getElementById('adminLoginBtnV131');if(b){b.classList.add('logged');b.textContent=`${isMaster?'마스터':'관리자'} · ${hintInfo.displayName||'확인 중'}`}
    const ver=document.getElementById('version');if(ver)ver.textContent=`${WEB_VERSION_V197} · ${isMaster?'마스터':'관리자'} 확인 중`;
@@ -901,7 +906,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    try{if(window.__psuBootPerfV299)window.__psuBootPerfV299.mark('modeHintApplied')}catch(_e){}
    return true;
  }
- function settleOptimisticShellV299(){optimisticShellV299=false;window.__psuOptimisticShellV299=false;try{if(window.__psuBootPerfV299)window.__psuBootPerfV299.mark('authSettled')}catch(_e){}}
+ function settleOptimisticShellV299(){optimisticShellV299=false;window.__psuOptimisticShellV299=false;document.body.classList.remove('auth-pending-v306');try{if(window.__psuBootPerfV299)window.__psuBootPerfV299.mark('authSettled')}catch(_e){}}
  window.__psuClearUiHintV299=clearUiHintV299;
  function token(){try{return window.__psuAuthTokenSyncV212?window.__psuAuthTokenSyncV212():(localStorage.getItem(TOKEN_KEY)||'')}catch(e){return localStorage.getItem(TOKEN_KEY)||''}}
  function fmtTime(v){try{const d=new Date(v);return isNaN(d)?'':d.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch(e){return ''}}
@@ -910,7 +915,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    if(window.__psuBootV247)window.__psuBootV247.mode(!!admin);
    const currentTab=(window.main&&String(main.dataset.tab||''))||'';
    adminInfoV131=admin?(info||{}):null;window.__webAuthInfoV136=adminInfoV131;window.__webAuthTokenV136=()=>token();
-   const isMaster=!!(admin&&info&&info.role==='master'),sameOptimisticRole=!!(prevOptimistic&&admin&&prevRole===String(info&&info.role||''));document.body.classList.toggle('admin-mode',!!admin);document.body.classList.toggle('general-mode',!admin);document.body.classList.toggle('master-mode',isMaster);
+   const isMaster=!!(admin&&info&&info.role==='master'),sameOptimisticRole=!!(prevOptimistic&&admin&&prevRole===String(info&&info.role||''));document.body.classList.toggle('admin-mode',!!admin);document.body.classList.toggle('general-mode',!admin);document.body.classList.toggle('master-mode',isMaster);document.body.classList.remove('auth-pending-v306');
    if(admin){const gate=document.getElementById('userNameGateV138');if(gate)gate.remove()}
    setTimeout(()=>{try{if(window.__psuRefreshUserNameV251)window.__psuRefreshUserNameV251()}catch(_e){}},0);
    if(window.main){const next=(preserveView&&(currentTab==='calendar'||currentTab==='progress'))?currentTab:(admin?'calendar':'progress');main.dataset.tab=next;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===next))}
@@ -1844,7 +1849,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
 <script id="web-v290-last-complete-screen-script">
 (function(){
  if(window.__webV290LastCompleteScreenInstalled)return;window.__webV290LastCompleteScreenInstalled=true;
- const DB='psu_web_visual_snapshot_v290',STORE='kv',KEY='latest-v1',MAX_AGE=7*24*60*60*1000;
+ const DB='psu_web_visual_snapshot',STORE='kv',KEY='latest-v1',MAX_AGE=7*24*60*60*1000;
  let frameWrap=null,saveTimer=0,saveBusy=false,lastSaveAt=0,restored=false,dbPromise=null;
  function dbOpen(){if(dbPromise)return dbPromise;dbPromise=new Promise((resolve,reject)=>{if(!window.indexedDB)return reject(new Error('no indexedDB'));const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('indexedDB open failed'))});return dbPromise}
  async function dbGet(){try{const db=await dbOpen();return await new Promise(resolve=>{const tx=db.transaction(STORE,'readonly'),r=tx.objectStore(STORE).get(KEY);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>resolve(null)})}catch(_e){return null}}
@@ -1857,7 +1862,10 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  async function capture(force=false){clearTimeout(saveTimer);if(saveBusy||!canCapture())return false;if(!force&&Date.now()-lastSaveAt<2500)return false;const html=safeCloneApp();if(!html)return false;const v=currentView(),payload={schema:1,at:Date.now(),appHtml:html,css:cssText(),...v};saveBusy=true;try{await dbPut(payload);lastSaveAt=Date.now();try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(_e){}return true}finally{saveBusy=false}}
  function scheduleCapture(delay=1200){clearTimeout(saveTimer);saveTimer=setTimeout(()=>capture(false),delay)}
  function applyView(x){try{if(x&&/^\d{4}-\d{2}-01$/.test(String(x.viewDate||''))&&typeof viewDate!=='undefined')viewDate=new Date(String(x.viewDate)+'T00:00:00')}catch(_e){}try{if(window.main&&(x.tab==='calendar'||x.tab==='progress')){main.dataset.tab=x.tab;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===x.tab))}}catch(_e){}try{if(window.area&&x.area)area.value=x.area;if(window.task&&x.task)task.value=x.task;if(window.search)search.value=String(x.search||'')}catch(_e){}}
- function snapshotDoc(x){const bodyClass=String(x.bodyClass||'').replace(/\bpsu[^\s]*boot[^\s]*\b/g,'').trim();return '<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>'+String(x.css||'')+'\nhtml,body{margin:0!important;min-height:100%!important}*{animation:none!important;transition:none!important}.modalback,.toast,#psuBootV247{display:none!important}</style></head><body class="'+bodyClass.replace(/"/g,'&quot;')+'">'+String(x.appHtml||'')+'</body></html>'}
+ function snapshotDoc(x){const bodyClass=String(x.bodyClass||'').replace(/\bpsu[^\s]*boot[^\s]*\b/g,'').trim();return '<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>'+String(x.css||'')+'\nhtml,body{margin:0!important;min-height:100%!important}*{animation:none!important;transition:none!important}.modalback,.toast,#psuBootV247{display:none!important}</style></head><body class="'+bodyClass.replace(/"/g,'&quot;')+'">'+String(x.appHtml||'')+'
+
+
+</body></html>'}
  function showSnapshot(x){if(frameWrap||!x||!x.appHtml)return false;applyView(x);const wrap=document.createElement('div');wrap.id='psuVisualSnapshotV290';wrap.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#f5f7fb;opacity:1;';const f=document.createElement('iframe');f.setAttribute('aria-label','최근 화면');f.style.cssText='display:block;width:100%;height:100%;border:0;background:#f5f7fb;';const badge=document.createElement('div');badge.textContent='최근 화면 · 최신 정보 확인 중';badge.style.cssText='position:absolute;right:10px;bottom:10px;z-index:2;padding:5px 8px;border-radius:999px;background:rgba(31,41,55,.82);color:#fff;font:700 10px/1.2 "Malgun Gothic",sans-serif;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.16)';wrap.appendChild(f);wrap.appendChild(badge);document.body.appendChild(wrap);frameWrap=wrap;f.onload=()=>{try{f.contentWindow.scrollTo(Number(x.scrollX||0),Number(x.scrollY||0))}catch(_e){}};f.srcdoc=snapshotDoc(x);restored=true;window.__psuVisualSnapshotRestoredV290=true;return true}
  async function restore(){const x=await dbGet();if(!x||x.schema!==1||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>MAX_AGE||!x.appHtml){if(x)dbDelete();return false}return showSnapshot(x)}
  let liveReadySeenV293=false,captureAfterAuthV293=false;
@@ -2058,8 +2066,12 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  async function authMaster(){const fb=window.__fbDirectV187;if(!fb)throw new Error('Firebase 연결 준비 중');await fb.auth();const a=window.__webAuthInfoV136||{};if(a.role!=='master')throw new Error('마스터 권한이 필요합니다.');return fb}
  async function memoUpdate(body){const fb=await authMaster(),id=String(body.id||'').trim(),text=String(body.text||'').trim(),memoDate=String(body.memoDate||'').trim();if(!id||!text)throw new Error('메모 정보가 올바르지 않습니다.');const at=new Date().toISOString(),ref=firebase.database().ref('memos/'+id),patch={text:text,updatedAt:at};if(/^\d{4}-\d{2}-\d{2}$/.test(memoDate))patch.memoDate=memoDate;await ref.update(patch);const s=await ref.once('value'),item=s.val();if(!item||item.deleted)throw new Error('메모 수정 확인 실패');await fb.bump('memo');return {ok:true,item:Object.assign({id:id},item)}}
  async function memoDelete(body){const fb=await authMaster(),id=String(body.id||'').trim();if(!id)throw new Error('메모 ID가 없습니다.');const at=new Date().toISOString(),ref=firebase.database().ref('memos/'+id);await ref.transaction(cur=>{if(!cur)return cur;cur.deleted=true;cur.deletedAt=at;cur.updatedAt=at;cur.text='';return cur});const s=await ref.once('value'),item=s.val();if(!item||item.deleted!==true)throw new Error('메모 삭제 확인 실패');await fb.bump('memo');return {ok:true,id:id,deleted:true}}
- async function pending(body){const fb=await authMaster(),unit=String(body.unit||'').trim(),action=String(body.action||''),id=String(body.taskId||''),key=fb.b64key(unit),ref=firebase.database().ref('pending/'+key),at=new Date().toISOString(),actor=String((window.__webAuthInfoV136||{}).displayName||(window.__webAuthInfoV136||{}).username||'관리자');let out=[];await ref.transaction(rec=>{rec=rec&&typeof rec==='object'?rec:{unit:unit,tasks:[]};let tasks=vals(rec.tasks),found=false;if(action==='toggle'){tasks=tasks.map(x=>{if(String(x&&x.id||'')!==id)return x;found=true;const done=!x.done;return Object.assign({},x,{done:done,completedAt:done?at:'',completedBy:done?actor:''})})}else if(action==='edit'){const text=String(body.text||'').trim();if(!text)throw new Error('미비작업 내용을 입력하세요.');tasks=tasks.map(x=>{if(String(x&&x.id||'')!==id)return x;found=true;return Object.assign({},x,{text:text.slice(0,200),updatedAt:at,updatedBy:actor})})}else if(action==='delete'){tasks=tasks.filter(x=>{if(String(x&&x.id||'')===id){found=true;return false}return true})}else if(action==='clearDone'){const before=tasks.length;tasks=tasks.filter(x=>!x.done);found=before!==tasks.length}else throw new Error('지원하지 않는 미비작업 동작입니다.');if(action!=='clearDone'&&!found)throw new Error('미비작업 항목을 찾지 못했습니다.');rec.tasks=tasks;rec.updatedAt=at;out=tasks;return rec});const chk=await ref.once('value'),saved=chk.val()||{},verify=vals(saved.tasks);if(action==='delete'&&verify.some(x=>String(x&&x.id||'')===id))throw new Error('미비작업 삭제 확인 실패');await fb.bump('pending');return {ok:true,unit:unit,pendingTasks:verify,savedAt:at,verified:true}}
- async function direct(op,body){body=body||{};if(op==='mobileNativeSpecialSet'){await authMaster();await window.__fbMasterProgressFieldV187(String(body.unit||''),{special:String(body.text||'')});return {ok:true}}if(op==='mobileNativeRemainingSet'){await authMaster();await window.__fbMasterProgressFieldV187(String(body.unit||''),{remaining:String(body.text||'')});return {ok:true}}if(op==='mobileNativeProgressVisibleSet'){await authMaster();await window.__fbMasterVisibleV187(String(body.unit||''),body.visible===true);return {ok:true}}if(op==='mobileNativeEquipmentSet'){await authMaster();const f=body.fields||{};const r=await window.__fbMasterUpdateEquipmentV187(String(body.unit||''),String(body.date||''),Object.assign({unit:String(f.unit||body.unit||'')},f));return {ok:true,unit:r&&r.unit||body.unit}}if(op==='mobileNativeProgressInfoSet'){const fb=await authMaster(),unit=String(body.unit||''),date=String(body.date||''),note=String(body.note||''),events=Array.isArray(state&&state.scheduleEvents)?state.scheduleEvents:[],e=events.find(x=>x&&String(x.unit||'')===unit&&String(x.date||'')===date);if(!e)throw new Error('선택한 일정을 찾지 못했습니다.');const src=String(e.sourceUnit||e.unit||unit),key=fb.b64key(src+'|'+date),at=new Date().toISOString(),task=String(e.task||e.workType||'');if(note)await fb.set('progressInfo/'+key,{key:key,sourceUnit:src,unit:unit,date:date,task:task,note:note,updatedAt:at,updatedBy:String((window.__webAuthInfoV136||{}).displayName||'')});else await fb.del('progressInfo/'+key);await fb.bump('progress');return {ok:true}}if(op==='mobileNativeMemoUpdate')return memoUpdate(body);if(op==='mobileNativeMemoDelete')return memoDelete(body);if(op==='mobileNativePendingAction')return pending(body);throw new Error('DIRECT_UNSUPPORTED')}
+ async function pending(body){const fb=await authMaster(),unit=String(body.unit||'').trim(),action=String(body.action||''),id=String(body.taskId||''),key=fb.b64key(unit),ref=firebase.database().ref('pending/'+key),at=new Date().toISOString(),actor=String((window.__webAuthInfoV136||{}).displayName||(window.__webAuthInfoV136||{}).username||'관리자');let out=[];await ref.transaction(rec=>{rec=rec&&typeof rec==='object'?rec:{unit:unit,tasks:[]};let tasks=vals(rec.tasks),found=false;if(action==='add'){const text=String(body.text||'').trim();if(!text)throw new Error('미비작업 내용을 입력하세요.');tasks.push({id:(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)),text:text.slice(0,200),done:false,createdAt:at,completedAt:'',createdBy:actor,completedBy:'',createdClientId:'android-web-master'});found=true}else if(action==='toggle'){tasks=tasks.map(x=>{if(String(x&&x.id||'')!==id)return x;found=true;const done=!x.done;return Object.assign({},x,{done:done,completedAt:done?at:'',completedBy:done?actor:''})})}else if(action==='edit'){const text=String(body.text||'').trim();if(!text)throw new Error('미비작업 내용을 입력하세요.');tasks=tasks.map(x=>{if(String(x&&x.id||'')!==id)return x;found=true;return Object.assign({},x,{text:text.slice(0,200),updatedAt:at,updatedBy:actor})})}else if(action==='delete'){tasks=tasks.filter(x=>{if(String(x&&x.id||'')===id){found=true;return false}return true})}else if(action==='clearDone'){const before=tasks.length;tasks=tasks.filter(x=>!x.done);found=before!==tasks.length}else throw new Error('지원하지 않는 미비작업 동작입니다.');if(action!=='clearDone'&&!found)throw new Error('미비작업 항목을 찾지 못했습니다.');rec.tasks=tasks;rec.updatedAt=at;out=tasks;return rec});const chk=await ref.once('value'),saved=chk.val()||{},verify=vals(saved.tasks);if(action==='delete'&&verify.some(x=>String(x&&x.id||'')===id))throw new Error('미비작업 삭제 확인 실패');await fb.bump('pending');return {ok:true,unit:unit,pendingTasks:verify,savedAt:at,verified:true}}
+ async function memoAdd(body){const fb=await authMaster(),unit=String(body.unit||'').trim(),text=String(body.text||'').trim(),memoDate=String(body.memoDate||'').trim(),author=String((window.__webAuthInfoV136||{}).displayName||(window.__webAuthInfoV136||{}).username||'마스터');if(!unit||!text)throw new Error('메모 정보를 확인해 주세요.');const p=typeof progressFor==='function'?(progressFor(unit)||{}):{},es=typeof eventsFor==='function'?eventsFor(unit):[],e=es[0]||{},sn=String(p.sn||e.sn||''),u=await fb.auth(),id='android_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9),at=new Date().toISOString(),item={id,unit,sn,author,text,memoDate:memoDate||at.slice(0,10),createdAt:at,updatedAt:at,createdUid:String(u&&u.uid||''),source:'android-web-master-v182'};await fb.set('memos/'+id,item);await fb.bump('memo');return {ok:true,item}}
+ async function notepad(body,delMode){const fb=await authMaster(),u=await fb.auth(),uid=String(u&&u.uid||'');if(!uid)throw new Error('로그인 사용자 정보를 확인하지 못했습니다.');if(delMode){await fb.del('personalNotepad/'+uid);return {ok:true,deleted:true}}const text=String(body.text||'').trim();if(!text)throw new Error('메모장 내용을 입력하세요.');const old=await fb.read('personalNotepad/'+uid)||{},at=new Date().toISOString(),note={text,createdAt:String(old.createdAt||at),updatedAt:at};await fb.set('personalNotepad/'+uid,note);return {ok:true,note}}
+ async function annualLeave(body){const fb=await authMaster(),date=String(body.date||''),clean=v=>Array.isArray(v)?[...new Set(v.map(x=>String(x||'').trim()).filter(Boolean))]:[],next={teoist:clean(body.teoist),temaat:clean(body.temaat),reno:clean(body.reno)};if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error('연차 날짜가 올바르지 않습니다.');if(!next.teoist.length&&!next.temaat.length&&!next.reno.length)await fb.del('annualLeave/'+date);else{next.updatedAt=new Date().toISOString();await fb.set('annualLeave/'+date,next)}await fb.bump('annualLeave');return {ok:true}}
+ async function vendorSet(body){await authMaster();const unit=String(body.unit||''),date=String(body.date||''),eventId=String(body.eventId||''),events=Array.isArray(state&&state.scheduleEvents)?state.scheduleEvents:[],e=(eventId&&events.find(x=>String(x&&x.eventId||'')===eventId))||events.find(x=>x&&String(x.unit||'')===unit&&String(x.date||'')===date);if(!e)throw new Error('해당 일정 장비를 찾지 못했습니다.');await window.__fbSetVendorV187(e,String(body.vendor||''));return {ok:true,eventId:String(e.eventId||eventId),unit,date,vendor:String(body.vendor||'')}}
+ async function direct(op,body){body=body||{};if(op==='mobileNativeSpecialSet'){await authMaster();await window.__fbMasterProgressFieldV187(String(body.unit||''),{special:String(body.text||'')});return {ok:true}}if(op==='mobileNativeRemainingSet'){await authMaster();await window.__fbMasterProgressFieldV187(String(body.unit||''),{remaining:String(body.text||'')});return {ok:true}}if(op==='mobileNativeHistorySet'){await authMaster();await window.__fbMasterProgressFieldV187(String(body.unit||''),{history:String(body.text||'')});return {ok:true}}if(op==='mobileNativeProgressVisibleSet'){await authMaster();await window.__fbMasterVisibleV187(String(body.unit||''),body.visible===true);return {ok:true}}if(op==='mobileNativeScheduleVendorSet')return vendorSet(body);if(op==='mobileNativeEquipmentSet'){await authMaster();const f=body.fields||{};const r=await window.__fbMasterUpdateEquipmentV187(String(body.unit||''),String(body.date||''),Object.assign({unit:String(f.unit||body.unit||'')},f));return {ok:true,unit:r&&r.unit||body.unit}}if(op==='mobileNativeProgressInfoSet'){await authMaster();await window.__fbMasterUpdateProgressInfoV187(String(body.unit||''),String(body.date||''),String(body.task||''),String(body.note||''));return {ok:true}}if(op==='mobileNativeMemoAdd')return memoAdd(body);if(op==='mobileNativeMemoUpdate')return memoUpdate(body);if(op==='mobileNativeMemoDelete')return memoDelete(body);if(op==='mobileNativePendingAction')return pending(body);if(op==='mobileNativeAnnualLeaveSet')return annualLeave(body);if(op==='mobileNativeNotepadSet')return notepad(body,false);if(op==='mobileNativeNotepadDelete')return notepad(body,true);throw new Error('DIRECT_UNSUPPORTED:'+op)}
  window.__psuAppDirectWriteV216=function(id,op,body){(async()=>{try{ok(id,await direct(String(op||''),body||{}))}catch(e){fail(id,e)}})()};
  window.__psuAppPresenceV216=function(){(async()=>{try{const fb=window.__fbDirectV187;if(!fb)throw new Error('Firebase 연결 준비 중');const cut=Date.now()-90000,snap=await firebase.database().ref('presence').orderByChild('lastSeen').startAt(new Date(cut).toISOString()).once('value'),raw=snap.val()||{};let pc=0,web=0;Object.values(raw).forEach(x=>{if(!x)return;const t=Date.parse(String(x.lastSeen||''));if(!Number.isFinite(t)||t<cut)return;const k=String(x.kind||'').toLowerCase();if(k==='viewer')pc++;else if(k==='web')web++});const b=app();if(b&&b.presenceSummary)b.presenceSummary(pc,web)}catch(e){const b=app();if(b&&b.presenceSummary)b.presenceSummary(-1,-1)}})()};
 })();
@@ -2187,9 +2199,9 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
 <script id="web-v253-display-cache-script">
 (function(){
  if(window.__webV253DisplayCacheInstalled)return;window.__webV253DisplayCacheInstalled=true;let t=0;
- function save(){clearTimeout(t);t=setTimeout(()=>{try{const a=window.__webAuthInfoV136||null;if(a&&['admin','master'].includes(String(a.role||'')))return;if(!window.state||!Array.isArray(state.progress))return;localStorage.setItem('psuWebDisplayCacheV253',JSON.stringify({at:Date.now(),state:state}))}catch(_e){}},500)}
+ function save(){clearTimeout(t);t=setTimeout(()=>{try{const a=window.__webAuthInfoV136||null;if(a&&['admin','master'].includes(String(a.role||'')))return;if(!window.state||!Array.isArray(state.progress))return;localStorage.setItem('psuWebDisplayCache',JSON.stringify({at:Date.now(),state:state}))}catch(_e){}},500)}
  const r=window.render;if(typeof r==='function')window.render=render=function(){const x=r.apply(this,arguments);save();return x};
- addEventListener('pagehide',()=>{try{clearTimeout(t);if(window.state)localStorage.setItem('psuWebDisplayCacheV253',JSON.stringify({at:Date.now(),state:state}))}catch(_e){}});
+ addEventListener('pagehide',()=>{try{clearTimeout(t);if(window.state)localStorage.setItem('psuWebDisplayCache',JSON.stringify({at:Date.now(),state:state}))}catch(_e){}});
 })();
 </script>
 <script id="web-v276-disable-legacy-memo-value-listener">window.__webV256DirectFastInstalled=true;</script>
@@ -2519,7 +2531,13 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
   const safe=v=>typeof esc==='function'?esc(String(v??'')):String(v??'');
   const when=v=>{try{const d=new Date(v);return Number.isNaN(d.getTime())?'':d.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch(_e){return ''}};
   async function masterAuth(){
-    if(window.__ensureAdminFirebaseV264) await window.__ensureAdminFirebaseV264();
+    let u=null;
+    if(window.__ensureAdminFirebaseV264) u=await window.__ensureAdminFirebaseV264();
+    u=u||(window.firebase&&firebase.auth?firebase.auth().currentUser:null);
+    if(!u||u.isAnonymous) throw new Error('마스터 Firebase 인증을 복원하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+    const ps=await firebase.database().ref('authUsers/'+u.uid).once('value'),p=ps.val()||{};
+    if(String(p.status||'')!=='approved'||String(p.role||'')!=='master') throw new Error('마스터 쓰기 권한 확인이 완료되지 않았습니다. 다시 로그인해 주세요.');
+    document.body.classList.remove('auth-pending-v306');
     const f=F(); if(!f) throw new Error('Firebase 연결 준비 중입니다.');
     await f.auth(); return f;
   }
@@ -2749,6 +2767,21 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
  const rc=window.renderCalendar;if(typeof rc==='function')window.renderCalendar=renderCalendar=function(){const r=rc.apply(this,arguments);decorate();return r};
  const rm=window.renderMobile;if(typeof rm==='function')window.renderMobile=renderMobile=function(){const r=rm.apply(this,arguments);decorate();return r};
  setTimeout(decorate,400);
+})();
+</script>
+
+
+<script id="web-v308-cache-refresh-script">
+(function(){
+ if(window.__webV308CacheRefresh)return;window.__webV308CacheRefresh=true;
+ async function cleanup(){try{for(const k of Object.keys(localStorage)){if(/^psuWebDisplayCacheV\d+$/i.test(k))localStorage.removeItem(k)}if(indexedDB.databases){const dbs=await indexedDB.databases();for(const d of dbs){const n=String(d&&d.name||'');if(/^psu_web_(?:fast|visual)_snapshot_v\d+$/i.test(n))indexedDB.deleteDatabase(n)}}}catch(_e){}}
+ cleanup();
+ const norm=v=>String(v||'').trim().toUpperCase();
+ function normalizeCards(){const box=document.getElementById('plist');if(!box)return;const groups=new Map();[...box.querySelectorAll('.pitem[data-punit]')].forEach(el=>{const k=norm(el.dataset.punit);if(!k)return;(groups.get(k)||groups.set(k,[]).get(k)).push(el)});for(const els of groups.values()){if(els.length<2)continue;els.sort((a,b)=>String(b.innerText||'').length-String(a.innerText||'').length);els.slice(1).forEach(x=>x.remove())}if(window.pcount)pcount.textContent=box.querySelectorAll('.pitem[data-punit]').length}
+ const rp=window.renderProgress;if(typeof rp==='function')window.renderProgress=renderProgress=function(){const r=rp.apply(this,arguments);normalizeCards();setTimeout(normalizeCards,0);return r};
+ function revSig(x){return JSON.stringify(x||{})}
+ async function fullRefresh(){const b=document.getElementById('refresh');if(b)b.disabled=true;try{const fb=window.__fbDirectV187;if(!fb)throw new Error('Firebase 연결 준비 중');await fb.auth();const rev=await fb.read('meta/revisions')||{},sig=revSig(rev),old=localStorage.getItem('psuWebRefreshRevision')||'',remoteUnits=(await fb.read('mainState/current/progressVisibleUnitsV445'))||state.progressVisibleUnitsV445||[],cards=[...document.querySelectorAll('#plist .pitem[data-punit]')],keys=cards.map(x=>norm(x.dataset.punit)).filter(Boolean),uniq=new Set(keys),rset=new Set((remoteUnits||[]).map(norm).filter(Boolean)),healthy=keys.length===uniq.size&&(!rset.size||rset.size===uniq.size&&[...rset].every(x=>uniq.has(x)));if(old&&old===sig&&healthy){toastMsg('변경된 데이터가 없습니다.');return}const [main,sched,visible,initialized,deleted,manual]=await Promise.all([fb.read('mainState/current'),fb.read('scheduleV2/events'),fb.read('mainState/current/progressVisibleUnitsV445'),fb.read('mainState/current/progressListInitializedV558'),fb.read('mainState/current/deletedProgressUnits'),fb.read('mainState/current/progressManualIncludeUnits')]);const keep=state&&state.scheduleEvents||[];if(main&&typeof main==='object')state=Object.assign({},state,main);state.scheduleEvents=Object.keys(sched||{}).map(id=>Object.assign({eventId:id},sched[id]||{})).filter(e=>e.unit).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))||String(a.unit||'').localeCompare(String(b.unit||''),'ko'));if(Array.isArray(visible))state.progressVisibleUnitsV445=visible;if(typeof initialized==='boolean')state.progressListInitializedV558=initialized;if(deleted&&typeof deleted==='object')state.deletedProgressUnits=deleted;if(manual&&typeof manual==='object')state.progressManualIncludeUnits=manualrender();normalizeCards();localStorage.setItem('psuWebRefreshRevision',sig);toastMsg(healthy?'최신 데이터를 불러왔습니다.':'Firebase 기준으로 화면을 복구했습니다.')}catch(e){psuAlert(e&&e.message?e.message:String(e))}finally{if(b)b.disabled=false}}
+ const bind=()=>{const b=document.getElementById('refresh');if(b)b.onclick=fullRefresh};bind();setTimeout(bind,500);
 })();
 </script>
 
