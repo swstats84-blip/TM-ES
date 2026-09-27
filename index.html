@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.29";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.30";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v317-shared-escape">window.__webEscAttrV317=function(v){return String(v??'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})};</script>
 <script>window.__PSU_WEB_TEST_BUILD="v3.05-immediate-ready-reveal";</script>
 <script id="web-v299-boot-perf-mode-hint">
@@ -2438,7 +2438,7 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
    try{return await ensureAdminPromiseV329}finally{ensureAdminPromiseV329=null}
  }
  window.__ensureAdminFirebaseV264=ensureAdminFirebaseV264;
- // v3.29: PWA 재실행 시 화면 권한 복원과 별개로 실제 Firebase 관리자 인증도 즉시 맞춘다.
+ // v3.30: PWA 재실행 시 화면 권한 복원과 별개로 실제 Firebase 관리자 인증도 즉시 맞춘다. 실제 UID custom token은 Apps Script v2.88이 제공한다.
  function kickAdminFirebaseV329(){const s=sess();if(!s)return;Promise.resolve(ensureAdminFirebaseV264()).then(()=>{try{window.__psuRefreshMasterPresenceV328&&window.__psuRefreshMasterPresenceV328()}catch(_e){}}).catch(()=>{})}
  setTimeout(kickAdminFirebaseV329,0);setTimeout(kickAdminFirebaseV329,700);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(kickAdminFirebaseV329,120)},{passive:true});
  window.__kickAdminFirebaseV329=kickAdminFirebaseV329;
@@ -3240,7 +3240,7 @@ body.master-landscape-v324-on #masterLandscapeV324{display:block}
      }
    }
  }
- async function enable(silent){if(!master())return;if(busy)return;busy=true;updateUi();try{if(!('serviceWorker'in navigator)||!('Notification'in window)||!window.PushManager)throw new Error('이 브라우저는 PWA 알림을 지원하지 않습니다.');if(Notification.permission!=='granted'){if(silent)return;if(await Notification.requestPermission()!=='granted')throw new Error('알림 권한이 허용되지 않았습니다.')}const {user,profile}=await adminUser(),m=await ensureMessaging(),reg=await pushRegistrationV329(),vapid=await vapidKey();if(!/^[A-Za-z0-9_-]{80,100}$/.test(vapid))throw new Error('Firebase Web Push 공개키(VAPID) 형식이 올바르지 않습니다.');const token=await getPushTokenV329(m,reg,vapid);if(!token)throw new Error('웹 푸시 토큰을 만들지 못했습니다.');const id=deviceId(),item={fcmToken:token,platform:'web-pwa',enabled:true,displayName:String(profile.displayName||profile.username||''),appVersion:String(window.__PSU_WEB_VERSION||'웹'),updatedAt:new Date().toISOString()};await firebase.database().ref('webPushMasterTokens/'+user.uid+'/'+id).set(item);setStoredToken(token);markReg();if(!silent)toastMsg('마스터 알림을 켰습니다.')}catch(e){if(!silent)psuAlert(e&&e.message?e.message:String(e));else console.warn('PWA 알림 자동 복원 실패',e)}finally{busy=false;updateUi()}}
+ async function enable(silent){if(!master())return;if(busy)return;busy=true;updateUi();try{if(!('serviceWorker'in navigator)||!('Notification'in window)||!window.PushManager)throw new Error('이 브라우저는 PWA 알림을 지원하지 않습니다.');if(Notification.permission!=='granted'){if(silent)return;if(await Notification.requestPermission()!=='granted')throw new Error('알림 권한이 허용되지 않았습니다.')}const {user,profile}=await adminUser(),m=await ensureMessaging(),reg=await pushRegistrationV329(),vapid=await vapidKey();if(!/^[A-Za-z0-9_-]{80,100}$/.test(vapid))throw new Error('Firebase Web Push 공개키(VAPID) 형식이 올바르지 않습니다. 현재 등록값은 '+vapid.length+'자입니다. Firebase Console > Cloud Messaging > Web Push certificates의 공개키를 다시 확인해 주세요.');const token=await getPushTokenV329(m,reg,vapid);if(!token)throw new Error('웹 푸시 토큰을 만들지 못했습니다.');const id=deviceId(),item={fcmToken:token,platform:'web-pwa',enabled:true,displayName:String(profile.displayName||profile.username||''),appVersion:String(window.__PSU_WEB_VERSION||'웹'),updatedAt:new Date().toISOString()};await firebase.database().ref('webPushMasterTokens/'+user.uid+'/'+id).set(item);setStoredToken(token);markReg();if(!silent)toastMsg('마스터 알림을 켰습니다.')}catch(e){if(!silent)psuAlert(e&&e.message?e.message:String(e));else console.warn('PWA 알림 자동 복원 실패',e)}finally{busy=false;updateUi()}}
  async function disable(){if(busy)return;busy=true;updateUi();try{const {user}=await adminUser();await firebase.database().ref('webPushMasterTokens/'+user.uid+'/'+deviceId()).remove();try{const m=await ensureMessaging();await m.deleteToken()}catch(_e){}setStoredToken('');toastMsg('마스터 알림을 껐습니다.')}catch(e){psuAlert(e&&e.message?e.message:String(e))}finally{busy=false;updateUi()}}
  async function test(){if(busy)return;busy=true;updateUi();try{if(!storedToken())throw new Error('먼저 알림 받기를 눌러 기기를 등록해 주세요.');const {user}=await adminUser(),idToken=await user.getIdToken();const res=await fetch(TEST_URL,{method:'POST',headers:{'Authorization':'Bearer '+idToken,'Content-Type':'application/json'},body:'{}'});let r={};try{r=await res.json()}catch(_e){}if(!res.ok||!r.ok)throw new Error(r&&r.message?r.message:'테스트 알림 발송에 실패했습니다.');toastMsg(`테스트 알림 발송 ${Number(r.sent||0)}건`)}catch(e){psuAlert(e&&e.message?e.message:String(e))}finally{busy=false;updateUi()}}
  function escV327(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
