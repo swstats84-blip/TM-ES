@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.22";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.24";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v317-shared-escape">window.__webEscAttrV317=function(v){return String(v??'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})};</script>
 <script>window.__PSU_WEB_TEST_BUILD="v3.05-immediate-ready-reveal";</script>
 <script id="web-v299-boot-perf-mode-hint">
@@ -2976,4 +2976,127 @@ body:not(.psu-schedule-badges-ready-v315) #mobileList{visibility:hidden!importan
  bindTopObserversV321();setTimeout(()=>{bindTopObserversV321();arrange()},120);setTimeout(()=>{bindTopObserversV321();arrange()},600);setTimeout(()=>{bindTopObserversV321();arrange()},1400);window.__arrangeWebTopV319=arrange;
 })();
 </script>
+
+
+<style id="web-v324-master-landscape-infinite-style">
+/* v3.24: Android v1.8.9의 마스터 가로 5열 일정 규격을 웹 마스터 가로모드에 재사용한다. */
+#masterLandscapeV324{display:none;min-width:560px;background:#f5f7fb;color:#172033;padding:0 6px 14px}
+body.master-landscape-v324-on{background:#f5f7fb;overflow-x:auto}
+body.master-landscape-v324-on>.app{display:none!important}
+body.master-landscape-v324-on #masterLandscapeV324{display:block}
+.master-land-week-v324{position:sticky;top:0;z-index:24;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:4px 0;background:#f5f7fb;border-bottom:1px solid #dfe5ed}
+.master-land-week-v324>div{height:30px;display:flex;align-items:center;justify-content:center;background:#eef2f7;border:1px solid #e1e6ee;border-radius:4px;font-size:11px;font-weight:900;color:#536070}
+.master-land-month-v324{margin:0 0 7px;scroll-margin-top:42px}
+.master-land-month-title-v324{height:27px;display:flex;align-items:center;padding:0 7px;font-size:12px;font-weight:900;color:#334155;background:#f5f7fb;border-bottom:1px solid #e2e8f0}
+.master-land-grid-v324{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:4px 0 7px}
+.master-land-day-v324,.master-land-blank-v324{min-width:0;min-height:96px;border:1px solid #dce2eb;background:#fff}
+.master-land-blank-v324{background:#f9fafc}
+.master-land-day-v324{padding:4px 5px 6px;overflow:hidden}
+.master-land-day-v324.today-v324{border:2px solid #315ea8;background:#f7faff}
+.master-land-date-v324{min-height:25px;display:flex;align-items:center;gap:4px;margin-bottom:3px}
+.master-land-date-v324>.num{font-size:12px;font-weight:900;color:#233046;flex:0 0 auto}
+.master-land-day-v324.today-v324 .master-land-date-v324>.num{color:#315ea8}
+.master-land-date-v324>.holiday-v324{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px;font-weight:900;color:#c44343;flex:1;text-align:center}
+.master-land-date-v324>.annual-leave-badge-v115{margin-left:auto!important;flex:0 0 auto;font-size:8px!important;line-height:16px!important;padding:0 5px!important;border-radius:9px!important}
+#masterLandscapeV324 .event.master-land-event-v324{position:relative;margin:0 0 4px!important;padding:4px 5px 4px 10px!important;border-radius:7px!important;background:#fcfdff!important;min-width:0;overflow:hidden}
+#masterLandscapeV324 .event.master-land-event-v324 .e1{gap:3px;min-width:0}
+#masterLandscapeV324 .event.master-land-event-v324 .loc{font-size:8px!important;padding:1px 4px!important;border-radius:4px!important}
+#masterLandscapeV324 .event.master-land-event-v324 .unit{font-size:11px!important;padding:0 2px!important;min-width:0;flex:0 1 auto}
+#masterLandscapeV324 .event.master-land-event-v324 .etype{font-size:8px!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#masterLandscapeV324 .event.master-land-event-v324 .task{display:block;margin-top:2px;font-size:9px!important;line-height:1.25;color:#be3631!important;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#masterLandscapeV324 .event.master-land-event-v324 .calendar-status-v160{margin-top:3px!important;gap:2px!important}
+#masterLandscapeV324 .event.master-land-event-v324 .calendar-status-v160 span,
+#masterLandscapeV324 .event.master-land-event-v324 .calendar-status-v160 button{font-size:8px!important;line-height:1.2!important;padding:1px 4px!important}
+#masterLandscapeV324 .event.master-land-event-v324 .progress-info-chip-v164{font-size:8px!important;padding:1px 4px!important}
+@media(orientation:portrait){#masterLandscapeV324{display:none!important}}
+</style>
+<script id="web-v324-master-landscape-infinite-script">
+(function(){
+ if(window.__webV324MasterLandscapeInstalled)return;window.__webV324MasterLandscapeInstalled=true;
+ const MIN_W=560,MAX_MOBILE_W=1000,MAX_MOBILE_H=650;
+ let root=null,months=null,active=false,minMonth=null,maxMonth=null,scrollRaf=0,refreshRaf=0,initializing=false;
+ const leaveCache=Object.create(null),leaveLoaded=new Set(),leaveLoading=new Set();
+ function firstOf(d){return new Date(d.getFullYear(),d.getMonth(),1,12,0,0,0)}
+ function shiftMonth(d,n){return new Date(d.getFullYear(),d.getMonth()+n,1,12,0,0,0)}
+ function key(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
+ function dayIso(y,m,d){return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+ function monthEndIso(d){return dayIso(d.getFullYear(),d.getMonth(),new Date(d.getFullYear(),d.getMonth()+1,0,12).getDate())}
+ function isMaster(){const info=window.__webAuthInfoV136||{};return document.body.classList.contains('master-mode')||String(info.role||'')==='master'}
+ function isLandscapePhone(){return innerWidth>innerHeight&&innerWidth<=MAX_MOBILE_W&&innerHeight<=MAX_MOBILE_H}
+ function isSchedule(){return !!(window.main&&String(main.dataset.tab||'')==='calendar')}
+ function shouldRun(){return isMaster()&&isLandscapePhone()&&isSchedule()}
+ function ensureRoot(){
+   if(root)return root;root=document.createElement('section');root.id='masterLandscapeV324';root.setAttribute('aria-label','마스터 가로 일정');
+   root.innerHTML='<div class="master-land-week-v324" aria-hidden="true"><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div></div><div id="masterLandscapeMonthsV324"></div>';
+   document.body.appendChild(root);months=root.querySelector('#masterLandscapeMonthsV324');return root;
+ }
+ function values(v){return Array.isArray(v)?v.map(x=>String(x||'').trim()).filter(Boolean):[]}
+ function leaveNames(ds){
+   const own=leaveCache[ds];if(own){const out=[];values(own.teoist).concat(values(own.temaat)).forEach(x=>{if(x&&!out.includes(x))out.push(x)});return out}
+   try{if(typeof window.__getAnnualLeaveGroupV236==='function'){const g=window.__getAnnualLeaveGroupV236(ds)||{},out=[];values(g.teoist).concat(values(g.temaat)).forEach(x=>{if(x&&!out.includes(x))out.push(x)});return out}}catch(_e){}
+   return [];
+ }
+ function openLeave(ds){
+   if(typeof window.__openLeaveSummaryV237==='function')return window.__openLeaveSummaryV237(ds);
+   if(typeof window.__openMyLeaveV237==='function')return window.__openMyLeaveV237(ds);
+   if(typeof window.__openMyLeaveV233==='function')return window.__openMyLeaveV233(ds);
+ }
+ function updateLeaveBadges(monthKey){
+   if(!root)return;root.querySelectorAll(`.master-land-month-v324[data-month="${monthKey}"] .master-land-day-v324[data-date]`).forEach(cell=>{
+     const ds=cell.dataset.date||'',b=cell.querySelector('.annual-leave-badge-v115');if(!b)return;const names=leaveNames(ds);b.textContent=names.length?`연차 ${names.length}`:'연차 +';b.classList.toggle('empty',!names.length);b.title=names.length?names.join(', '):'연차 입력';
+   });
+ }
+ async function loadLeaveMonth(d){
+   const mk=key(d);if(leaveLoaded.has(mk)||leaveLoading.has(mk))return;const fb=window.__fbDirectV187;if(!fb||typeof fb.readRange!=='function'){setTimeout(()=>active&&loadLeaveMonth(d),500);return}
+   leaveLoading.add(mk);try{const start=mk+'-01',raw=await fb.readRange('annualLeave',start,monthEndIso(d))||{};Object.keys(raw).forEach(ds=>{leaveCache[ds]=raw[ds]||{}});leaveLoaded.add(mk);updateLeaveBadges(mk)}catch(_e){}finally{leaveLoading.delete(mk)}
+ }
+ function sortedEvents(ds){
+   const list=typeof activeEvents==='function'?activeEvents():(state.scheduleEvents||[]);return list.filter(e=>e&&String(e.date||'')===ds&&(typeof matchEvent!=='function'||matchEvent(e))).sort((a,b)=>(vendorOrderV167(a)-vendorOrderV167(b))||(AREA_ORDER[areaOf(a)]||9)-(AREA_ORDER[areaOf(b)]||9)||String(a.unit||'').localeCompare(String(b.unit||''),'ko'));
+ }
+ function cardHtml(e,ds){const a=areaOf(e),note=String(e.note||'').trim();return `<div class="event master-land-event-v324 ${vendorClassV167(e)}" data-unit="${esc(e.unit||'')}" data-date="${esc(ds)}"><div class="e1"><span class="loc ${badge(a)}">${esc(a)} ${esc(e.line||'')}</span><span class="unit">${esc(e.unit||'')}</span><span class="etype">${esc(e.type||'')}</span></div><span class="task">${esc(e.task||e.workType||'-')}</span>${note?'<div class="calendar-status-v160"><button type="button" class="progress-info-chip-v164">진행정보</button></div>':''}</div>`}
+ function cellHtml(y,m,d){
+   const ds=dayIso(y,m,d),today=typeof iso==='function'?iso(new Date()):'',holiday=typeof webHolidayV263==='function'?webHolidayV263(ds):'',evs=sortedEvents(ds),leave=leaveNames(ds);return `<div class="master-land-day-v324${ds===today?' today-v324':''}" data-date="${ds}"><div class="master-land-date-v324"><span class="num">${d}</span>${holiday?`<span class="holiday-v324">${esc(holiday)}</span>`:'<span class="holiday-v324"></span>'}<button type="button" class="annual-leave-badge-v115${leave.length?'':' empty'}" data-leave-date-v324="${ds}" title="${leave.length?esc(leave.join(', ')):'연차 입력'}">${leave.length?`연차 ${leave.length}`:'연차 +'}</button></div>${evs.map(e=>cardHtml(e,ds)).join('')}</div>`
+ }
+ function renderMonth(d){
+   const y=d.getFullYear(),m=d.getMonth(),mk=key(d),last=new Date(y,m+1,0,12).getDate(),firstDow=new Date(y,m,1,12).getDay();let offset=(firstDow>=1&&firstDow<=5)?firstDow-1:0,html='';
+   for(let i=0;i<offset;i++)html+='<div class="master-land-blank-v324" aria-hidden="true"></div>';
+   for(let day=1;day<=last;day++){const dow=new Date(y,m,day,12).getDay();if(dow===0||dow===6)continue;html+=cellHtml(y,m,day)}
+   const count=offset+Array.from({length:last},(_,i)=>new Date(y,m,i+1,12).getDay()).filter(w=>w!==0&&w!==6).length;for(let i=count%5;i&&i<5;i++)html+='<div class="master-land-blank-v324" aria-hidden="true"></div>';
+   const sec=document.createElement('section');sec.className='master-land-month-v324';sec.dataset.month=mk;sec.innerHTML=`<div class="master-land-month-title-v324">${y}년 ${m+1}월</div><div class="master-land-grid-v324">${html}</div>`;
+   sec.querySelectorAll('[data-leave-date-v324]').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();openLeave(b.dataset.leaveDateV324||'')});
+   sec.querySelectorAll('.progress-info-chip-v164').forEach(b=>{const card=b.closest('.master-land-event-v324');if(card)b.onclick=e=>{e.preventDefault();e.stopPropagation();if(typeof window.showProgressInfoV164==='function')window.showProgressInfoV164(card.dataset.unit||'',card.dataset.date||'')}});
+   if(typeof bindEvents==='function')bindEvents(sec);loadLeaveMonth(d);return sec;
+ }
+ function decorate(){try{if(typeof window.__decorateCalendarFlagsV160==='function')window.__decorateCalendarFlagsV160()}catch(_e){}}
+ function buildAround(base){
+   ensureRoot();months.innerHTML='';const b=firstOf(base);minMonth=shiftMonth(b,-1);maxMonth=shiftMonth(b,1);months.appendChild(renderMonth(minMonth));months.appendChild(renderMonth(b));months.appendChild(renderMonth(maxMonth));decorate();
+ }
+ function targetDateFor(base){
+   try{const f=scheduleFocusDateV233();if(f.getFullYear()===base.getFullYear()&&f.getMonth()===base.getMonth())return iso(f)}catch(_e){}
+   for(let d=1;d<=7;d++){const x=new Date(base.getFullYear(),base.getMonth(),d,12),w=x.getDay();if(w!==0&&w!==6)return dayIso(base.getFullYear(),base.getMonth(),d)}return key(base)+'-01';
+ }
+ function scrollInitial(base){requestAnimationFrame(()=>requestAnimationFrame(()=>{const ds=targetDateFor(base),el=root&&root.querySelector(`.master-land-day-v324[data-date="${ds}"]`);if(!el)return;const top=Math.max(0,el.getBoundingClientRect().top+scrollY-42);scrollTo(0,top)}))}
+ function prepend(){if(!active||!months||initializing)return;initializing=true;const before=document.documentElement.scrollHeight,y=scrollY;minMonth=shiftMonth(minMonth,-1);months.insertBefore(renderMonth(minMonth),months.firstChild);decorate();requestAnimationFrame(()=>{const delta=document.documentElement.scrollHeight-before;scrollTo(0,y+Math.max(0,delta));initializing=false})}
+ function append(){if(!active||!months||initializing)return;initializing=true;maxMonth=shiftMonth(maxMonth,1);months.appendChild(renderMonth(maxMonth));decorate();requestAnimationFrame(()=>{initializing=false})}
+ function visibleMonth(){if(!root)return null;const wh=root.querySelector('.master-land-week-v324'),top=(wh?wh.getBoundingClientRect().bottom:38)+10,sections=[...root.querySelectorAll('.master-land-month-v324[data-month]')];for(const sec of sections){const r=sec.getBoundingClientRect();if(r.top<=top&&r.bottom>top)return sec}return sections.find(sec=>sec.getBoundingClientRect().top>top)||sections[sections.length-1]||null}
+ function syncViewDate(){const sec=visibleMonth();if(!sec)return;const m=/^(\d{4})-(\d{2})$/.exec(sec.dataset.month||'');if(!m)return;const y=Number(m[1]),mo=Number(m[2])-1;if(viewDate.getFullYear()!==y||viewDate.getMonth()!==mo){viewDate=new Date(y,mo,1,12);if(window.monthTitle)monthTitle.textContent=`${y}년 ${mo+1}월`}}
+ function onScroll(){if(!active||scrollRaf)return;scrollRaf=requestAnimationFrame(()=>{scrollRaf=0;syncViewDate();const y=scrollY,h=innerHeight,total=document.documentElement.scrollHeight;if(y<150)prepend();else if(y+h>total-220)append()})}
+ function activate(){
+   if(active)return;active=true;document.body.classList.add('master-landscape-v324-on');ensureRoot();root.hidden=false;const base=firstOf(viewDate||new Date());buildAround(base);scrollInitial(base);window.addEventListener('scroll',onScroll,{passive:true});
+ }
+ function deactivate(){
+   if(!active)return;syncViewDate();active=false;window.removeEventListener('scroll',onScroll);document.body.classList.remove('master-landscape-v324-on');if(root)root.hidden=true;try{if(typeof render==='function')render()}catch(_e){}requestAnimationFrame(()=>scrollTo(0,0));
+ }
+ function evaluate(){shouldRun()?activate():deactivate()}
+ function refresh(){if(!active)return;if(refreshRaf)return;refreshRaf=requestAnimationFrame(()=>{refreshRaf=0;const visible=visibleMonth(),anchor=visible&&visible.dataset.month,oldY=scrollY,oldTop=visible?visible.getBoundingClientRect().top:0,keys=[];months.querySelectorAll('.master-land-month-v324[data-month]').forEach(x=>keys.push(x.dataset.month));months.innerHTML='';keys.forEach(k=>{const m=/^(\d{4})-(\d{2})$/.exec(k);if(m)months.appendChild(renderMonth(new Date(Number(m[1]),Number(m[2])-1,1,12)))});decorate();if(anchor){const sec=months.querySelector(`.master-land-month-v324[data-month="${anchor}"]`);if(sec)scrollBy(0,sec.getBoundingClientRect().top-oldTop);else scrollTo(0,oldY)}})}
+ const oldCal=window.renderCalendar;if(typeof oldCal==='function')window.renderCalendar=renderCalendar=function(){const r=oldCal.apply(this,arguments);refresh();return r};
+ const bodyObs=new MutationObserver(e=>{if(e.some(x=>x.type==='attributes'&&x.attributeName==='class'))evaluate()});bodyObs.observe(document.body,{attributes:true,attributeFilter:['class']});
+ if(window.main)new MutationObserver(e=>{if(e.some(x=>x.attributeName==='data-tab'))evaluate()}).observe(main,{attributes:true,attributeFilter:['data-tab']});
+ window.addEventListener('resize',()=>setTimeout(evaluate,40),{passive:true});window.addEventListener('orientationchange',()=>setTimeout(evaluate,120),{passive:true});
+ window.addEventListener('psu-badge-ready-v314',()=>refresh(),{passive:true});
+ setTimeout(evaluate,0);setTimeout(evaluate,350);setTimeout(evaluate,900);
+ window.__refreshMasterLandscapeV324=refresh;
+})();
+</script>
+
 </body></html>
