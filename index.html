@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.24";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.25";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v317-shared-escape">window.__webEscAttrV317=function(v){return String(v??'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})};</script>
 <script>window.__PSU_WEB_TEST_BUILD="v3.05-immediate-ready-reveal";</script>
 <script id="web-v299-boot-perf-mode-hint">
@@ -3053,7 +3053,7 @@ body.master-landscape-v324-on #masterLandscapeV324{display:block}
  function sortedEvents(ds){
    const list=typeof activeEvents==='function'?activeEvents():(state.scheduleEvents||[]);return list.filter(e=>e&&String(e.date||'')===ds&&(typeof matchEvent!=='function'||matchEvent(e))).sort((a,b)=>(vendorOrderV167(a)-vendorOrderV167(b))||(AREA_ORDER[areaOf(a)]||9)-(AREA_ORDER[areaOf(b)]||9)||String(a.unit||'').localeCompare(String(b.unit||''),'ko'));
  }
- function cardHtml(e,ds){const a=areaOf(e),note=String(e.note||'').trim();return `<div class="event master-land-event-v324 ${vendorClassV167(e)}" data-unit="${esc(e.unit||'')}" data-date="${esc(ds)}"><div class="e1"><span class="loc ${badge(a)}">${esc(a)} ${esc(e.line||'')}</span><span class="unit">${esc(e.unit||'')}</span><span class="etype">${esc(e.type||'')}</span></div><span class="task">${esc(e.task||e.workType||'-')}</span>${note?'<div class="calendar-status-v160"><button type="button" class="progress-info-chip-v164">진행정보</button></div>':''}</div>`}
+ function cardHtml(e,ds){const a=areaOf(e),note=String(e.note||'').trim(),v=(typeof vendorValueV167==='function'?vendorValueV167(e):String(e&&e.vendor||'').trim().toUpperCase());return `<div class="event master-land-event-v324 ${vendorClassV167(e)}" data-unit="${esc(e.unit||'')}" data-date="${esc(ds)}"><button type="button" class="vendor-edge-v169" data-v="${esc(v)}" title="팀 지정 (이 날짜 일정만 적용)" aria-label="팀 지정"></button><div class="e1"><span class="loc ${badge(a)}">${esc(a)} ${esc(e.line||'')}</span><span class="unit">${esc(e.unit||'')}</span><span class="etype">${esc(e.type||'')}</span></div><span class="task">${esc(e.task||e.workType||'-')}</span>${note?'<div class="calendar-status-v160"><button type="button" class="progress-info-chip-v164">진행정보</button></div>':''}</div>`}
  function cellHtml(y,m,d){
    const ds=dayIso(y,m,d),today=typeof iso==='function'?iso(new Date()):'',holiday=typeof webHolidayV263==='function'?webHolidayV263(ds):'',evs=sortedEvents(ds),leave=leaveNames(ds);return `<div class="master-land-day-v324${ds===today?' today-v324':''}" data-date="${ds}"><div class="master-land-date-v324"><span class="num">${d}</span>${holiday?`<span class="holiday-v324">${esc(holiday)}</span>`:'<span class="holiday-v324"></span>'}<button type="button" class="annual-leave-badge-v115${leave.length?'':' empty'}" data-leave-date-v324="${ds}" title="${leave.length?esc(leave.join(', ')):'연차 입력'}">${leave.length?`연차 ${leave.length}`:'연차 +'}</button></div>${evs.map(e=>cardHtml(e,ds)).join('')}</div>`
  }
@@ -3085,7 +3085,7 @@ body.master-landscape-v324-on #masterLandscapeV324{display:block}
    if(active)return;active=true;document.body.classList.add('master-landscape-v324-on');ensureRoot();root.hidden=false;const base=firstOf(viewDate||new Date());buildAround(base);scrollInitial(base);window.addEventListener('scroll',onScroll,{passive:true});
  }
  function deactivate(){
-   if(!active)return;syncViewDate();active=false;window.removeEventListener('scroll',onScroll);document.body.classList.remove('master-landscape-v324-on');if(root)root.hidden=true;try{if(typeof render==='function')render()}catch(_e){}requestAnimationFrame(()=>scrollTo(0,0));
+   if(!active)return;active=false;window.removeEventListener('scroll',onScroll);document.body.classList.remove('master-landscape-v324-on');if(root)root.hidden=true;try{if(typeof goToday==='function'){goToday(false);return}if(typeof render==='function')render()}catch(_e){}requestAnimationFrame(()=>scrollTo(0,0));
  }
  function evaluate(){shouldRun()?activate():deactivate()}
  function refresh(){if(!active)return;if(refreshRaf)return;refreshRaf=requestAnimationFrame(()=>{refreshRaf=0;const visible=visibleMonth(),anchor=visible&&visible.dataset.month,oldY=scrollY,oldTop=visible?visible.getBoundingClientRect().top:0,keys=[];months.querySelectorAll('.master-land-month-v324[data-month]').forEach(x=>keys.push(x.dataset.month));months.innerHTML='';keys.forEach(k=>{const m=/^(\d{4})-(\d{2})$/.exec(k);if(m)months.appendChild(renderMonth(new Date(Number(m[1]),Number(m[2])-1,1,12)))});decorate();if(anchor){const sec=months.querySelector(`.master-land-month-v324[data-month="${anchor}"]`);if(sec)scrollBy(0,sec.getBoundingClientRect().top-oldTop);else scrollTo(0,oldY)}})}
@@ -3099,4 +3099,59 @@ body.master-landscape-v324-on #masterLandscapeV324{display:block}
 })();
 </script>
 
+
+<style id="web-v325-team-touch-style">
+/* v3.25: 기존 팀지정 표시/버튼 모양은 유지하고, 실제 터치 판정만 카드 왼쪽 25%로 확장한다. */
+@media (pointer:coarse){
+ body.master-mode #mobileList .mcard,
+ body.master-landscape-v324-on #masterLandscapeV324 .master-land-event-v324{touch-action:manipulation}
+}
+</style>
+<script id="web-v325-team-touch-script">
+(function(){
+ if(window.__webV325TeamTouchInstalled)return;window.__webV325TeamTouchInstalled=true;
+ function master(){const info=window.__webAuthInfoV136||{};return document.body.classList.contains('master-mode')||String(info.role||'')==='master'}
+ function mobileTouch(){try{return (window.matchMedia&&window.matchMedia('(pointer:coarse)').matches)||Math.min(innerWidth,innerHeight)<=820}catch(_e){return innerWidth<=1000}}
+ function interactive(t){return !!(t&&t.closest&&t.closest('button,a,input,select,textarea,[role="button"],[contenteditable="true"]'))}
+ document.addEventListener('click',ev=>{
+   if(!master()||!mobileTouch()||!ev.target||!ev.target.closest)return;
+   if(ev.target.closest('.vendor-edge-v169'))return;
+   const card=ev.target.closest('#mobileList .mcard[data-unit][data-date],#masterLandscapeV324 .master-land-event-v324[data-unit][data-date]');
+   if(!card||interactive(ev.target))return;
+   const r=card.getBoundingClientRect();if(!r.width||ev.clientX<r.left||ev.clientX>r.left+r.width*.25)return;
+   const edge=card.querySelector('.vendor-edge-v169');if(!edge||edge.disabled)return;
+   ev.preventDefault();ev.stopImmediatePropagation();edge.click();
+ },true);
+})();
+</script>
+<script id="web-v325-auth-pwa-recovery-script">
+(function(){
+ if(window.__webV325AuthPwaRecoveryInstalled)return;window.__webV325AuthPwaRecoveryInstalled=true;
+ let pendingSince=0,retryAt=0;
+ const standalone=()=>{try{return !!((window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true)}catch(_e){return false}};
+ const pending=()=>{try{return !!(window.__psuOptimisticShellV299||document.body.classList.contains('auth-pending-v306')||(window.__psuAuthTokenSyncV212&&window.__psuAuthTokenSyncV212()&&window.__psuAuthRestoreSettledV291!==true))}catch(_e){return false}};
+ function authenticatedAdmin(){try{const u=window.firebase&&firebase.auth&&firebase.auth().currentUser,role=String(window.__webAuthInfoV136&&window.__webAuthInfoV136.role||'');return !!(u&&!u.isAnonymous&&role)}catch(_e){return false}}
+ function settleKnownGood(){
+   if(!authenticatedAdmin())return false;
+   window.__psuAuthRestorePendingV291=false;window.__psuAuthRestoreSettledV291=true;window.__psuOptimisticShellV299=false;
+   document.body.classList.remove('auth-pending-v306');return true;
+ }
+ function reloadOnce(){
+   if(!standalone()||document.visibilityState!=='visible')return false;
+   const k='psuAuthPwaRecoverV325',now=Date.now();let prev=0;try{prev=Number(sessionStorage.getItem(k)||0)}catch(_e){}
+   if(prev&&now-prev<60000)return false;try{sessionStorage.setItem(k,String(now))}catch(_e){}location.reload();return true;
+ }
+ function check(){
+   if(!pending()){pendingSince=0;retryAt=0;return}
+   if(!pendingSince)pendingSince=Date.now();
+   if(settleKnownGood()){pendingSince=0;retryAt=0;return}
+   const age=Date.now()-pendingSince;
+   if(age>6000&&Date.now()-retryAt>7000&&typeof window.__verifySavedSessionV131==='function'){retryAt=Date.now();try{Promise.resolve(window.__verifySavedSessionV131(true)).catch(()=>{})}catch(_e){}}
+   if(age>16000)reloadOnce();
+ }
+ setInterval(check,2000);
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){pendingSince=0;setTimeout(check,300);setTimeout(check,2500)}});
+ window.addEventListener('pageshow',()=>{pendingSince=0;setTimeout(check,400)});
+})();
+</script>
 </body></html>
