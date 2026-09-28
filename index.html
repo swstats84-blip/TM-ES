@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.30";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.34";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v317-shared-escape">window.__webEscAttrV317=function(v){return String(v??'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})};</script>
 <script>window.__PSU_WEB_TEST_BUILD="v3.05-immediate-ready-reveal";</script>
 <script id="web-v299-boot-perf-mode-hint">
@@ -967,8 +967,9 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    prefillId=(typeof prefillId==='string')?prefillId:'';
    if(adminInfoV131){
      const masterBoxV327=adminInfoV131.role==='master'?`<div class="master-presence-box-v327"><div class="master-presence-head-v327"><b>현재 접속자</b><span id="masterPresenceSummaryV327">확인 중...</span></div><div id="masterPresenceListV327" class="master-presence-list-v327"><div class="master-presence-empty-v327">불러오는 중...</div></div></div><div class="master-push-box-v327"><div><b>마스터 알림</b><span id="masterPushStatusV327">상태 확인 중...</span></div><div class="master-push-actions-v327"><button class="btn" id="masterPushEnableV327">알림 받기</button><button class="btn" id="masterPushTestV327">테스트 알림</button><button class="btn danger" id="masterPushDisableV327">알림 끄기</button></div></div>`:'';
-     mtitle.textContent=adminInfoV131.role==='master'?`마스터 · ${adminInfoV131.displayName||adminInfoV131.username||'관리자'}`:'관리자';mbody.innerHTML=`${adminInfoV131.role==='master'?'':`<div class="admin-reg-note-v131"><b>${esc(adminInfoV131.displayName||adminInfoV131.username||'관리자')}</b> · 관리자 권한으로 로그인되어 있습니다.</div>`}${masterBoxV327}<div style="text-align:right;margin-top:10px"><button class="btn danger" id="logoutV131">로그아웃</button></div>`;modalback.classList.add('show');
+     mtitle.textContent=adminInfoV131.role==='master'?`마스터 · ${adminInfoV131.displayName||adminInfoV131.username||'관리자'}`:'관리자';mbody.innerHTML=`${adminInfoV131.role==='master'?'':`<div class="admin-reg-note-v131"><b>${esc(adminInfoV131.displayName||adminInfoV131.username||'관리자')}</b> · 관리자 권한으로 로그인되어 있습니다.</div>`}${masterBoxV327}<div id="adminPushInlineV334"></div><div style="display:flex;justify-content:flex-end;gap:7px;margin-top:10px"><button class="btn danger" id="logoutV131">로그아웃</button></div>`;modalback.classList.add('show');
      if(adminInfoV131.role==='master'&&window.__psuBindMasterPanelV327)setTimeout(window.__psuBindMasterPanelV327,0);
+     setTimeout(()=>{try{if(window.__psuRenderAdminPushInlineV334)window.__psuRenderAdminPushInlineV334()}catch(_e){}},0);
      document.getElementById('logoutV131').onclick=()=>{clearUiHintV299();if(window.__psuAuthTokenClearV212)window.__psuAuthTokenClearV212();else localStorage.removeItem(TOKEN_KEY);try{if(window.__firebaseFastLogoutV186)window.__firebaseFastLogoutV186()}catch(e){}adminInfoV131=null;closeM();setMode(false,null);load(false)};return;
    }
    mtitle.textContent='관리자 로그인';mbody.innerHTML=`<div class="admin-reg-note-v131">승인된 관리자만 전체 일정과 스케줄 이력을 볼 수 있습니다.</div><input class="admin-field-v131" id="adminIdV131" name="psu_admin_login_id_v133" placeholder="아이디" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" readonly data-lpignore="true" data-1p-ignore="true"><input class="admin-field-v131" id="adminPwV131" name="psu_admin_login_pw_v133" type="password" placeholder="비밀번호" autocomplete="new-password" readonly data-lpignore="true" data-1p-ignore="true"><div style="display:flex;align-items:center;justify-content:space-between;margin-top:7px"><button class="admin-link-v131" id="registerAdminV131">관리자 등록</button><button class="btn primary" id="loginAdminV131">로그인</button></div>`;modalback.classList.add('show');
@@ -1878,6 +1879,9 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
 
 
 
+
+
+
 </body></html>'}
  function showSnapshot(x){if(frameWrap||!x||!x.appHtml)return false;applyView(x);const wrap=document.createElement('div');wrap.id='psuVisualSnapshotV290';wrap.style.cssText='position:fixed;inset:0;z-index:2147483000;background:#f5f7fb;opacity:1;';const f=document.createElement('iframe');f.setAttribute('aria-label','최근 화면');f.style.cssText='display:block;width:100%;height:100%;border:0;background:#f5f7fb;';const badge=document.createElement('div');badge.textContent='최근 화면 · 최신 정보 확인 중';badge.style.cssText='position:absolute;right:10px;bottom:10px;z-index:2;padding:5px 8px;border-radius:999px;background:rgba(31,41,55,.82);color:#fff;font:700 10px/1.2 "Malgun Gothic",sans-serif;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.16)';wrap.appendChild(f);wrap.appendChild(badge);document.body.appendChild(wrap);frameWrap=wrap;f.onload=()=>{try{f.contentWindow.scrollTo(Number(x.scrollX||0),Number(x.scrollY||0))}catch(_e){}};f.srcdoc=snapshotDoc(x);restored=true;window.__psuVisualSnapshotRestoredV290=true;return true}
  async function restore(){const x=await dbGet();if(!x||x.schema!==1||!Number.isFinite(Number(x.at))||Date.now()-Number(x.at)>MAX_AGE||!x.appHtml){if(x)dbDelete();return false}return showSnapshot(x)}
@@ -2709,6 +2713,7 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
  const inAndroidApp=/PSUAdminApp\//.test(ua)||/[?&]app=android(?:&|$)/.test(location.search||'');
  const androidInApp=isAndroid&&!inAndroidApp&&(/KAKAOTALK|NAVER|FBAN|FBAV|Instagram|Line\//i.test(ua)||/;\s*wv\)/i.test(ua));
  const standalone=()=>{try{return window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(_e){return false}};
+ if(new URLSearchParams(location.search||'').get('psuInstall')==='1')window.__psuInstallFlowActiveV333=true;
  let installPrompt=null;
  function ensureGuide(){
    let back=document.getElementById('homeGuideBackV284');if(back)return back;
@@ -2729,7 +2734,7 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
    try{const u=new URL(location.href);u.searchParams.set('psuInstall','1');u.hash='';return u}catch(_e){return null}
  }
  function openAndroidExternalBrowser(){
-   const u=externalTarget();if(!u)return false;
+   const u=externalTarget();if(!u)return false;window.__psuInstallFlowActiveV333=true;
    const intent='intent://'+u.host+u.pathname+u.search+'#Intent;scheme='+u.protocol.replace(':','')+';action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end';
    try{location.href=intent;return true}catch(_e){return false}
  }
@@ -2740,34 +2745,38 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
  function waitInstallPrompt(ms){
    return new Promise(resolve=>{if(installPrompt){resolve(true);return}const t0=Date.now();const t=setInterval(()=>{if(installPrompt){clearInterval(t);resolve(true)}else if(Date.now()-t0>=ms){clearInterval(t);resolve(false)}},100)});
  }
+ async function runInstallV333(b){
+   b=b||document.getElementById('homeInstallBtnV284');
+   if(isIOS){openIOSGuide();return true}
+   if(standalone()){if(b)b.hidden=true;return true}
+   if(androidInApp){
+     if(!openAndroidExternalBrowser())showAndroidExternalHelp();
+     setTimeout(()=>showAndroidExternalHelp(),1400);
+     return true;
+   }
+   if(!installPrompt)await waitInstallPrompt(2200);
+   if(installPrompt){
+     const ev=installPrompt;installPrompt=null;
+     try{await ev.prompt();const choice=await Promise.resolve(ev.userChoice).catch(()=>null);if(choice&&choice.outcome==='accepted'){if(b)b.hidden=true}return true}catch(_e){}
+   }
+   const browser=/SamsungBrowser\//i.test(ua)?'삼성 인터넷':(/Chrome\//i.test(ua)?'Chrome':'브라우저');
+   const msg=browser==='삼성 인터넷'?'설치 확인창이 준비되지 않았습니다. 잠시 후 “홈 화면 추가”를 한 번 더 눌러 주세요. 그래도 뜨지 않으면 삼성 인터넷 메뉴의 “현재 페이지 추가” → “홈 화면”을 이용해 주세요.':'브라우저 메뉴(⋮)에서 “앱 설치” 또는 “홈 화면에 추가”를 선택해 주세요.';
+   if(typeof psuAlert==='function')psuAlert(msg,'홈 화면 추가');else alert(msg);return false;
+ }
  function ensureButton(){
    const h=document.querySelector('header'),refresh=document.getElementById('refresh');if(!h)return null;
    if(refresh)refresh.hidden=true;
-   if(inAndroidApp||standalone()||(!isAndroid&&!isIOS))return null
+   if(inAndroidApp||standalone()||(!isAndroid&&!isIOS))return null;
    let b=document.getElementById('homeInstallBtnV284');
    if(!b){
      b=document.createElement('button');b.id='homeInstallBtnV284';b.className='refresh home-install-head-v317';b.type='button';
      if(refresh)refresh.insertAdjacentElement('beforebegin',b);else h.appendChild(b);
-     b.onclick=async()=>{
-       if(isIOS){openIOSGuide();return}
-       if(standalone()){b.hidden=true;return}
-       if(androidInApp){
-         if(!openAndroidExternalBrowser())showAndroidExternalHelp();
-         setTimeout(()=>showAndroidExternalHelp(),1400);
-         return;
-       }
-       if(!installPrompt)await waitInstallPrompt(2200);
-       if(installPrompt){
-         const ev=installPrompt;installPrompt=null;
-         try{await ev.prompt();const choice=await Promise.resolve(ev.userChoice).catch(()=>null);if(choice&&choice.outcome==='accepted'){b.hidden=true;return}}catch(_e){}
-       }
-       const browser=/SamsungBrowser\//i.test(ua)?'삼성 인터넷':(/Chrome\//i.test(ua)?'Chrome':'브라우저');
-       const msg=browser==='삼성 인터넷'?'설치 확인창이 준비되지 않았습니다. 잠시 후 “홈 화면 추가”를 한 번 더 눌러 주세요. 그래도 뜨지 않으면 삼성 인터넷 메뉴의 “현재 페이지 추가” → “홈 화면”을 이용해 주세요.':'브라우저 메뉴(⋮)에서 “앱 설치” 또는 “홈 화면에 추가”를 선택해 주세요.';
-       if(typeof psuAlert==='function')psuAlert(msg,'홈 화면 추가');else alert(msg);
-     };
+     b.onclick=()=>runInstallV333(b);
    }
    b.textContent=new URLSearchParams(location.search).get('psuInstall')==='1'?'설치 계속':'홈 화면 추가';b.hidden=false;return b;
  }
+ window.__psuStartHomeInstallV333=()=>runInstallV333(ensureButton());
+ window.__psuHomeInstallEnvV333={isAndroid,isIOS,androidInApp,standalone};
  window.addEventListener('beforeinstallprompt',e=>{if(!isAndroid||inAndroidApp)return;e.preventDefault();installPrompt=e;ensureButton()});
  window.addEventListener('appinstalled',()=>{installPrompt=null;const b=document.getElementById('homeInstallBtnV284');if(b)b.hidden=true});
  if(!inAndroidApp&&isAndroid&&'serviceWorker' in navigator&&location.protocol==='https:'){
@@ -2955,7 +2964,7 @@ body:not(.psu-schedule-badges-ready-v315) #mobileList{visibility:hidden!importan
  function nextName(){const ns=ladderItems().map(x=>parseInt(String(x.name||'').match(/\d+/)?.[0]||'0',10)).filter(Number.isFinite);return String((ns.length?Math.max(...ns):0)+1)+'Set'}
  function nextId(){return 'set-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)}
  async function writeLadder(id,v,remove=false){const f=F();if(!f)throw new Error('Firebase 연결 준비 중입니다.');await f.auth();id=clean(id)||nextId();const ref=firebase.database().ref('sharedLocations/ladders/'+id);if(remove){await ref.remove();await f.bump('sharedLocations');return id}let createdAt=clean(raw.ladders[id]&&raw.ladders[id].createdAt);if(!createdAt)createdAt=new Date().toISOString();const rec={id,name:clean(v.name),site:clean(v.site),line:clean(v.line),floor:clean(v.floor),bay:clean(v.bay),detail:clean(v.detail),updatedBy:actor(),updatedAt:new Date().toISOString(),createdAt};if(!rec.name)throw new Error('Set 이름을 입력하세요.');await ref.set(rec);await f.bump('sharedLocations');return id}
- function renderLadderList(){openEditor={kind:'ladder-list',unit:'',id:'',dirty:false};const xs=ladderItems(),body=xs.length?`<div class="shared-ladder-list-v316">${xs.map(x=>{const p=placeLadder(x);return `<div class="shared-ladder-item-v316"><div class="shared-ladder-name-v316">${safe(x.name||'Set')}</div><div class="shared-ladder-place-v316 ${p?'':'empty'}" title="${safe(p)}">${safe(p||'위치 미입력')}</div><div class="shared-ladder-actions-v316"><button data-web-loc-edit="${safe(x.id)}">수정</button><button class="delete" data-web-loc-clear="${safe(x.id)}" ${p?'':'disabled'}>내용삭제</button></div></div>`}).join('')}</div>`:'<div class="empty" style="padding:18px">등록된 사다리 Set이 없습니다.</div>';modal('사다리 위치',body+'<div class="shared-location-actions-v316"><button class="btn" id="webLadderCloseV316">닫기</button><button class="btn danger" id="webLadderDeleteSetV316">Set 삭제</button><button class="btn primary" id="webLadderAddV316">Set 추가</button></div>');document.getElementById('webLadderCloseV316').onclick=close;document.getElementById('webLadderAddV316').onclick=()=>openLadderEditor('',{name:nextName()});document.getElementById('webLadderDeleteSetV316').onclick=openSetDelete;document.querySelectorAll('[data-web-loc-edit]').forEach(b=>b.onclick=()=>{const x=raw.ladders[b.dataset.webLocEdit];if(x)openLadderEditor(x.id,x)});document.querySelectorAll('[data-web-loc-clear]').forEach(b=>b.onclick=async()=>{const id=b.dataset.webLocClear,x=raw.ladders[id];if(!x)return;const ask=window.psuConfirmV148?await window.psuConfirmV148('사다리 위치 내용삭제',`${x.name||'Set'} 위치 내용만 삭제할까요?`,'Set은 그대로 유지됩니다.',true):confirm(`${x.name||'Set'} 위치 내용만 삭제할까요?`);if(!ask)return;b.disabled=true;try{await writeLadder(id,{name:x.name||'Set',site:'',line:'',floor:'',bay:'',detail:''});toastMsg('사다리 위치 내용을 삭제했습니다.')}catch(e){b.disabled=false;psuAlert(e.message||String(e))}})}
+ function renderLadderList(){openEditor={kind:'ladder-list',unit:'',id:'',dirty:false};const xs=ladderItems(),pushBox=((window.__webAuthInfoV136||{}).role==='admin'||(window.__webAuthInfoV136||{}).role==='master')?'':'<div id="ladderPushSettingV333"></div>',body=xs.length?`<div class="shared-ladder-list-v316">${xs.map(x=>{const p=placeLadder(x);return `<div class="shared-ladder-item-v316"><div class="shared-ladder-name-v316">${safe(x.name||'Set')}</div><div class="shared-ladder-place-v316 ${p?'':'empty'}" title="${safe(p)}">${safe(p||'위치 미입력')}</div><div class="shared-ladder-actions-v316"><button data-web-loc-edit="${safe(x.id)}">수정</button></div></div>`}).join('')}</div>`:'<div class="empty" style="padding:18px">등록된 사다리 Set이 없습니다.</div>';modal('사다리 위치',pushBox+body+'<div class="shared-location-actions-v316"><button class="btn" id="webLadderCloseV316">닫기</button><button class="btn danger" id="webLadderDeleteSetV316">Set 삭제</button><button class="btn primary" id="webLadderAddV316">Set 추가</button></div>');document.getElementById('webLadderCloseV316').onclick=close;document.getElementById('webLadderAddV316').onclick=()=>openLadderEditor('',{name:nextName()});document.getElementById('webLadderDeleteSetV316').onclick=openSetDelete;document.querySelectorAll('[data-web-loc-edit]').forEach(b=>b.onclick=()=>{const x=raw.ladders[b.dataset.webLocEdit];if(x)openLadderEditor(x.id,x)});setTimeout(()=>{try{window.__psuRenderLadderPushSettingV333&&window.__psuRenderLadderPushSettingV333()}catch(_e){}},0)}
  function openLadderEditor(id,x={}){openEditor={kind:'ladder',unit:'',id:clean(id),dirty:false};modal(id?`${x.name||'Set'} 위치 수정`:'사다리 Set 추가',ladderFields(x)+`<div class="shared-location-actions-v316"><button class="btn" id="webLadderBackV316">취소</button><button class="btn primary" id="webLadderSaveV316">저장</button></div>`);bindLadderDirty();document.getElementById('webLadderBackV316').onclick=renderLadderList;document.getElementById('webLadderSaveV316').onclick=async()=>{const b=document.getElementById('webLadderSaveV316'),v=readLadder();if(!v.name)return psuAlert('Set 이름을 입력하세요.');b.disabled=true;try{const savedId=await writeLadder(id,v);openEditor.id=savedId;toastMsg('사다리 위치를 저장했습니다.');renderLadderList()}catch(e){b.disabled=false;psuAlert(e.message||String(e))}}}
  function openSetDelete(){const xs=ladderItems();if(!xs.length)return psuAlert('삭제할 Set이 없습니다.');openEditor={kind:'ladder-delete',unit:'',id:'',dirty:false};modal('사다리 Set 삭제',`<div style="font-size:11px;color:#64748b;margin-bottom:10px">삭제할 Set을 선택하세요. <b>Set 자체와 위치 내용이 함께 삭제됩니다.</b></div><div class="shared-set-delete-v316"><div class="loc-label-v316">삭제할 Set</div><select class="control" id="webSetDeleteSelectV316">${xs.map(x=>`<option value="${safe(x.id)}">${safe(x.name||'Set')}</option>`).join('')}</select></div><div class="shared-location-actions-v316"><button class="btn" id="webSetDeleteBackV316">취소</button><button class="btn danger" id="webSetDeleteRunV316">Set 삭제</button></div>`);document.getElementById('webSetDeleteBackV316').onclick=renderLadderList;document.getElementById('webSetDeleteRunV316').onclick=async()=>{const id=clean(document.getElementById('webSetDeleteSelectV316')?.value),x=raw.ladders[id];if(!x)return;const ask=window.psuConfirmV148?await window.psuConfirmV148('사다리 Set 삭제',`${x.name||'Set'} 자체를 삭제할까요?`,'위치 내용도 함께 삭제됩니다.',true):confirm(`${x.name||'Set'} 자체를 삭제할까요?`);if(!ask)return;const b=document.getElementById('webSetDeleteRunV316');b.disabled=true;try{await writeLadder(id,{},true);toastMsg('사다리 Set을 삭제했습니다.');renderLadderList()}catch(e){b.disabled=false;psuAlert(e.message||String(e))}}}
  async function ensureDefaults(){if(defaultBusy)return;defaultBusy=true;try{const f=F();if(!f)return;await f.auth();const s=await firebase.database().ref('sharedLocations/ladders').orderByKey().limitToFirst(1).once('value');if(s.exists())return;const at=new Date().toISOString();let created=false;for(let i=1;i<=4;i++){const id='set-'+i,ref=firebase.database().ref('sharedLocations/ladders/'+id),tr=await ref.transaction(cur=>cur||{id,name:i+'Set',site:'',line:'',floor:'',bay:'',detail:'',updatedBy:'',updatedAt:'',createdAt:at});if(tr&&tr.committed)created=true}if(created)await f.bump('sharedLocations')}catch(e){console.warn('사다리 기본 Set 확인 실패',e)}finally{defaultBusy=false}}
@@ -3196,6 +3205,41 @@ body.master-landscape-v324-on #masterLandscapeV324{display:block}
 #mobileList .dategroup.adjacent-month-v328>h3{color:#64748b}
 .adjacent-month-label-v328{font-size:9px;font-weight:800;color:#94a3b8;border:1px solid #dbe2ea;border-radius:999px;padding:1px 5px;background:#fff}
 </style>
+<style id="web-v331-ladder-push-style">
+.ladder-push-back-v331{position:fixed;inset:0;z-index:69000;background:rgba(15,23,42,.52);display:flex;align-items:flex-end;justify-content:center;padding:16px}.ladder-push-card-v331{width:min(460px,96vw);background:#fff;border-radius:14px;padding:17px 16px;box-shadow:0 18px 55px rgba(0,0,0,.28)}.ladder-push-card-v331 h3{margin:0 0 7px;font-size:17px}.ladder-push-card-v331 p{margin:0;color:#64748b;font-size:12px;line-height:1.55}.ladder-push-actions-v331{display:flex;justify-content:flex-end;gap:7px;margin-top:14px}.ladder-push-actions-v331 .btn{min-height:38px}
+</style>
+<script id="web-v333-ladder-push-script">
+(function(){
+ if(window.__webV333LadderPushInstalled)return;window.__webV333LadderPushInstalled=true;
+ const LOCAL_KEY='psuLadderPushLocalV331',DEVICE_KEY='psuLadderPushDeviceV331';let messaging=null,busy=false;
+ function clean(v){return String(v==null?'':v).trim()}
+ function role(){const a=window.__webAuthInfoV136||{};return clean(a.role)}
+ function currentName(){const a=window.__webAuthInfoV136||{};let n=clean(a.displayName||a.username);if(!n&&typeof window.__psuNameSyncV158==='function')try{n=clean(window.__psuNameSyncV158())}catch(_e){}if(!n)try{n=clean(localStorage.getItem('psuMyLeaveNameV131')||'')}catch(_e){}return n.slice(0,60)}
+ function isMobile(){try{if(navigator.userAgentData&&navigator.userAgentData.mobile===true)return true}catch(_e){}const ua=navigator.userAgent||'',p=navigator.platform||'';return /Android|iPhone|iPad|iPod|Mobile/i.test(ua)||(p==='MacIntel'&&Number(navigator.maxTouchPoints||0)>1)}
+ function isIOS(){const ua=navigator.userAgent||'',p=navigator.platform||'';return /iPhone|iPad|iPod/i.test(ua)||(p==='MacIntel'&&Number(navigator.maxTouchPoints||0)>1)}
+ function standalone(){try{return !!(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}catch(_e){return false}}
+ function supported(){return ('serviceWorker'in navigator)&&('Notification'in window)&&!!window.PushManager}
+ function localState(){try{return JSON.parse(localStorage.getItem(LOCAL_KEY)||'null')||null}catch(_e){return null}}
+ function saveLocal(x){try{if(x)localStorage.setItem(LOCAL_KEY,JSON.stringify(x));else localStorage.removeItem(LOCAL_KEY)}catch(_e){}}
+ function isOn(){const n=currentName(),st=localState();return !!(n&&st&&clean(st.name)===n&&clean(st.token))}
+ function deviceId(){let v='';try{v=clean(localStorage.getItem(DEVICE_KEY)||'')}catch(_e){}if(!v){try{v=crypto.randomUUID()}catch(_e){v=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)}try{localStorage.setItem(DEVICE_KEY,v)}catch(_e){}}return v.slice(0,100)}
+ async function nameKey(name){const src=new TextEncoder().encode(clean(name).normalize('NFC').toLocaleLowerCase('ko-KR')),b=await crypto.subtle.digest('SHA-256',src);return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+ function rpc(name,args){return new Promise((resolve,reject)=>{try{google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[name].apply(null,args||[])}catch(e){reject(e)}})}
+ async function vapid(){const r=await rpc('getLadderPushConfigV331',[]);if(!r||r.ok===false)throw new Error(r&&r.message?r.message:'알림 설정을 불러오지 못했습니다.');const k=clean(r.vapidKey);if(!/^[A-Za-z0-9_-]{80,100}$/.test(k))throw new Error('Firebase Web Push 공개키(VAPID) 설정을 확인해 주세요.');return k}
+ function loadScript(src,label){return new Promise((resolve,reject)=>{if([...document.scripts].some(x=>x.src===src))return resolve();const sc=document.createElement('script');sc.src=src;sc.async=true;sc.onload=resolve;sc.onerror=()=>reject(new Error((label||'Firebase SDK')+'를 불러오지 못했습니다.'));document.head.appendChild(sc)})}
+ async function ensureMessaging(){if(messaging)return messaging;await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js','Firebase Messaging SDK');if(!window.firebase||!firebase.messaging)throw new Error('Firebase Messaging을 준비하지 못했습니다.');messaging=firebase.messaging();if(!window.__psuPushForegroundBoundV331){window.__psuPushForegroundBoundV331=true;messaging.onMessage(async payload=>{try{const d=payload&&payload.data||{},reg=await navigator.serviceWorker.ready;if(reg&&reg.showNotification)await reg.showNotification(d.title||'PSU 알림',{body:d.body||'',icon:'./temaat_icon_192.png',badge:'./temaat_icon_192.png',tag:'psu-'+String(d.eventId||d.type||Date.now()),data:{url:d.url||'./'}})}catch(_e){}})}return messaging}
+ async function installations(){await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-installations-compat.js','Firebase Installations SDK');if(!window.firebase||typeof firebase.installations!=='function')throw new Error('Firebase Installations를 준비하지 못했습니다.');return firebase.installations()}
+ async function swReg(){const reg=await navigator.serviceWorker.register('./psu-sw.js',{scope:'./',updateViaCache:'none'});try{await reg.update()}catch(_e){}return await navigator.serviceWorker.ready}
+ function authErr(e){const code=clean(e&&e.code),msg=clean(e&&e.message||e);return code==='messaging/token-subscribe-failed'&&/missing required authentication credential|unauthenticated|401/i.test(msg)}
+ async function tokenOf(m,reg,key){let inst=null;try{inst=await installations();await inst.getToken(true)}catch(_e){}try{return await m.getToken({serviceWorkerRegistration:reg,vapidKey:key})}catch(first){if(!authErr(first))throw first;try{await m.deleteToken()}catch(_e){}try{if(!inst)inst=await installations();await inst.delete()}catch(_e){}await new Promise(r=>setTimeout(r,250));if(inst){await inst.getId();await inst.getToken(true)}return await m.getToken({serviceWorkerRegistration:await swReg(),vapidKey:key})}}
+ async function register(opts={}){if(busy)throw new Error('알림 설정을 처리 중입니다.');const name=currentName();if(!name)throw new Error('사용자 이름을 확인할 수 없습니다.');busy=true;try{const fb=window.__fbDirectV187;if(!fb)throw new Error('Firebase 연결 준비 중입니다.');const user=await fb.auth();if(!user)throw new Error('Firebase 연결을 확인하지 못했습니다.');const [key,m,reg,vk]=await Promise.all([nameKey(name),ensureMessaging(),swReg(),vapid()]),token=await tokenOf(m,reg,vk);if(!token)throw new Error('사다리 알림 토큰을 만들지 못했습니다.');const item={displayName:name,fcmToken:token,deviceId:deviceId(),ownerUid:String(user.uid||''),platform:'web-mobile',enabled:true,appVersion:String(window.__PSU_WEB_VERSION||'웹'),updatedAt:new Date().toISOString()};await firebase.database().ref('webPushLadderTokens/'+key).set(item);saveLocal({name,deviceId:item.deviceId,token,registeredAt:Date.now()});if(!opts.silent&&window.toastMsg)toastMsg('사다리 알림을 켰습니다.');return true}finally{busy=false}}
+ async function unregister(opts={}){if(busy)throw new Error('알림 설정을 처리 중입니다.');const name=currentName();if(!name){saveLocal(null);return true}busy=true;try{const fb=window.__fbDirectV187;if(fb)await fb.auth();const key=await nameKey(name);await firebase.database().ref('webPushLadderTokens/'+key).remove();saveLocal(null);if(!opts.silent&&window.toastMsg)toastMsg('사다리 알림을 껐습니다.');return true}finally{busy=false}}
+ async function enable(opts={}){if(!isMobile())throw new Error('사다리 알림은 모바일에서 설정할 수 있습니다.');if(isIOS()&&!standalone())throw new Error('IOS_HOME_REQUIRED');if(!supported())throw new Error('PUSH_ENV_UNSUPPORTED');if(Notification.permission==='default'){const p=await Notification.requestPermission();if(p!=='granted')throw new Error('알림 권한이 허용되지 않았습니다.')}if(Notification.permission!=='granted')throw new Error('알림 권한이 차단되어 있습니다.');return register(opts)}
+ window.__psuLadderPushV333={currentName,role,isMobile,isIOS,standalone,supported,isOn,enable,disable:unregister,register,localState};
+ window.__psuLadderPushMaybeV331=function(){};
+})();
+</script>
+
 <style id="web-v327-master-push-presence-style">
 .master-presence-box-v327,.master-push-box-v327{margin:10px 0;padding:11px 12px;border:1px solid #dbe4ef;border-radius:10px;background:#f8fafc}.master-presence-head-v327,.master-push-box-v327>div:first-child{display:flex;align-items:center;justify-content:space-between;gap:10px}.master-presence-head-v327 b,.master-push-box-v327 b{font-size:12px;color:#334155}.master-presence-head-v327 span,.master-push-box-v327 span{font-size:10px;color:#64748b}.master-presence-list-v327{margin-top:8px;display:grid;gap:5px;max-height:220px;overflow:auto}.master-presence-row-v327{display:grid;grid-template-columns:minmax(80px,1fr) auto;gap:8px;align-items:center;padding:7px 8px;border-radius:8px;background:#fff;border:1px solid #e6ebf1}.master-presence-row-v327 b{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.master-presence-row-v327 span{font-size:9px;color:#64748b;white-space:nowrap}.master-presence-empty-v327{font-size:11px;color:#94a3b8;padding:7px 2px}.master-push-actions-v327{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;margin-top:9px}.master-push-actions-v327 .btn{min-height:34px}
 </style>
@@ -3219,7 +3263,7 @@ body.master-landscape-v324-on #masterLandscapeV324{display:block}
  function statusText(){if(!('Notification'in window))return'이 브라우저는 알림을 지원하지 않습니다.';if(Notification.permission==='denied')return'알림 권한이 차단되어 있습니다.';if(Notification.permission==='granted'&&storedToken())return'알림 사용 중';if(Notification.permission==='granted')return'권한 허용됨 · 연결 필요';return'알림 사용 안 함'}
  function updateUi(){const st=document.getElementById('masterPushStatusV327'),en=document.getElementById('masterPushEnableV327'),te=document.getElementById('masterPushTestV327'),di=document.getElementById('masterPushDisableV327');if(st)st.textContent=statusText();const supported=('serviceWorker'in navigator)&&('Notification'in window)&&!!window.PushManager;if(en)en.disabled=busy||!supported;if(te)te.disabled=busy||!storedToken();if(di)di.disabled=busy||!storedToken()}
  function loadScript(src,label){return new Promise((resolve,reject)=>{if([...document.scripts].some(x=>x.src===src))return resolve();const sc=document.createElement('script');sc.src=src;sc.async=true;sc.onload=resolve;sc.onerror=()=>reject(new Error((label||'Firebase SDK')+'를 불러오지 못했습니다.'));document.head.appendChild(sc)})}
- async function ensureMessaging(){if(messaging)return messaging;await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js','Firebase Messaging SDK');if(!window.firebase||!firebase.messaging)throw new Error('Firebase Messaging을 준비하지 못했습니다.');messaging=firebase.messaging();if(!onMessageBound){onMessageBound=true;messaging.onMessage(async payload=>{try{const d=payload&&payload.data||{},reg=await navigator.serviceWorker.ready;if(reg&&reg.showNotification)await reg.showNotification(d.title||'PSU 알림',{body:d.body||'',icon:'./temaat_icon_192.png',badge:'./temaat_icon_192.png',tag:'psu-'+String(d.eventId||d.type||Date.now()),data:{url:d.url||'./'}})}catch(_e){}})}return messaging}
+ async function ensureMessaging(){if(messaging)return messaging;await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js','Firebase Messaging SDK');if(!window.firebase||!firebase.messaging)throw new Error('Firebase Messaging을 준비하지 못했습니다.');messaging=firebase.messaging();if(!onMessageBound&&!window.__psuPushForegroundBoundV331){onMessageBound=true;window.__psuPushForegroundBoundV331=true;messaging.onMessage(async payload=>{try{const d=payload&&payload.data||{},reg=await navigator.serviceWorker.ready;if(reg&&reg.showNotification)await reg.showNotification(d.title||'PSU 알림',{body:d.body||'',icon:'./temaat_icon_192.png',badge:'./temaat_icon_192.png',tag:'psu-'+String(d.eventId||d.type||Date.now()),data:{url:d.url||'./'}})}catch(_e){}})}return messaging}
  async function ensureInstallationsV329(){await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-installations-compat.js','Firebase Installations SDK');if(!window.firebase||typeof firebase.installations!=='function')throw new Error('Firebase Installations를 준비하지 못했습니다.');return firebase.installations()}
  async function pushRegistrationV329(){const reg=await navigator.serviceWorker.register('./psu-sw.js',{scope:'./',updateViaCache:'none'});try{await reg.update()}catch(_e){}return await navigator.serviceWorker.ready}
  function subscribeAuthErrorV329(e){const code=String(e&&e.code||''),msg=String(e&&e.message||e||'');return code==='messaging/token-subscribe-failed'&&/missing required authentication credential|unauthenticated|401/i.test(msg)}
@@ -3257,6 +3301,90 @@ body.master-landscape-v324-on #masterLandscapeV324{display:block}
  window.__psuRefreshMasterPresenceV328=()=>refreshPresence(false);
  function restore(){if(master()&&('Notification'in window)&&Notification.permission==='granted'&&storedToken()&&!regFresh())enable(true)}
  setTimeout(restore,1800);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(restore,500)},{passive:true});
+})();
+</script>
+
+
+
+<style id="web-v332-install-resume-style">
+.psu-install-resume-back-v332{position:fixed;inset:0;z-index:70000;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:18px}.psu-install-resume-card-v332{width:min(430px,94vw);background:#fff;border-radius:15px;box-shadow:0 20px 60px rgba(15,23,42,.3);padding:20px 18px}.psu-install-resume-card-v332 h3{margin:0 0 8px;font-size:18px}.psu-install-resume-card-v332 p{margin:0;color:#64748b;font-size:13px;line-height:1.6}.psu-install-resume-actions-v332{display:flex;justify-content:flex-end;gap:8px;margin-top:17px}.psu-install-resume-actions-v332 .btn{min-height:42px;padding-left:16px;padding-right:16px}.psu-install-resume-actions-v332 .primary{min-width:112px}.psu-install-resume-v332 #homeInstallBtnV284{display:none!important}
+</style>
+<script id="web-v333-install-resume-script">
+(function(){
+ if(window.__webV333InstallResumeInstalled)return;window.__webV333InstallResumeInstalled=true;
+ const q=new URLSearchParams(location.search||'');if(q.get('psuInstall')!=='1')return;
+ const ua=String(navigator.userAgent||'');if(!/Android/i.test(ua))return;window.__psuInstallFlowActiveV333=true;
+ function cleanUrl(){try{const u=new URL(location.href);u.searchParams.delete('psuInstall');history.replaceState(null,'',u.pathname+(u.search||'')+(u.hash||''));const b=document.getElementById('homeInstallBtnV284');if(b)b.textContent='홈 화면 추가'}catch(_e){}}
+ function close(){document.documentElement.classList.remove('psu-install-resume-v332');document.body&&document.body.classList.remove('psu-install-resume-v332');document.getElementById('psuInstallResumeBackV332')?.remove()}
+ function show(){if(document.getElementById('psuInstallResumeBackV332'))return;if(window.matchMedia&&matchMedia('(display-mode: standalone)').matches){cleanUrl();return}document.documentElement.classList.add('psu-install-resume-v332');document.body.classList.add('psu-install-resume-v332');const back=document.createElement('div');back.id='psuInstallResumeBackV332';back.className='psu-install-resume-back-v332';back.innerHTML='<div class="psu-install-resume-card-v332" role="dialog" aria-modal="true"><h3>홈 화면에 추가</h3><p>외부 브라우저로 이동했습니다.<br>PSU 작업현황을 홈 화면에 추가하여 앱처럼 사용하시겠습니까?</p><div class="psu-install-resume-actions-v332"><button class="btn" id="psuInstallLaterV332">나중에</button><button class="btn primary" id="psuInstallContinueV332">설치 계속</button></div></div>';document.body.appendChild(back);document.getElementById('psuInstallLaterV332').onclick=()=>{cleanUrl();close()};document.getElementById('psuInstallContinueV332').onclick=async()=>{const b=document.getElementById('psuInstallContinueV332');if(b){b.disabled=true;b.textContent='설치 확인 중...'}try{if(typeof window.__psuStartHomeInstallV333!=='function')throw new Error('설치 기능을 준비하지 못했습니다.');const invoked=await window.__psuStartHomeInstallV333();if(invoked){cleanUrl();close();return}if(b){b.disabled=false;b.textContent='설치 계속'}}catch(e){if(b){b.disabled=false;b.textContent='설치 계속'}if(typeof window.psuAlert==='function')window.psuAlert(e&&e.message?e.message:String(e),'홈 화면에 추가')}};}
+ const start=()=>setTimeout(show,180);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
+</script>
+
+<script id="web-v333-admin-work-push-script">
+(function(){
+ if(window.__webV333AdminWorkPushInstalled)return;window.__webV333AdminWorkPushInstalled=true;
+ const LOCAL_KEY='psuAdminWorkPushLocalV332',DEVICE_KEY='psuAdminWorkPushDeviceV332';let busy=false,messaging=null;
+ function clean(v){return String(v==null?'':v).trim()}
+ function role(){const a=window.__webAuthInfoV136||{};return clean(a.role)}
+ function isAdminRole(){return role()==='admin'||role()==='master'}
+ function currentName(){const a=window.__webAuthInfoV136||{};return clean(a.displayName||a.username).slice(0,60)}
+ function isMobile(){try{if(navigator.userAgentData&&navigator.userAgentData.mobile===true)return true}catch(_e){}const ua=navigator.userAgent||'',p=navigator.platform||'';return /Android|iPhone|iPad|iPod|Mobile/i.test(ua)||(p==='MacIntel'&&Number(navigator.maxTouchPoints||0)>1)}
+ function isIOS(){const ua=navigator.userAgent||'',p=navigator.platform||'';return /iPhone|iPad|iPod/i.test(ua)||(p==='MacIntel'&&Number(navigator.maxTouchPoints||0)>1)}
+ function standalone(){try{return !!(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}catch(_e){return false}}
+ function supported(){return ('serviceWorker'in navigator)&&('Notification'in window)&&!!window.PushManager}
+ function localState(){try{return JSON.parse(localStorage.getItem(LOCAL_KEY)||'null')||null}catch(_e){return null}}
+ function saveLocal(x){try{if(x)localStorage.setItem(LOCAL_KEY,JSON.stringify(x));else localStorage.removeItem(LOCAL_KEY)}catch(_e){}}
+ function isOn(){const st=localState(),name=currentName();return !!(isAdminRole()&&name&&st&&clean(st.name)===name&&clean(st.token)&&clean(st.role)===role())}
+ function deviceId(){let v='';try{v=clean(localStorage.getItem(DEVICE_KEY)||'')}catch(_e){}if(!v){try{v=crypto.randomUUID()}catch(_e){v=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)}try{localStorage.setItem(DEVICE_KEY,v)}catch(_e){}}return v.slice(0,100)}
+ async function nameKey(name){const src=new TextEncoder().encode(clean(name).normalize('NFC').toLocaleLowerCase('ko-KR')),b=await crypto.subtle.digest('SHA-256',src);return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+ function rpc(name,args){return new Promise((resolve,reject)=>{try{google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[name].apply(null,args||[])}catch(e){reject(e)}})}
+ async function vapid(){const r=await rpc('getLadderPushConfigV331',[]),k=clean(r&&r.vapidKey);if(!r||r.ok===false||!/^[A-Za-z0-9_-]{80,100}$/.test(k))throw new Error('관리자 업무 알림 VAPID 설정을 확인해 주세요.');return k}
+ function loadScript(src,label){return new Promise((resolve,reject)=>{if([...document.scripts].some(x=>x.src===src))return resolve();const sc=document.createElement('script');sc.src=src;sc.async=true;sc.onload=resolve;sc.onerror=()=>reject(new Error((label||'Firebase SDK')+'를 불러오지 못했습니다.'));document.head.appendChild(sc)})}
+ async function ensureMessaging(){if(messaging)return messaging;await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js','Firebase Messaging SDK');if(!window.firebase||!firebase.messaging)throw new Error('Firebase Messaging을 준비하지 못했습니다.');messaging=firebase.messaging();if(!window.__psuPushForegroundBoundV331){window.__psuPushForegroundBoundV331=true;messaging.onMessage(async payload=>{try{const d=payload&&payload.data||{},reg=await navigator.serviceWorker.ready;if(reg&&reg.showNotification)await reg.showNotification(d.title||'PSU 알림',{body:d.body||'',icon:'./temaat_icon_192.png',badge:'./temaat_icon_192.png',tag:'psu-'+String(d.eventId||d.type||Date.now()),data:{url:d.url||'./'}})}catch(_e){}})}return messaging}
+ async function installations(){await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-installations-compat.js','Firebase Installations SDK');if(!window.firebase||typeof firebase.installations!=='function')throw new Error('Firebase Installations를 준비하지 못했습니다.');return firebase.installations()}
+ async function swReg(){const reg=await navigator.serviceWorker.register('./psu-sw.js',{scope:'./',updateViaCache:'none'});try{await reg.update()}catch(_e){}return navigator.serviceWorker.ready}
+ function authErr(e){const code=clean(e&&e.code),msg=clean(e&&e.message||e);return code==='messaging/token-subscribe-failed'&&/missing required authentication credential|unauthenticated|401/i.test(msg)}
+ async function tokenOf(m,reg,key){let inst=null;try{inst=await installations();await inst.getToken(true)}catch(_e){}try{return await m.getToken({serviceWorkerRegistration:reg,vapidKey:key})}catch(first){if(!authErr(first))throw first;try{await m.deleteToken()}catch(_e){}try{if(!inst)inst=await installations();await inst.delete()}catch(_e){}await new Promise(r=>setTimeout(r,250));if(inst){await inst.getId();await inst.getToken(true)}return m.getToken({serviceWorkerRegistration:await swReg(),vapidKey:key})}}
+ async function adminUser(){if(typeof window.__ensureAdminFirebaseV264!=='function')throw new Error('관리자 Firebase 인증 준비 중입니다.');const u=await window.__ensureAdminFirebaseV264();if(!u||u.isAnonymous)throw new Error('관리자 Firebase 인증이 필요합니다.');const p=(await firebase.database().ref('authUsers/'+u.uid).once('value')).val()||{},r=clean(p.role);if(clean(p.status)!=='approved'||(r!=='admin'&&r!=='master'))throw new Error('승인된 관리자 권한이 필요합니다.');return {user:u,profile:p,role:r}}
+ async function register(opts={}){if(busy||!isAdminRole())throw new Error('관리자 권한이 필요합니다.');busy=true;try{const {user,profile,role:r}=await adminUser(),name=clean(profile.displayName||profile.username);if(!name)throw new Error('관리자 이름을 확인할 수 없습니다.');const [key,m,reg,vk]=await Promise.all([nameKey(name),ensureMessaging(),swReg(),vapid()]),token=await tokenOf(m,reg,vk);if(!token)throw new Error('관리자 업무 알림 토큰을 만들지 못했습니다.');const item={displayName:name,fcmToken:token,deviceId:deviceId(),ownerUid:String(user.uid||''),role:r,platform:'web-mobile',enabled:true,appVersion:String(window.__PSU_WEB_VERSION||'웹'),updatedAt:new Date().toISOString()};await firebase.database().ref('webPushAdminWorkTokens/'+key).set(item);saveLocal({name,token,deviceId:item.deviceId,role:r,registeredAt:Date.now()});if(!opts.silent&&window.toastMsg)toastMsg('업무 알림을 켰습니다.');return true}finally{busy=false}}
+ async function unregister(opts={}){if(busy)throw new Error('알림 설정을 처리 중입니다.');const name=currentName();if(!name){saveLocal(null);return true}busy=true;try{await adminUser();const key=await nameKey(name);await firebase.database().ref('webPushAdminWorkTokens/'+key).remove();saveLocal(null);if(!opts.silent&&window.toastMsg)toastMsg('업무 알림을 껐습니다.');return true}finally{busy=false}}
+ async function enable(opts={}){if(!isAdminRole())throw new Error('관리자 권한이 필요합니다.');if(!isMobile())throw new Error('업무 알림은 모바일에서 설정할 수 있습니다.');if(isIOS()&&!standalone())throw new Error('IOS_HOME_REQUIRED');if(!supported())throw new Error('PUSH_ENV_UNSUPPORTED');if(Notification.permission==='default'){const p=await Notification.requestPermission();if(p!=='granted')throw new Error('알림 권한이 허용되지 않았습니다.')}if(Notification.permission!=='granted')throw new Error('알림 권한이 차단되어 있습니다.');return register(opts)}
+ window.__psuAdminWorkPushV333={role,isAdminRole,currentName,isMobile,isIOS,standalone,supported,isOn,enable,disable:unregister,register,localState};
+ window.__psuAdminWorkPushMaybeV332=function(){};
+})();
+</script>
+
+
+<style id="web-v333-personal-push-style">
+.push-personal-box-v333{border:1px solid #dbe4ee;border-radius:11px;background:#f8fafc;padding:11px 12px;margin-bottom:10px}.push-personal-row-v333{display:flex;align-items:center;gap:12px;min-height:42px}.push-personal-text-v333{flex:1;min-width:0}.push-personal-text-v333 b{display:block;font-size:13px;color:#1e293b}.push-personal-text-v333 span{display:block;margin-top:2px;font-size:10.5px;line-height:1.4;color:#64748b}.push-personal-switch-v333{position:relative;width:48px;height:26px;flex:0 0 48px}.push-personal-switch-v333 input{position:absolute;opacity:0;pointer-events:none}.push-personal-track-v333{position:absolute;inset:0;border-radius:999px;background:#cbd5e1;cursor:pointer;transition:.15s}.push-personal-track-v333:after{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(15,23,42,.28);transition:.15s}.push-personal-switch-v333 input:checked+.push-personal-track-v333{background:#2f7c59}.push-personal-switch-v333 input:checked+.push-personal-track-v333:after{transform:translateX(22px)}.push-personal-switch-v333 input:disabled+.push-personal-track-v333{opacity:.55;cursor:wait}.push-personal-note-v333{font-size:10.5px;line-height:1.5;color:#64748b;margin-top:6px}.push-personal-modal-v333{display:grid;gap:9px}.push-personal-modal-v333 .push-personal-box-v333{margin:0}.push-intro-back-v333{position:fixed;inset:0;z-index:69500;background:rgba(15,23,42,.54);display:flex;align-items:flex-end;justify-content:center;padding:16px}.push-intro-card-v333{width:min(460px,96vw);background:#fff;border-radius:14px;padding:17px 16px;box-shadow:0 18px 55px rgba(0,0,0,.28)}.push-intro-card-v333 h3{margin:0 0 7px;font-size:17px}.push-intro-card-v333 p{margin:0;color:#64748b;font-size:12px;line-height:1.6}.push-intro-actions-v333{display:flex;justify-content:flex-end;gap:7px;margin-top:14px}.push-intro-actions-v333 .btn{min-height:38px}
+</style>
+<script id="web-v333-personal-push-script">
+(function(){
+ if(window.__webV333PersonalPushInstalled)return;window.__webV333PersonalPushInstalled=true;
+ const SEEN='psuPushIntroSeenV333:';const introShownSession=new Set();
+ const clean=v=>String(v==null?'':v).trim(),esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function ladder(){return window.__psuLadderPushV333||null}function work(){return window.__psuAdminWorkPushV333||null}
+ function role(){const a=window.__webAuthInfoV136||{};return clean(a.role)}function isAdmin(){return role()==='admin'||role()==='master'}
+ function name(){const l=ladder();return l?clean(l.currentName()):''}
+ function seenKey(){const kind=isAdmin()?'admin':'user',n=name().normalize('NFC').toLocaleLowerCase('ko-KR');return SEEN+kind+':'+encodeURIComponent(n)}
+ function seen(){try{return !!localStorage.getItem(seenKey())}catch(_e){return false}}function markSeen(){try{localStorage.setItem(seenKey(),String(Date.now()))}catch(_e){}}
+ function active(){const l=ladder(),w=work();return isAdmin()?!!(l&&l.isOn()&&w&&w.isOn()):!!(l&&l.isOn())}
+ function removeIntro(){document.getElementById('pushIntroBackV333')?.remove()}
+ function installAction(){const l=ladder();if(l&&l.isIOS()&&!l.standalone()){try{window.__openIOSHomeGuideV317&&window.__openIOSHomeGuideV317()}catch(_e){}return}try{window.__psuStartHomeInstallV333&&window.__psuStartHomeInstallV333()}catch(_e){}}
+ function introCard(title,text,buttons){removeIntro();const back=document.createElement('div');back.id='pushIntroBackV333';back.className='push-intro-back-v333';back.innerHTML='<div class="push-intro-card-v333"><h3>'+esc(title)+'</h3><p>'+text+'</p><div class="push-intro-actions-v333">'+buttons.map(b=>'<button class="btn '+(b.primary?'primary':'')+'" data-k="'+esc(b.key)+'">'+esc(b.text)+'</button>').join('')+'</div></div>';document.body.appendChild(back);buttons.forEach(b=>{const el=back.querySelector('[data-k="'+b.key+'"]');if(el)el.onclick=()=>b.click(el,back)});return back}
+ async function enableForCurrent(){const l=ladder(),w=work();if(!l)throw new Error('알림 기능을 준비 중입니다.');await l.enable({silent:true});if(isAdmin()&&w)await w.enable({silent:true});if(window.toastMsg)toastMsg('알림을 켰습니다.')}
+ function showEnvironmentIntro(){const l=ladder();if(!l)return;const ios=l.isIOS()&&!l.standalone(),text=ios?'알림을 받으려면 <b>홈 화면에 추가</b>한 뒤 앱으로 실행해 주세요.':'알림을 받으려면 <b>홈 화면에 추가</b>하거나 <b>Chrome</b>에서 이용해 주세요.';introCard('알림을 받으려면',text,[{key:'later',text:'나중에',click:()=>{markSeen();removeIntro()}},{key:'install',text:'홈 화면에 추가',primary:true,click:()=>{removeIntro();installAction()}}])}
+ function showDenied(){introCard('알림 설정 확인','현재 브라우저에서 알림 권한이 차단되어 있습니다.<br>브라우저/휴대폰 알림 설정에서 허용한 뒤 알림 설정을 켜 주세요.',[{key:'ok',text:'확인',primary:true,click:()=>{markSeen();removeIntro()}}])}
+ function showPermissionIntro(){const text=isAdmin()?'관리자 업무 변경사항과 사다리 위치 변경 알림을 이 휴대폰에서 받을 수 있습니다.<br>알림은 계정 화면의 <b>알림 스위치</b>에서 언제든지 켜거나 끌 수 있습니다.':'사다리 위치가 변경되면 이 휴대폰에서 알림을 받을 수 있습니다.<br>알림은 사다리 위치 화면에서 언제든지 켜거나 끌 수 있습니다.';introCard('알림을 받으시겠습니까?',text,[{key:'later',text:'나중에',click:()=>{markSeen();removeIntro()}},{key:'enable',text:'알림 받기',primary:true,click:async(el)=>{el.disabled=true;el.textContent='설정 중...';try{await enableForCurrent();markSeen();removeIntro();renderLadderSetting()}catch(e){markSeen();removeIntro();if(window.psuAlert)psuAlert(e&&e.message?e.message:String(e),'알림 설정')}}}])}
+ function maybeIntro(){if(window.__psuInstallFlowActiveV333)return;const l=ladder();if(!l||!l.isMobile())return;const n=name();if(!n)return;const sk=seenKey();if(introShownSession.has(sk))return;if(active()){markSeen();return}if(seen())return;introShownSession.add(sk);if(l.isIOS()&&!l.standalone()){showEnvironmentIntro();return}if(!l.supported()){showEnvironmentIntro();return}if(Notification.permission==='denied'){showDenied();return}showPermissionIntro()}
+ function switchHtml(id,title,sub,on){return '<div class="push-personal-row-v333"><div class="push-personal-text-v333"><b>'+esc(title)+'</b><span>'+esc(sub)+'</span></div><label class="push-personal-switch-v333"><input type="checkbox" id="'+id+'" '+(on?'checked':'')+'><span class="push-personal-track-v333"></span></label></div>'}
+ async function applyToggle(input,api,on,label){const before=!on;input.disabled=true;try{if(on)await api.enable();else await api.disable();markSeen();return true}catch(e){input.checked=before;if(e&&e.message==='IOS_HOME_REQUIRED'||e&&e.message==='PUSH_ENV_UNSUPPORTED')showEnvironmentIntro();else if(window.psuAlert)psuAlert(e&&e.message?e.message:String(e),label||'알림 설정');return false}finally{input.disabled=false}}
+ function renderLadderSetting(){const box=document.getElementById('ladderPushSettingV333'),l=ladder();if(!box||!l)return;if(isAdmin()||!l.isMobile()){box.innerHTML='';return}box.innerHTML='<div class="push-personal-box-v333">'+switchHtml('ladderPushToggleV333','사다리 알림','사다리 위치가 실제로 변경되면 알림을 받습니다.',l.isOn())+'<div class="push-personal-note-v333">이름당 마지막으로 등록한 휴대폰 1대에만 전송됩니다.</div></div>';const t=document.getElementById('ladderPushToggleV333');if(t)t.onchange=()=>applyToggle(t,l,t.checked,'사다리 알림')}
+ window.__psuRenderLadderPushSettingV333=renderLadderSetting;
+ function renderAdminInline(){const box=document.getElementById('adminPushInlineV334'),l=ladder(),w=work();if(!box)return;if(!isAdmin()||!l||!w){box.innerHTML='';return}if(!l.isMobile()){box.innerHTML='<div class="push-personal-box-v333"><div class="push-personal-note-v333">개인 푸시 알림은 휴대폰/태블릿에서 설정할 수 있습니다.</div></div>';return}const masterNote=role()==='master'?'<div class="push-personal-note-v333">기존 마스터 전용 알림은 위 “마스터 알림” 영역에서 별도로 관리됩니다.</div>':'';box.innerHTML='<div class="push-personal-modal-v333"><div class="push-personal-box-v333">'+switchHtml('adminWorkToggleV334','업무 알림','진행정보 · 미비작업 · 메모 변경 알림',w.isOn())+'</div><div class="push-personal-box-v333">'+switchHtml('adminLadderToggleV334','사다리 알림','사다리 위치 변경 알림',l.isOn())+masterNote+'</div></div>';const wt=document.getElementById('adminWorkToggleV334'),lt=document.getElementById('adminLadderToggleV334');if(wt)wt.onchange=()=>applyToggle(wt,w,wt.checked,'업무 알림');if(lt)lt.onchange=()=>applyToggle(lt,l,lt.checked,'사다리 알림')}
+ window.__psuRenderAdminPushInlineV334=renderAdminInline;
+ setTimeout(maybeIntro,2300);setTimeout(maybeIntro,5200);setInterval(()=>{if(document.visibilityState==='visible')maybeIntro()},12000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(maybeIntro,500)},{passive:true});try{new MutationObserver(()=>setTimeout(maybeIntro,320)).observe(document.body,{attributes:true,attributeFilter:['class']})}catch(_e){}
 })();
 </script>
 
