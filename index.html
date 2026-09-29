@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.44";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.45";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v317-shared-escape">window.__webEscAttrV317=function(v){return String(v??'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})};</script>
 <script>window.__PSU_WEB_TEST_BUILD="v3.05-immediate-ready-reveal";</script>
 <script id="web-v299-boot-perf-mode-hint">
@@ -1012,7 +1012,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    const saveCache=r=>{teamRosterCacheV230=normalizeRosterV230(r);window.__psuTeamRosterCacheV230=teamRosterCacheV230;try{localStorage.setItem(CACHE,JSON.stringify({at:Date.now(),roster:teamRosterCacheV230}))}catch(_e){}return teamRosterCacheV230};
    const viaScript=()=>new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(r=>{if(!r||r.ok===false)return reject(new Error(r&&r.message?r.message:'팀 구성을 불러오지 못했습니다.'));resolve(saveCache(r))}).withFailureHandler(e=>reject(new Error(e&&e.message?e.message:String(e)))).getPsuTeamRosterV230()});
    const privilegedV344=(()=>{const role=String(window.__webAuthInfoV136&&window.__webAuthInfoV136.role||'');return role==='admin'||role==='master'})();
-   if(window.__PSU_STATIC_GITHUB_V250||privilegedV344){
+   if(privilegedV344){
      const viaFirebase=async()=>{const until=Date.now()+3000;while(Date.now()<until){try{const role=String(window.__webAuthInfoV136&&window.__webAuthInfoV136.role||'');if((role==='admin'||role==='master')&&typeof window.__ensureAdminFirebaseV264==='function'){const u=await window.__ensureAdminFirebaseV264();if(!u||u.isAnonymous)throw new Error('관리자 Firebase 인증 미완료')}else if(window.__fbDirectV187&&typeof window.__fbDirectV187.auth==='function'){await window.__fbDirectV187.auth()}const snap=await firebase.database().ref('teamRoster').once('value'),raw=snap.val()||{},r=normalizeRosterV230(raw);if(rosterPeopleV230(r,true).length)return saveCache(r)}catch(_e){}await new Promise(r=>setTimeout(r,90))}throw new Error('Firebase 팀 구성 직접 조회 불가')};
      try{return await viaFirebase()}catch(_fbErr){try{return await viaScript()}catch(_scriptErr){
        try{const c=JSON.parse(localStorage.getItem(CACHE)||'null');if(c&&c.roster)return saveCache(c.roster)}catch(__e){}
@@ -1166,13 +1166,13 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  try{Promise.resolve(window.__psuUiModeHintPromiseV299).then(h=>{if(h&&token())applyOptimisticShellV299(h)}).catch(()=>{})}catch(_e){}
  let initialSavedTokenV291='';try{initialSavedTokenV291=token()}catch(_e){}
  window.__psuAuthRestoreSettledV291=!initialSavedTokenV291;
- if(!initialSavedTokenV291)setMode(false,null);else window.__psuAuthRestorePendingV291=true;
+ if(!initialSavedTokenV291){document.body.classList.add('user-name-locked-v345');setMode(false,null)}else window.__psuAuthRestorePendingV291=true;
  function authSettledV291(){window.__psuAuthRestorePendingV291=false;window.__psuAuthRestoreSettledV291=true;settleOptimisticShellV299();try{if(window.__psuVisualSnapshotAuthReadyV291)window.__psuVisualSnapshotAuthReadyV291()}catch(_e){}}
  async function verifySavedSessionV131(reloadOnSuccess){
    try{if(window.__psuBootPerfV299)window.__psuBootPerfV299.mark('authStart')}catch(_e){}
    let t=token();if(!t&&window.__psuAuthTokenRestoreV212)try{t=await window.__psuAuthTokenRestoreV212()}catch(_e){}
    window.__psuAuthRestorePendingV291=!!t;window.__psuAuthRestoreSettledV291=!t;
-   const finishGeneral=async()=>{setMode(false,null,false);if(window.__psuBootV247)window.__psuBootV247.auth(false);authSettledV291();if(window.__psuEnsureNameBeforeLoadV252)await window.__psuEnsureNameBeforeLoadV252();if(reloadOnSuccess)load(false)};
+   const finishGeneral=async()=>{document.body.classList.add('user-name-locked-v345');setMode(false,null,false);if(window.__psuBootV247)window.__psuBootV247.auth(false);authSettledV291();if(window.__psuEnsureNameBeforeLoadV252)await window.__psuEnsureNameBeforeLoadV252();if(reloadOnSuccess)load(false)};
    // v2.53: 저장된 관리자 토큰이 전혀 없는 일반 사용자는 관리자 복원 대기(최대 1.8초)를 건너뛴다.
    if(!t){finishGeneral();return}
    // v2.47: 저장된 관리자 세션 판정을 끝낸다.
@@ -1253,7 +1253,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
 
 
 <style id="web-v138-collab-style">
-.user-name-gate-v138{position:fixed;inset:0;z-index:70000;background:rgba(20,28,39,.58);display:flex;align-items:center;justify-content:center;padding:18px}.user-name-card-v138{width:min(420px,94vw);background:#fff;border-radius:14px;padding:20px;box-shadow:0 16px 50px rgba(0,0,0,.22)}.user-name-card-v138 h3{margin:0 0 8px;font-size:19px}.user-name-card-v138 p{margin:0 0 14px;color:#64748b;line-height:1.55;font-size:12px}.user-name-card-v138 input{width:100%;border:1px solid #ccd5e2;border-radius:8px;padding:11px;font-size:16px}.user-name-card-v138 .actions{display:flex;justify-content:flex-end;gap:7px;margin-top:12px}.user-name-card-v138 .status-v252{font-size:11px;color:#64748b;margin-top:8px;min-height:17px}.user-name-card-v138 .btn[disabled]{opacity:.55;cursor:wait}
+body.user-name-locked-v345{overflow:hidden!important;background:#f5f7fb!important}body.user-name-locked-v345 .app,body.user-name-locked-v345 .modalback,body.user-name-locked-v345 .toast{visibility:hidden!important;pointer-events:none!important}body.user-name-locked-v345 .user-name-gate-v138{visibility:visible!important;pointer-events:auto!important}.user-name-gate-v138{position:fixed;inset:0;z-index:70000;background:#f5f7fb;display:flex;align-items:center;justify-content:center;padding:18px}.user-name-card-v138{width:min(420px,94vw);background:#fff;border-radius:14px;padding:20px;box-shadow:0 16px 50px rgba(0,0,0,.16)}.user-name-card-v138 h3{margin:0 0 8px;font-size:19px}.user-name-card-v138 p{margin:0 0 14px;color:#64748b;line-height:1.55;font-size:12px}.user-name-card-v138 input{width:100%;border:1px solid #ccd5e2;border-radius:8px;padding:11px;font-size:16px}.user-name-card-v138 .actions{display:flex;justify-content:flex-end;gap:7px;margin-top:12px}.user-name-card-v138 .status-v252{font-size:11px;color:#64748b;margin-top:8px;min-height:17px}.user-name-card-v138 .btn[disabled]{opacity:.55;cursor:wait}
 .pending-btn-v138{margin-left:4px;border:1px solid #e0b86d;background:#fff9ec;color:#8a570e;border-radius:7px;padding:4px 7px;font-size:10px;font-weight:900;white-space:nowrap}.pending-btn-v138.has-open{background:#ffe4dc;border-color:#e18772;color:#a43f2d}.pending-count-v138{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;margin-left:3px;border-radius:999px;background:#c76a16;color:#fff;font-size:9px}.pending-section-v138{border-top:1px solid #e2e8f0;margin-top:12px;padding-top:11px}.pending-title-v138{display:flex;align-items:center;gap:7px;font-weight:900;margin-bottom:8px}.pending-list-v138{display:grid;gap:7px}.pending-row-v138{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;border:1px solid #e2e8f0;border-radius:8px;padding:8px;background:#fff}.pending-row-v138.done{opacity:.68}.pending-row-v138.done .pending-text-v138{text-decoration:line-through}.pending-row-v138 input[type=checkbox]{width:19px;height:19px}.pending-text-v138{min-width:0;word-break:break-word}.pending-meta-v138{font-size:10px;color:#94a3b8;margin-top:3px}.pending-actions-v142{display:flex;gap:5px;align-items:center}.pending-edit-v142,.pending-del-v138{border-radius:6px;padding:4px 7px;font-size:10px;background:#fff}.pending-edit-v142{border:1px solid #b9c9df;color:#315ea8}.pending-del-v138{border:1px solid #efc0bc;background:#fff7f6;color:#a63a3a}.pending-toolbar-v142{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.pending-toolbar-v142 .admin-reg-note-v131{margin:0;flex:1}.pending-open-add-v142{white-space:nowrap}.pending-empty-v138{padding:18px;text-align:center;color:#94a3b8;border:1px dashed #dbe2ea;border-radius:8px}.pending-compose-back-v142{position:fixed;inset:0;z-index:1200;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;padding:18px}.pending-compose-card-v142{width:min(470px,94vw);background:#fff;border-radius:13px;padding:16px;box-shadow:0 18px 60px rgba(0,0,0,.25)}.pending-compose-card-v142 h3{margin:0 0 12px;font-size:17px}.pending-compose-card-v142 input{width:100%;box-sizing:border-box;font-size:16px}.pending-compose-actions-v142{display:flex;justify-content:flex-end;gap:7px;margin-top:12px}.master-log-btn-v138{border-color:#b8c8df!important;color:#23487f!important;background:#f7faff!important}.activity-tools-v138{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.activity-tools-v138 button{border:1px solid #ccd5e2;background:#fff;border-radius:7px;padding:6px 9px;font-size:11px;font-weight:800}.activity-tools-v138 button.on{background:#315ea8;color:#fff;border-color:#315ea8}.activity-list-v138{display:grid;gap:7px}.activity-row-v138{border:1px solid #e2e8f0;border-radius:8px;padding:9px 10px}.activity-head-v138{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.activity-who-v138{font-weight:900}.activity-kind-v138{font-size:10px;border-radius:999px;padding:2px 6px;background:#eef2f7;color:#475569}.activity-time-v138{font-size:10px;color:#94a3b8;margin-left:auto}.activity-detail-v138{font-size:12px;color:#475569;margin-top:5px;line-height:1.45}.activity-unit-v138{font-weight:900;color:#315ea8}.general-mode .master-log-btn-v138,.admin-mode:not(.master-mode) .master-log-btn-v138{display:none!important}
 .activity-manage-v147{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 10px}.activity-manage-v147 button{border:1px solid #ccd5e2;background:#fff;border-radius:7px;padding:6px 9px;font-size:11px;font-weight:800}.activity-manage-v147 .danger{border-color:#efc0bc;background:#fff7f6;color:#a63a3a}.activity-manage-v147 .spacer{flex:1}.activity-selected-v147{font-size:10px;color:#64748b}.activity-row-wrap-v147{display:grid;grid-template-columns:22px 1fr auto;gap:6px;align-items:start}.activity-row-wrap-v147>input{margin-top:4px;width:16px;height:16px}.activity-delete-v147{border:1px solid #efc0bc;background:#fff7f6;color:#a63a3a;border-radius:6px;padding:4px 7px;font-size:10px;font-weight:800}.activity-row-main-v147{min-width:0}
 @media(max-width:620px){.activity-time-v138{width:100%;margin-left:0}.pending-row-v138{grid-template-columns:auto 1fr}.pending-actions-v142{grid-column:2;justify-self:end}.pending-toolbar-v142{align-items:stretch;flex-direction:column}.pending-open-add-v142{align-self:flex-end}}
@@ -1342,43 +1342,62 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    if(ensureNamePromiseV251)return ensureNamePromiseV251;
    ensureNamePromiseV251=(async()=>{
      const authNow=()=>window.__webAuthInfoV136||null,isAdminNow=()=>{const a=authNow();return !!(a&&['admin','master'].includes(String(a.role||'')))};
-     if(isAdminNow()){const g=document.getElementById('userNameGateV138');if(g)g.remove();return ''}
+     const unlock=()=>document.body.classList.remove('user-name-locked-v345');
+     if(isAdminNow()){const g=document.getElementById('userNameGateV138');if(g)g.remove();unlock();return ''}
 
-     // 저장된 이름은 서버 확인을 기다리지 않고 즉시 사용한다.
-     let n='';try{n=String(window.__psuNameSyncV158?window.__psuNameSyncV158():(localStorage.getItem(NAME_KEY)||'')).trim()}catch(_e){}
-     if(n){window.__psuUserNameV138=n;if(window.__psuRefreshUserNameV251)window.__psuRefreshUserNameV251();return n}
-
-     // 이름이 없으면 가장 먼저 입력창을 띄우고, 뒤에서 Firebase 팀 명단만 준비한다.
+     // v3.45: 일반 사용자 이름 검증이 끝날 때까지 본문은 절대 공개하지 않는다.
+     document.body.classList.add('user-name-locked-v345');
      let gate=document.getElementById('userNameGateV138');
      if(!gate){
        gate=document.createElement('div');gate.id='userNameGateV138';gate.className='user-name-gate-v138';
-       gate.innerHTML='<div class="user-name-card-v138"><h3>사용자 이름 입력</h3><p>팀 구성에 등록된 본인 이름을 입력해 주세요.</p><input id="userNameInputV138" class="control" style="width:100%" placeholder="이름 입력" autocomplete="name"><div id="userNameStatusV252" class="status-v252" style="display:none"></div><div class="actions"><button class="btn primary" id="userNameSaveV138" disabled>이름 저장</button></div></div>';
+       gate.innerHTML='<div class="user-name-card-v138"><h3>사용자 이름 입력</h3><p>팀 구성 또는 예외 관리자에 등록된 본인 이름을 입력해 주세요.</p><input id="userNameInputV138" class="control" style="width:100%" placeholder="이름 입력" autocomplete="name"><div id="userNameStatusV252" class="status-v252" style="display:block">사용 가능한 이름을 불러오는 중...</div><div class="actions"><button class="btn primary" id="userNameSaveV138" disabled>불러오는 중...</button></div></div>';
        document.body.appendChild(gate);
      }
      const input=document.getElementById('userNameInputV138'),save=document.getElementById('userNameSaveV138'),status=document.getElementById('userNameStatusV252');
+     if(input)input.disabled=true;if(save){save.disabled=true;save.textContent='불러오는 중...'}
      setTimeout(()=>{try{input&&input.focus()}catch(_e){}},30);
 
-     let readyPeople=[],rosterDone=false;
-     if(status){status.textContent='';status.style.display='none';}
-     if(save){save.disabled=false;save.textContent='이름 저장'}
+     let readyPeople=[],rosterReady=false,rosterError=null;
      const rosterPromise=Promise.resolve().then(()=>window.__psuLoadTeamRosterV230(true)).then(roster=>{
-       readyPeople=roster&&window.__psuRosterPeopleV230?window.__psuRosterPeopleV230(roster,false):[];rosterDone=true;
-       if(status){status.textContent='';status.style.display='none';}
+       // v3.45: 운영팀/추가팀뿐 아니라 예외 관리자(viewOnlyAdmins)도 최초 이름 로그인 허용 대상에 포함한다.
+       readyPeople=roster&&window.__psuRosterPeopleV230?window.__psuRosterPeopleV230(roster,true):[];
+       if(!readyPeople.length)throw new Error('로그인 가능한 이름 명단이 비어 있습니다.');
+       rosterReady=true;rosterError=null;
+       if(status){status.textContent='등록된 이름을 입력해 주세요.';status.style.display='block'}
+       if(input)input.disabled=false;if(save){save.disabled=false;save.textContent='이름 저장'}
        return readyPeople;
-     }).catch(()=>{rosterDone=true;if(status){status.textContent='팀 구성 명단을 불러오지 못했습니다. 이름을 확인한 뒤 다시 시도해 주세요.';status.style.display='block';}return []});
-     if(isAdminNow()){if(gate)gate.remove();return ''}
+     }).catch(e=>{
+       rosterReady=false;rosterError=e||new Error('팀 구성 명단을 불러오지 못했습니다.');
+       if(status){status.textContent='이름 명단을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.';status.style.display='block'}
+       if(input)input.disabled=true;if(save){save.disabled=true;save.textContent='명단 확인 필요'}
+       return [];
+     });
+
+     // 과거 타이밍 오류로 임의 이름이 저장되었을 수 있으므로 저장된 이름도 매 접속 시 명단 검증 후에만 사용한다.
+     let stored='';try{stored=String(window.__psuNameSyncV158?window.__psuNameSyncV158():(localStorage.getItem(NAME_KEY)||'')).trim()}catch(_e){}
+     await rosterPromise;
+     if(isAdminNow()){if(gate)gate.remove();unlock();return ''}
+     if(stored&&rosterReady){
+       const p=readyPeople.find(x=>x.name===stored);
+       if(p){window.__psuUserNameV138=stored;try{localStorage.setItem('psuMyLeaveCompanyV131',p.company)}catch(_e){};if(gate)gate.remove();unlock();if(window.__psuRefreshUserNameV251)window.__psuRefreshUserNameV251();return stored}
+       // 잘못 저장된 이름은 재사용하지 않는다. 서버/브라우저 저장소까지 같이 비워 다음 접속에서도 우회되지 않게 한다.
+       try{if(window.__psuNameClearV252)await window.__psuNameClearV252();else{localStorage.removeItem(NAME_KEY);localStorage.removeItem('psuSharedMemoAuthor');localStorage.removeItem('psuMyLeaveCompanyV131')}}catch(_e){}
+       stored='';if(input)input.value='';if(status){status.textContent='저장된 이름이 현재 허용 명단에 없습니다. 등록된 이름을 입력해 주세요.';status.style.display='block'}
+     }
 
      return await new Promise(resolve=>{
        let committing=false;
        const commit=async()=>{
-         if(committing)return;if(isAdminNow()){gate.remove();resolve('');return}
-         const v=String(input&&input.value||'').trim();if(!v)return psuAlert('이름을 입력하세요.');committing=true;if(save){save.disabled=true;save.textContent='확인 중...'}
-         if(!rosterDone){try{await Promise.race([rosterPromise,new Promise(r=>setTimeout(r,900))])}catch(_e){}}
-         const p=readyPeople.find(x=>x.name===v);
-         if(readyPeople.length&&!p){committing=false;if(save){save.disabled=false;save.textContent='이름 저장'};return psuAlert('팀 구성에 등록된 본인 이름을 정확히 입력하세요.')}
-         if(window.__psuNameSaveV158)window.__psuNameSaveV158(v);else try{localStorage.setItem(NAME_KEY,v);localStorage.setItem('psuSharedMemoAuthor',v)}catch(_e){}
-         if(p)try{localStorage.setItem('psuMyLeaveCompanyV131',p.company)}catch(_e){}
-         window.__psuUserNameV138=v;gate.remove();if(window.__psuRefreshUserNameV251)window.__psuRefreshUserNameV251();if(window.__psuPresencePingV138)setTimeout(window.__psuPresencePingV138,20);resolve(v);
+         if(committing)return;if(isAdminNow()){gate.remove();unlock();resolve('');return}
+         if(!rosterReady){if(rosterError)psuAlert('이름 명단을 아직 확인하지 못했습니다. 새로고침 후 다시 시도해 주세요.');return}
+         const v=String(input&&input.value||'').trim();if(!v)return psuAlert('이름을 입력하세요.');
+         const p=readyPeople.find(x=>x.name===v);if(!p)return psuAlert('팀 구성 또는 예외 관리자에 등록된 본인 이름을 정확히 입력하세요.');
+         committing=true;if(save){save.disabled=true;save.textContent='확인 중...'}
+         try{
+           if(window.__psuNameSaveV158)window.__psuNameSaveV158(v);else try{localStorage.setItem(NAME_KEY,v);localStorage.setItem('psuSharedMemoAuthor',v)}catch(_e){}
+           try{localStorage.setItem('psuMyLeaveCompanyV131',p.company)}catch(_e){}
+           window.__psuUserNameV138=v;gate.remove();unlock();if(window.__psuRefreshUserNameV251)window.__psuRefreshUserNameV251();if(window.__psuPresencePingV138)setTimeout(window.__psuPresencePingV138,20);resolve(v);
+         }finally{committing=false}
        };
        save.onclick=commit;input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();commit()}};
      });
