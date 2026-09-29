@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.37";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.38";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v317-shared-escape">window.__webEscAttrV317=function(v){return String(v??'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})};</script>
 <script>window.__PSU_WEB_TEST_BUILD="v3.05-immediate-ready-reveal";</script>
 <script id="web-v299-boot-perf-mode-hint">
@@ -3003,7 +3003,7 @@ body:not(.psu-schedule-badges-ready-v315) #mobileList{visibility:hidden!importan
    const leave=by.get('myLeaveBtnV131');if(leave)leave.hidden=(m==='master');
    const order=m==='master'?['weeklyBtnV131','sharedLadderBtnV316','personalNotepadBtnV262','adminApprovalBtnV149','activityLogBtnV138','adminLoginBtnV131']:
               m==='admin'?['weeklyBtnV131','sharedLadderBtnV316','myLeaveBtnV131','personalNotepadBtnV262','adminLoginBtnV131']:
-              ['weeklyBtnV131','sharedLadderBtnV316','myLeaveBtnV131','adminLoginBtnV131'];
+              ['weeklyBtnV131','sharedLadderBtnV316','myLeaveBtnV131','generalPushSettingsBtnV337','adminLoginBtnV131'];
    const wanted=[];order.forEach(id=>{const x=by.get(id);if(x)wanted.push(x)});kids.forEach(x=>{if(!wanted.includes(x))wanted.push(x)});if(wanted.length===kids.length&&wanted.every((x,i)=>x===kids[i]))return;wanted.forEach(x=>box.appendChild(x));
  }
  arrange();
