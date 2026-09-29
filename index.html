@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.42";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.43";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v317-shared-escape">window.__webEscAttrV317=function(v){return String(v??'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})};</script>
 <script>window.__PSU_WEB_TEST_BUILD="v3.05-immediate-ready-reveal";</script>
 <script id="web-v299-boot-perf-mode-hint">
@@ -988,7 +988,7 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    r=r&&r.roster?r.roster:r||{};
    const defaults=[{id:'T',name:'T',color:'#e54855'},{id:'D1',name:'D1',color:'#326fda'},{id:'D2',name:'D2',color:'#20a4b8'}],seen={};
    const raw=Array.isArray(r.workTeams)?r.workTeams:(r.workTeams&&typeof r.workTeams==='object'?Object.keys(r.workTeams).sort((a,b)=>Number(a)-Number(b)).map(k=>r.workTeams[k]):[]);
-   const wt0=raw.map(x=>{const id=String(x&&x.id||'').trim().toUpperCase(),name=String(x&&x.name||'').trim(),color=String(x&&x.color||'').trim().toLowerCase();if(!id||!name||seen[id])return null;seen[id]=true;return {id,name,color:/^#[0-9a-f]{6}$/i.test(color)?color:'#64748b'}}).filter(Boolean);
+   const wt0=raw.map(x=>{const id=String(x&&x.id||'').trim().toUpperCase(),code=String(x&&x.code||id).trim().toUpperCase();let name=String(x&&x.name||'').trim(),color=String(x&&x.color||'').trim().toLowerCase();if(!name||name===id)name=id==='T'?'티마트':((id==='D1'||id==='D2')?'디이스트':(name||id));if(!id||!code||!name||seen[id])return null;seen[id]=true;return {id,code,name,color:/^#[0-9a-f]{6}$/i.test(color)?color:'#64748b'}}).filter(Boolean);
    // v3.42: 운영팀은 최소 1개 정책. configured=true인데 빈 배열인 과도기 데이터도 기본팀으로 복구한다.
    const wt=wt0.length?wt0:defaults,configured=r.workTeamsConfigured===true,legacy={T:arrRosterV230(r.T),D1:arrRosterV230(r.D1),D2:arrRosterV230(r.D2)},rawMembers=r.workTeamMembers&&typeof r.workTeamMembers==='object'?r.workTeamMembers:{},members={};
    wt.forEach(t=>{members[t.id]=arrRosterV230(Object.prototype.hasOwnProperty.call(rawMembers,t.id)?rawMembers[t.id]:(legacy[t.id]||[]))});
@@ -1013,10 +1013,10 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
    const viaScript=()=>new Promise((resolve,reject)=>{google.script.run.withSuccessHandler(r=>{if(!r||r.ok===false)return reject(new Error(r&&r.message?r.message:'팀 구성을 불러오지 못했습니다.'));resolve(saveCache(r))}).withFailureHandler(e=>reject(new Error(e&&e.message?e.message:String(e)))).getPsuTeamRosterV230()});
    if(window.__PSU_STATIC_GITHUB_V250){
      const viaFirebase=async()=>{const until=Date.now()+1800;while(Date.now()<until){try{if(window.__fbDirectV187&&typeof window.__fbDirectV187.read==='function'){const raw=await window.__fbDirectV187.read('teamRoster');const r=normalizeRosterV230(raw||{});if(rosterPeopleV230(r,true).length)return saveCache(r)}}catch(_e){}await new Promise(r=>setTimeout(r,70))}throw new Error('Firebase 팀 구성 직접 조회 불가')};
-     try{return await Promise.any([viaFirebase(),viaScript()])}catch(_e){
+     try{return await viaFirebase()}catch(_fbErr){try{return await viaScript()}catch(_scriptErr){
        try{const c=JSON.parse(localStorage.getItem(CACHE)||'null');if(c&&c.roster)return saveCache(c.roster)}catch(__e){}
        throw new Error('팀 구성 명단을 불러오지 못했습니다.');
-     }
+     }}
    }
    return await viaScript();
  }
@@ -3453,10 +3453,10 @@ body.master-landscape-v324-on #masterLandscapeV324{display:block}
 <script id="web-v339-dynamic-team-script">
 (function(){
  if(window.__webV339DynamicTeamInstalled)return;window.__webV339DynamicTeamInstalled=true;
- const DEFAULTS=[{id:'T',name:'T',color:'#e54855'},{id:'D1',name:'D1',color:'#326fda'},{id:'D2',name:'D2',color:'#20a4b8'}];
+ const DEFAULTS=[{id:'T',code:'T',name:'티마트',color:'#e54855'},{id:'D1',code:'D1',name:'디이스트',color:'#326fda'},{id:'D2',code:'D2',name:'디이스트',color:'#20a4b8'}];
  let teams=DEFAULTS.map(x=>({...x})),loading=false,lastSig='';
  const clean=v=>String(v||'').trim(),esc2=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- function norm(raw,configured){const a=Array.isArray(raw)?raw:(raw&&typeof raw==='object'?Object.keys(raw).sort((a,b)=>Number(a)-Number(b)).map(k=>raw[k]):[]),seen={};const out=a.map(x=>{const id=clean(x&&x.id).toUpperCase(),name=clean(x&&x.name),color=clean(x&&x.color).toLowerCase();if(!id||!name||seen[id])return null;seen[id]=1;return {id,name,color:/^#[0-9a-f]{6}$/i.test(color)?color:'#64748b'}}).filter(Boolean);return configured===true?out:(out.length?out:DEFAULTS.map(x=>({...x})))}
+ function norm(raw,configured){const a=Array.isArray(raw)?raw:(raw&&typeof raw==='object'?Object.keys(raw).sort((a,b)=>Number(a)-Number(b)).map(k=>raw[k]):[]),seen={};const out=a.map(x=>{const id=clean(x&&x.id).toUpperCase(),code=clean(x&&x.code||id).toUpperCase();let name=clean(x&&x.name),color=clean(x&&x.color).toLowerCase();if(!name||name===id)name=id==='T'?'티마트':((id==='D1'||id==='D2')?'디이스트':(name||id));if(!id||!code||!name||seen[id])return null;seen[id]=1;return {id,code,name,color:/^#[0-9a-f]{6}$/i.test(color)?color:'#64748b'}}).filter(Boolean);return configured===true&&out.length?out:(out.length?out:DEFAULTS.map(x=>({...x})))}
  function map(){const m={};teams.forEach((t,i)=>m[t.id]={...t,order:i});return m}
  function val(e){let v=clean(e&&e.vendor).toUpperCase();if(v==='D')v='D1';return map()[v]?v:''}
  function order(e){const v=val(e),m=map();return v&&m[v]?m[v].order:teams.length+1}
@@ -3464,14 +3464,15 @@ body.master-landscape-v324-on #masterLandscapeV324{display:block}
  function name(v){const t=map()[clean(v).toUpperCase()];return t?t.name:clean(v)}
  function applyCard(card,v){if(!card)return;card.classList.remove('psu-team-v339');card.style.removeProperty('--psu-team-color');if(!v)return;card.classList.add('psu-team-v339');card.style.setProperty('--psu-team-color',color(v))}
  function applyEdge(edge,v){if(!edge)return;edge.classList.toggle('psu-team-edge-v339',!!v);if(v){edge.style.setProperty('--psu-team-color',color(v));edge.title=`팀 지정 · ${name(v)}`}else{edge.style.removeProperty('--psu-team-color');edge.title='팀 지정'}}
- function buttons(){return teams.map(t=>`<button type="button" class="psu-team-choice-v339" data-v="${esc2(t.id)}" style="color:${esc2(t.color)};border-color:${esc2(t.color)}">${esc2(t.name)}</button>`).join('')+'<button type="button" data-v="">미지정</button>'}
- function options(){return '<option value="">미지정</option>'+teams.map(t=>`<option value="${esc2(t.id)}">${esc2(t.name)}</option>`).join('')}
+ function buttons(){return teams.map(t=>`<button type="button" class="psu-team-choice-v339" data-v="${esc2(t.id)}" style="color:${esc2(t.color)};border-color:${esc2(t.color)}">${esc2(t.code||t.id)}</button>`).join('')+'<button type="button" data-v="">미지정</button>'}
+ function options(){return '<option value="">미지정</option>'+teams.map(t=>`<option value="${esc2(t.id)}">${esc2(t.code||t.id)}</option>`).join('')}
  function eventOf(card){const id=clean(card&&card.dataset&&card.dataset.eventId);if(id){const x=(state.scheduleEvents||[]).find(e=>clean(e&&e.eventId)===id);if(x)return x}const u=clean(card&&card.dataset&&card.dataset.unit),d=clean(card&&card.dataset&&card.dataset.date);return (state.scheduleEvents||[]).find(e=>e&&clean(e.unit)===u&&clean(e.date)===d)||null}
  function refreshSelects(){document.querySelectorAll('#mVendorV168').forEach(s=>{const cur=clean(s.value).toUpperCase()==='D'?'D1':clean(s.value).toUpperCase();s.innerHTML=options();s.dataset.teamV339=String(teams.length);s.value=map()[cur]?cur:''})}
  function applyAll(){window.__psuWorkTeamsV339=teams;window.vendorValueV167=val;window.vendorOrderV167=order;window.vendorClassV167=e=>{const v=val(e);return v?'vendor-'+v.toLowerCase().replace(/[^a-z0-9_-]/g,'-'):''};try{vendorValueV167=window.vendorValueV167;vendorOrderV167=window.vendorOrderV167;vendorClassV167=window.vendorClassV167}catch(_e){}document.querySelectorAll('#calendar .event[data-unit][data-date],#mobileList .mcard[data-unit][data-date],.master-land-event-v324[data-unit][data-date]').forEach(c=>{const v=val(eventOf(c));applyCard(c,v);const edge=c.querySelector('.vendor-edge-v169');if(edge){edge.dataset.v=v;applyEdge(edge,v)}});refreshSelects()}
  async function load(force=true){if(loading)return;loading=true;try{const r=typeof loadRosterV230==='function'?await loadRosterV230(!!force):null,got=norm(r&&r.workTeams,r&&r.workTeamsConfigured),sig=JSON.stringify(got);if(sig!==lastSig){teams=got;lastSig=sig;applyAll();if(typeof renderCalendar==='function')renderCalendar();if(typeof renderMobile==='function')renderMobile()}}catch(e){console.warn('동적 팀 설정 갱신 실패',e);if(!lastSig){teams=DEFAULTS.map(x=>({...x}));lastSig=JSON.stringify(teams);applyAll()}}finally{loading=false}}
  window.__psuTeamValueV339=val;window.__psuTeamOrderV339=order;window.__psuApplyTeamCardV339=applyCard;window.__psuApplyTeamEdgeV339=applyEdge;window.__psuTeamPickerButtonsV339=buttons;window.__psuTeamSelectOptionsV339=options;window.__psuLoadWorkTeamsV339=load;
- applyAll();setTimeout(()=>load(true),250);setInterval(()=>{if(document.visibilityState==='visible')load(true)},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>load(true),250)});
+ let teamRefV343=null,teamRevRefV343=null,teamRetryV343=0,lastTeamRevV343='';async function attachTeamRealtimeV343(){if(teamRefV343||teamRevRefV343)return;try{const fb=window.__fbDirectV187;if(!fb){setTimeout(attachTeamRealtimeV343,500);return}await fb.auth();teamRevRefV343=firebase.database().ref('meta/revisions/teamRoster');teamRevRefV343.on('value',snap=>{const rev=String(snap.val()||'');if(!lastTeamRevV343){lastTeamRevV343=rev;return}if(rev&&rev!==lastTeamRevV343){lastTeamRevV343=rev;load(true)}},()=>{});teamRefV343=firebase.database().ref('teamRoster');teamRefV343.on('value',snap=>{try{const raw=snap.val()||{},r=normalizeRosterV230(raw);teamRosterCacheV230=r;window.__psuTeamRosterCacheV230=r;try{localStorage.setItem('psuTeamRosterCacheV253',JSON.stringify({at:Date.now(),roster:r}))}catch(_e){}const got=norm(r.workTeams,r.workTeamsConfigured),sig=JSON.stringify(got);if(sig!==lastSig){teams=got;lastSig=sig;applyAll();if(typeof renderCalendar==='function')renderCalendar();if(typeof renderMobile==='function')renderMobile()}}catch(e){console.warn('팀 설정 실시간 반영 실패',e)}},e=>{console.warn('팀 설정 직접 구독 제한, revision 구독으로 유지',e);try{teamRefV343.off()}catch(_e){}teamRefV343=null});teamRetryV343=0}catch(e){teamRefV343=null;teamRevRefV343=null;const wait=Math.min(30000,1500*Math.pow(2,teamRetryV343++));setTimeout(attachTeamRealtimeV343,wait)}}
+ applyAll();setTimeout(()=>load(true),250);setTimeout(attachTeamRealtimeV343,400);setInterval(()=>{if(document.visibilityState==='visible')load(true)},60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){setTimeout(()=>load(true),250);if(!teamRefV343&&!teamRevRefV343)setTimeout(attachTeamRealtimeV343,350)}});
 })();
 </script>
 
