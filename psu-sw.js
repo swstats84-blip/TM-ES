@@ -1,4 +1,4 @@
-// PSU 작업현황 v3.58 - PWA install + Firebase-triggered master/admin-work/schedule/ladder Web Push.
+// PSU 작업현황 v3.59 - PWA install + Firebase-triggered master/admin-work/schedule/ladder Web Push.
 // 업무 데이터 캐시는 사용하지 않는다. Push 수신만 Firebase Messaging compat로 처리한다.
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js');
