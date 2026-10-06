@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.85";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.86";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v317-shared-escape">window.__webEscAttrV317=function(v){return String(v??'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})};</script>
 <script>window.__PSU_WEB_TEST_BUILD="v3.74-cache-first-no-legacy-hide";</script>
 <script id="web-v299-boot-perf-mode-hint">
@@ -782,7 +782,7 @@ prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1
  window.__fbMasterUpdateEquipmentV187=async function(oldUnit,date,fields){if(!isMaster())throw new Error('마스터 권한이 필요합니다.');await masterWriteAuthV320();const selected=(state.scheduleEvents||[]).find(e=>e&&String(e.unit||'')===String(oldUnit)&&(!date||String(e.date||'')===String(date)))||(state.scheduleEvents||[]).find(e=>e&&String(e.unit||'')===String(oldUnit));if(!selected)throw new Error('장비의 스케줄 정보를 찾지 못했습니다.');const src=String(selected.sourceUnit||selected.unit||oldUnit),nu=String(fields.unit||oldUnit).trim();if(!nu)throw new Error('장비 호기는 비워둘 수 없습니다.');const targets=(state.scheduleEvents||[]).filter(e=>e&&String(e.sourceUnit||e.unit||'')===src&&String(e.eventId||'')).map(e=>({id:String(e.eventId),date:String(e.date||'')}));if(!targets.length)throw new Error('수정할 일정 ID를 찾지 못했습니다.');const savedEvents=[];for(const t of targets){const tr=await transactionCanonicalV385('scheduleV2/events/'+t.id,e=>{if(!e)return e;['line','sn','unit','type','workType'].forEach(f=>manual(e,f,String(fields[f]??e[f]??'').trim()));if(t.date===String(date)){if(fields.vendor!==undefined)manual(e,'vendor',String(fields.vendor||'').toUpperCase());if(fields.task!==undefined)manual(e,'task',String(fields.task||'').trim())}e.area=String(fields.area??e.area??'').trim();e.sourceUnit=e.sourceUnit||src;stripScheduleNoteV199(e);return e});const sv=tr&&tr.snapshot&&tr.snapshot.val?tr.snapshot.val():null;if(sv)savedEvents.push(sv)}let found=await findProgressChildV316(oldUnit);if(!found&&nu!==String(oldUnit))found=await findProgressChildV316(nu);if(found&&found.key){await transactionCanonicalV385('mainState/current/progress/'+found.key,p=>{if(!p)return p;Object.assign(p,{area:String(fields.area||''),line:String(fields.line||''),sn:String(fields.sn||''),unit:nu,type:String(fields.type||''),workType:String(fields.workType||'')});if(fields.docNo!==undefined){p.docNo=String(fields.docNo||'').trim();p.docStatus=p.docNo?'found':'pending'}return p})}else{const e=selected||{},row={area:String(fields.area||e.area||''),line:String(fields.line||e.line||''),sn:String(fields.sn||e.sn||''),unit:nu,type:String(fields.type||e.type||''),workType:String(fields.workType||e.workType||''),docNo:String(fields.docNo||''),docStatus:fields.docNo?'found':'pending'},childKey=await nextProgressChildKeyV316();await set('mainState/current/progress/'+childKey,row)}if(nu!==String(oldUnit)){await window.__psuDbRefV355('mainState/current/progressVisibleUnitsV445').transaction(raw=>fbStringsV189(raw).map(x=>x===String(oldUnit)?nu:x))}await set('mainState/current/savedAt',new Date().toISOString());await Promise.all([bump('mainProgress'),bumpScheduleDeltaV286(savedEvents,[],{}),bump('progressList')]);if(fields.note!==undefined)await window.__fbMasterUpdateProgressInfoV187(nu,date,String(fields.task||selected.task||''),String(fields.note||''));return {unit:nu}};
 })();
 </script>
-<script src="./hybrid.js?v=3.85"></script>
+<script src="./hybrid.js?v=3.86"></script>
 <script id="web-v298-auth-prewarm-script">
 (function(){
   if(window.__psuAuthPrewarmStartedV298)return;
@@ -3031,17 +3031,14 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
 })();
 </script>
 
-<style id="web-v378-top-layout-style">
+<style id="web-v386-top-layout-restore">
+/* v3.86: 사용자 제공 정상 스크린샷과 동일했던 기존 상단바 치수/오른쪽 정렬 기준을 그대로 복원한다. */
 #refresh[hidden]{display:none!important}
 @media(max-width:820px){
   header{align-items:center}
   #homeInstallBtnV284{order:2;margin-left:auto;font-size:11px;padding:6px 8px}
-  .web-actions-v131{order:3;width:100%;margin-left:0;display:flex;justify-content:space-between!important;gap:4px;flex-wrap:nowrap!important}
-  .web-actions-v131 .mini-v131{font-size:10px;padding:6px 4px;min-width:0;flex:0 1 auto;letter-spacing:-.1px}
-}
-@media(max-width:390px){
-  .web-actions-v131{gap:3px}
-  .web-actions-v131 .mini-v131{font-size:9.5px;padding:6px 3px;letter-spacing:-.2px}
+  .web-actions-v131{order:3;width:100%;margin-left:0;display:flex;justify-content:flex-end!important;gap:5px;flex-wrap:wrap}
+  .web-actions-v131 .mini-v131{font-size:10.5px;padding:6px 8px}
 }
 </style>
 <script id="web-v321-top-layout-script">
