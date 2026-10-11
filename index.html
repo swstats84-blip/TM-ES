@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.92";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.93";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v389-progress-canonical-resolver">
 (function(){
  if(window.__webProgressCanonicalResolverV389)return;window.__webProgressCanonicalResolverV389=true;
@@ -950,6 +950,23 @@ prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1
     try{if(!firebase.auth().currentUser)await firebase.auth().signInAnonymously();await window.__psuDbRefV355('presence/'+clientId).remove()}catch(e){}
   }
   function adminRestorePendingV298(){try{const t=window.__psuAuthTokenSyncV212?window.__psuAuthTokenSyncV212():'';return !!t&&window.__psuAuthRestoreSettledV291!==true}catch(_e){return false}}
+  const presenceActiveMsV393=90000;window.__PSU_PRESENCE_ACTIVE_MS_V393=presenceActiveMsV393;
+  async function ensureAccessForConnectionV393(presenceRef,presenceNow,name,role,env,now){
+    const connectionId=String(presenceNow&&presenceNow.connectionId||'').trim();if(!connectionId)return false;
+    if(String(presenceNow&&presenceNow.accessLoggedConnectionId||'').trim()===connectionId)return true;
+    if(window.__psuAccessLoggingV393)return false;window.__psuAccessLoggingV393=true;
+    try{
+      const excluded=await activityExcludedV392(name);
+      if(!excluded){
+        const id='web_access_'+connectionId,detail='웹뷰어 접속'+(env.label?' · '+env.label:''),ref=window.__psuDbRefV355('activityLog/'+id),rec={id,at:String(presenceNow.connectedAt||now),eventType:'access',accessModel:'connection-v393',actorName:name,sourceKind:'web',clientId:clientId,sessionId:connectionId,browserSessionId:sessionId,connectionId:connectionId,action:'접속',unit:'',detail:detail,role:role,version:WEB_VERSION_V197};
+        const tr=await ref.transaction(cur=>cur||rec);if(!tr||!tr.snapshot||!tr.snapshot.val())throw new Error('접속기록 저장 결과를 확인하지 못했습니다.');
+        try{await window.__psuDbRefV355('meta/revisions/activity').set(String(Date.now())+'-'+Math.random().toString(36).slice(2,8))}catch(_e){}
+      }
+      // 제외 사용자도 같은 connection에서 매 heartbeat마다 재검사하지 않도록 처리한다.
+      await presenceRef.transaction(cur=>{if(!cur||String(cur.connectionId||'')!==connectionId)return cur;cur.accessLoggedConnectionId=connectionId;return cur});
+      return true;
+    }finally{window.__psuAccessLoggingV393=false}
+  }
   async function ping(){
     if(isAndroidApp||window.__PSU_ANDROID_APP||adminRestorePendingV298())return;
     const name=currentName();if(!name||!window.firebase)return;
@@ -957,25 +974,21 @@ prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1
     try{
       if(!firebase.auth().currentUser)await firebase.auth().signInAnonymously();
       const env=window.__psuClientEnvV174||{};
-      const now=new Date().toISOString();
-      await window.__psuDbRefV355('presence/'+clientId).set({clientId:clientId,kind:'web',version:WEB_VERSION_V197,name:name,role:role,sessionId:sessionId,clientEnv:String(env.label||''),lastSeen:now});
-      // v3.92: heartbeat(presence)와 접속 이벤트(activityLog)를 분리한다.
-      // 같은 브라우저 세션은 항상 같은 DB key(web_access_<sessionId>)를 사용하므로 재연결/재시도/heartbeat로 중복 행이 생기지 않는다.
-      const accessFlagV392='psu_access_logged_v392_'+sessionId;
-      let accessLoggedV392='';try{accessLoggedV392=sessionStorage.getItem(accessFlagV392)||''}catch(_e){}
-      if(!accessLoggedV392&&!window.__psuAccessLoggingV392){
-        window.__psuAccessLoggingV392=true;
-        try{
-          const excluded=await activityExcludedV392(name);
-          if(!excluded){
-            const id='web_access_'+sessionId,detail='웹뷰어 접속'+(env.label?' · '+env.label:''),ref=window.__psuDbRefV355('activityLog/'+id),rec={id,at:now,eventType:'access',actorName:name,sourceKind:'web',clientId:clientId,sessionId:sessionId,action:'접속',unit:'',detail:detail,role:role,version:WEB_VERSION_V197};
-            let created=false;
-            const tr=await ref.transaction(cur=>{if(cur)return;created=true;return rec});
-            if(created&&tr&&tr.committed){try{await window.__psuDbRefV355('meta/revisions/activity').set(String(Date.now())+'-'+Math.random().toString(36).slice(2,8))}catch(_e){}}
-          }
-          try{sessionStorage.setItem(accessFlagV392,'1')}catch(_e){}
-        }finally{window.__psuAccessLoggingV392=false}
-      }
+      const nowMsV393=Date.now(),now=new Date(nowMsV393).toISOString();
+      // v3.93: 현재 접속 판정(90초)과 새 connection 판정을 같은 시간창으로 통일한다.
+      // 브라우저 sessionStorage는 추적용일 뿐 접속 세션 판정에 사용하지 않는다.
+      const presenceRefV393=window.__psuDbRefV355('presence/'+clientId),candidateConnectionIdV393='wc_'+nowMsV393.toString(36)+'_'+Math.random().toString(36).slice(2,10);
+      const presenceTxV393=await presenceRefV393.transaction(cur=>{
+        cur=cur&&typeof cur==='object'?cur:{};
+        const prevMs=Date.parse(String(cur.lastSeen||'')),continuous=Number.isFinite(prevMs)&&(nowMsV393-prevMs)>=0&&(nowMsV393-prevMs)<presenceActiveMsV393&&String(cur.name||'').trim()===name&&String(cur.kind||'web').toLowerCase()==='web';
+        const connectionId=continuous&&String(cur.connectionId||'').trim()?String(cur.connectionId):candidateConnectionIdV393;
+        const connectedAt=connectionId===candidateConnectionIdV393?now:String(cur.connectedAt||cur.lastSeen||now);
+        const accessLoggedConnectionId=continuous?String(cur.accessLoggedConnectionId||''):'';
+        return {clientId:clientId,kind:'web',version:WEB_VERSION_V197,name:name,role:role,sessionId:sessionId,connectionId,connectedAt,accessLoggedConnectionId,clientEnv:String(env.label||''),lastSeen:now}
+      });
+      const presenceNowV393=presenceTxV393&&presenceTxV393.snapshot?presenceTxV393.snapshot.val()||{}:{};
+      // 접속로그 쓰기가 순간 실패해도 accessLoggedConnectionId가 남지 않으므로 다음 heartbeat에서 반드시 재시도한다.
+      await ensureAccessForConnectionV393(presenceRefV393,presenceNowV393,name,role,env,now);
     }catch(e){console.warn('Firebase presence ping 실패',e)}
   }
   window.__psuPresencePingV138=ping;
@@ -1653,7 +1666,7 @@ body.user-name-locked-v345{overflow:hidden!important;background:#f5f7fb!importan
    const draw=()=>{
      const items=all.filter(x=>mode==='all'||x.eventType===mode),access=all.filter(x=>x.eventType==='access').length,acts=all.length-access,excluded=Array.isArray(settings.excludeNames)?settings.excludeNames:[];
      const rows=items.length?items.map(x=>{const id=String(x.id||'');return `<div class="activity-row-v138"><div class="activity-row-wrap-v147"><input type="checkbox" data-log-check-v147="${esc(id)}" ${selected.has(id)?'checked':''}><div class="activity-row-main-v147"><div class="activity-head-v138"><span class="activity-who-v138">${esc(x.actorName||'이름 미등록')}</span><span class="activity-kind-v138">${esc(srcLabelV138(x))}${x.role?` · ${esc(x.role==='master'?'마스터':x.role==='admin'?'관리자':x.role)}`:''}</span><span class="activity-time-v138">${esc(fmtV138(x.at||''))}</span></div><div class="activity-detail-v138">${x.unit?`<span class="activity-unit-v138">${esc(x.unit)}</span> · `:''}${esc(x.action||'')}${x.detail?` · ${esc(x.detail)}`:''}</div></div><button class="activity-delete-v147" data-log-del-v147="${esc(id)}">삭제</button></div></div>`}).join(''):'<div class="empty">해당 기록이 없습니다.</div>';
-     mbody.innerHTML=`<div class="admin-reg-note-v131">새 접속 기록은 실제 세션마다 1회만 저장합니다. 기존 구버전 기록만 ${Number(settings.dedupeMinutes||10)}분 기준으로 화면에서 중복 정리합니다.${excluded.length?`<br>접속기록 제외 이름: <b>${esc(excluded.join(', '))}</b>`:''}</div><div class="activity-tools-v138"><button data-log-mode="all" class="${mode==='all'?'on':''}">전체 ${all.length}</button><button data-log-mode="access" class="${mode==='access'?'on':''}">접속 ${access}</button><button data-log-mode="activity" class="${mode==='activity'?'on':''}">활동 ${acts}</button></div><div class="activity-manage-v147"><button id="logSelectAllV147">현재 목록 전체선택</button><button class="danger" id="logDeleteSelectedV147" ${selected.size?'':'disabled'}>선택 삭제</button><span class="activity-selected-v147">선택 ${selected.size}건</span><span class="spacer"></span><button id="logExcludeV147">제외 이름 설정</button><button class="danger" id="logClearAllV147" ${all.length?'':'disabled'}>전체 기록 삭제</button></div><div class="activity-list-v138">${rows}</div>`;
+     mbody.innerHTML=`<div class="admin-reg-note-v131">새 접속 기록은 현재 접속이 연속되는 동안 1회만 저장하고, 2분 이상 끊겼다가 다시 접속하면 새 기록을 만듭니다. 기존 구버전 기록만 ${Number(settings.dedupeMinutes||10)}분 기준으로 화면에서 중복 정리합니다.${excluded.length?`<br>접속기록 제외 이름: <b>${esc(excluded.join(', '))}</b>`:''}</div><div class="activity-tools-v138"><button data-log-mode="all" class="${mode==='all'?'on':''}">전체 ${all.length}</button><button data-log-mode="access" class="${mode==='access'?'on':''}">접속 ${access}</button><button data-log-mode="activity" class="${mode==='activity'?'on':''}">활동 ${acts}</button></div><div class="activity-manage-v147"><button id="logSelectAllV147">현재 목록 전체선택</button><button class="danger" id="logDeleteSelectedV147" ${selected.size?'':'disabled'}>선택 삭제</button><span class="activity-selected-v147">선택 ${selected.size}건</span><span class="spacer"></span><button id="logExcludeV147">제외 이름 설정</button><button class="danger" id="logClearAllV147" ${all.length?'':'disabled'}>전체 기록 삭제</button></div><div class="activity-list-v138">${rows}</div>`;
      mbody.querySelectorAll('[data-log-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.logMode;draw()});
      mbody.querySelectorAll('[data-log-check-v147]').forEach(ch=>ch.onchange=()=>{const id=ch.dataset.logCheckV147;if(ch.checked)selected.add(id);else selected.delete(id);draw()});
      mbody.querySelectorAll('[data-log-del-v147]').forEach(b=>b.onclick=async()=>{const id=b.dataset.logDelV147,x=all.find(v=>String(v.id||'')===id);if(!(await psuConfirmV148('기록 삭제','이 기록 1건을 삭제할까요?',x?(x.actorName||'')+' · '+(x.action||''):'',true)))return;manage('delete',[id],[],false,()=>{all=all.filter(v=>String(v.id||'')!==id);selected.delete(id);draw()})});
@@ -2779,6 +2792,7 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
   const F=()=>window.__fbDirectV187;
   const safe=v=>typeof esc==='function'?esc(String(v??'')):String(v??'');
   const when=v=>{try{const d=new Date(v);return Number.isNaN(d.getTime())?'':d.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch(_e){return ''}};
+  let activityRevRefV393=null,activityRevHandlerV393=null,activityRevLastV393='',activityRevReloadTimerV393=0,activityLiveRefreshV393=null;
   async function masterAuth(){
     let u=null;
     if(window.__ensureAdminFirebaseV264) u=await window.__ensureAdminFirebaseV264();
@@ -2792,12 +2806,16 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
   }
   function src(x){return x.sourceKind==='viewer'?'PC뷰어':x.sourceKind==='admin'?'관리자':'웹'}
   function dedupe(items,min){
-    const out=[],last=new Map(),win=Math.max(1,Number(min)||10)*60000;
+    const out=[],seenSession=new Set(),lastLegacy=new Map(),win=Math.max(1,Number(min)||10)*60000;
     for(const x of items){
       if(String(x.eventType||'')!=='access'){out.push(x);continue}
-      const t=Date.parse(String(x.at||''))||0,actor=String(x.actorName||'').trim().toLowerCase(),source=String(x.sourceKind||''),fallback=String(x.clientId||x.sessionId||x.session||'').trim(),k=`${actor||fallback}|${source}`,prev=last.get(k);
+      // sessionId/connectionId가 있는 신형 기록은 실제 접속 단위다. 시간 기준으로 합치지 않는다.
+      const source=String(x.sourceKind||''),sessionKey=String(x.connectionId||x.sessionId||x.session||'').trim();
+      if(sessionKey){const k=source+'|'+sessionKey;if(seenSession.has(k))continue;seenSession.add(k);out.push(x);continue}
+      // 정말 구형(session 식별자 없음) 기록만 사용자/클라이언트 기준 10분 중복 정리한다.
+      const t=Date.parse(String(x.at||''))||0,actor=String(x.actorName||'').trim().toLowerCase(),client=String(x.clientId||'').trim(),k=`${source}|${actor}|${client}`,prev=lastLegacy.get(k);
       if(prev&&t&&Math.abs(prev-t)<win)continue;
-      if(t)last.set(k,t);out.push(x);
+      if(t)lastLegacy.set(k,t);out.push(x);
     }
     return out;
   }
@@ -2810,6 +2828,7 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
     items.sort((a,b)=>(Date.parse(b.at||0)||0)-(Date.parse(a.at||0)||0));
     return {items:dedupe(items,settings.dedupeMinutes).slice(0,300),settings};
   }
+  async function ensureActivityRealtimeV393(refresh){activityLiveRefreshV393=refresh;if(activityRevRefV393)return;await masterAuth();activityRevRefV393=window.__psuDbRefV355('meta/revisions/activity');activityRevHandlerV393=snap=>{const v=String(snap&&snap.val?snap.val()||'':'');if(!activityRevLastV393){activityRevLastV393=v;return}if(v===activityRevLastV393)return;activityRevLastV393=v;clearTimeout(activityRevReloadTimerV393);activityRevReloadTimerV393=setTimeout(()=>{if(activityLiveRefreshV393&&modalback.classList.contains('show')&&mtitle.textContent==='접속 / 활동 기록')activityLiveRefreshV393()},80)};activityRevRefV393.on('value',activityRevHandlerV393,()=>{try{activityRevRefV393&&activityRevRefV393.off()}catch(_e){}activityRevRefV393=activityRevHandlerV393=null;activityRevLastV393='';setTimeout(()=>{if(isMaster()&&activityLiveRefreshV393)ensureActivityRealtimeV393(activityLiveRefreshV393).catch(()=>{})},1800)})}
   async function removeIds(ids){const f=await masterAuth(),a=[...new Set((ids||[]).map(String).filter(Boolean))];await Promise.all(a.map(id=>window.__psuDbRefV355('activityLog/'+id).remove()));await f.bump('activity')}
   async function setExcluded(names,purge){
     const f=await masterAuth(),clean=[],seen=new Set();
@@ -2826,7 +2845,7 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
     const draw=()=>{
       const items=all.filter(x=>mode==='all'||x.eventType===mode),access=all.filter(x=>x.eventType==='access').length,acts=all.length-access,excluded=Array.isArray(settings.excludeNames)?settings.excludeNames:[];
       const rows=items.length?items.map(x=>{const detail=[src(x),x.role==='master'?'마스터':x.role==='admin'?'관리자':x.role||'',x.unit||'',x.action||'',x.detail||''].filter(Boolean).join(' · ');return `<div class="activity-row-v266"><input type="checkbox" data-ac="${safe(x.id)}" ${sel.has(String(x.id))?'checked':''}><span class="who">${safe(x.actorName||'이름 미등록')}</span><span class="line" title="${safe(detail)}">${safe(detail)}</span><span class="time">${safe(when(x.at))}</span><button data-ad="${safe(x.id)}">삭제</button></div>`}).join(''):'<div class="activity-empty-v266">해당 기록이 없습니다.</div>';
-      mbody.innerHTML=`<div class="master-note-v266">Firebase 원본 timestamp 최신순 · 새 접속은 세션당 1회 · 구버전 접속기록만 10분 기준 중복 합침${excluded.length?` · 제외: <b>${safe(excluded.join(', '))}</b>`:''}</div><div class="activity-toolbar-v266"><button data-mode="all" class="${mode==='all'?'on':''}">전체 ${all.length}</button><button data-mode="access" class="${mode==='access'?'on':''}">접속 ${access}</button><button data-mode="activity" class="${mode==='activity'?'on':''}">활동 ${acts}</button><span class="activity-count-v266">선택 ${sel.size}건</span><span class="spacer"></span><button id="v266SelAll">전체선택</button><button class="danger" id="v266DelSel" ${sel.size?'':'disabled'}>선택 삭제</button><button id="v266Exclude">제외 이름</button><button class="danger" id="v266Clear" ${all.length?'':'disabled'}>전체 삭제</button></div><div class="activity-list-v266"><div class="activity-head-v266"><span></span><span>이름</span><span>접속/활동 내용</span><span style="text-align:right">시간</span><span></span></div>${rows}</div>`;
+      mbody.innerHTML=`<div class="master-note-v266">Firebase 원본 timestamp 최신순 · 90초 이내 heartbeat는 같은 접속 · 90초 이상 끊긴 뒤 재접속 시 새 1회 · session 식별자가 없는 구버전 기록만 10분 기준 중복 합침${excluded.length?` · 제외: <b>${safe(excluded.join(', '))}</b>`:''}</div><div class="activity-toolbar-v266"><button data-mode="all" class="${mode==='all'?'on':''}">전체 ${all.length}</button><button data-mode="access" class="${mode==='access'?'on':''}">접속 ${access}</button><button data-mode="activity" class="${mode==='activity'?'on':''}">활동 ${acts}</button><span class="activity-count-v266">선택 ${sel.size}건</span><span class="spacer"></span><button id="v266SelAll">전체선택</button><button class="danger" id="v266DelSel" ${sel.size?'':'disabled'}>선택 삭제</button><button id="v266Exclude">제외 이름</button><button class="danger" id="v266Clear" ${all.length?'':'disabled'}>전체 삭제</button></div><div class="activity-list-v266"><div class="activity-head-v266"><span></span><span>이름</span><span>접속/활동 내용</span><span style="text-align:right">시간</span><span></span></div>${rows}</div>`;
       mbody.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;draw()});
       mbody.querySelectorAll('[data-ac]').forEach(c=>c.onchange=()=>{c.checked?sel.add(c.dataset.ac):sel.delete(c.dataset.ac);draw()});
       mbody.querySelectorAll('[data-ad]').forEach(b=>b.onclick=async()=>{if(!await psuConfirmV148('접속기록 삭제','선택한 기록을 삭제할까요?','',true))return;await removeIds([b.dataset.ad]);refresh()});
@@ -2835,7 +2854,7 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
       document.getElementById('v266Exclude').onclick=async()=>{const raw=await psuPromptV148('제외 이름 설정','접속 기록에서 제외할 이름을 쉼표(,)로 구분해 입력하세요.',excluded.join(', '),'예: 임영규, 오철민');if(raw===null)return;const names=String(raw).split(/[,\n]/).map(x=>x.trim()).filter(Boolean),purge=names.length?await psuConfirmV148('기존 접속기록 정리','설정한 이름들의 기존 기록도 함께 삭제할까요?','',true):false;await setExcluded(names,purge);refresh()};
       document.getElementById('v266Clear').onclick=async()=>{if(!await psuConfirmV148('전체 기록 삭제','접속/활동 기록을 모두 삭제할까요?','복구할 수 없습니다.',true))return;await clearAll();sel.clear();refresh()};
     };
-    refresh();
+    refresh().then(()=>ensureActivityRealtimeV393(refresh)).catch(()=>{});
   }
   function pub(x){return {uid:String(x.uid||''),username:String(x.username||''),displayName:String(x.displayName||x.username||''),status:String(x.status||'pending'),role:String(x.role||'admin'),requestedAt:String(x.requestedAt||''),approvedAt:String(x.approvedAt||'')}}
   let authUsersRefV270=null,authUsersHandlersV273=null,authUsersRawV270=null,authUsersReadyV270=false,authUsersWaitV270=[],authUsersReadyTimerV273=0;
@@ -3411,7 +3430,7 @@ body.master-landscape-v324-on #masterLandscapeV324{display:block}
  if(window.__webV327PushInstalled)return;window.__webV327PushInstalled=true;
  const TOKEN_KEY='psuWebPushFcmTokenV327',DEVICE_KEY='psuWebPushDeviceV327',REG_KEY='psuWebPushRegAtV327';
  const TEST_URL='https://asia-southeast1-tm-es-psu-6981d.cloudfunctions.net/sendMasterPushTestV327';
- let messaging=null,onMessageBound=false,busy=false,presenceTimer=0;
+ let messaging=null,onMessageBound=false,busy=false,presenceTimer=0,presenceLiveRefV393=null,presenceLiveHandlerV393=null,presenceLiveRawV393={},presenceLiveExpiryV393=0,presenceLiveRetryV393=0;
  function master(){return !!(window.__webAuthInfoV136&&String(window.__webAuthInfoV136.role||'')==='master')}
  function session(){try{return window.__webAuthTokenV136?String(window.__webAuthTokenV136()||''):String(localStorage.getItem('psuWebAdminSessionV131')||'')}catch(_e){return''}}
  function rpc(name,args){return new Promise((resolve,reject)=>{try{google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[name].apply(null,args||[])}catch(e){reject(e)}})}
@@ -3451,21 +3470,25 @@ body.master-landscape-v324-on #masterLandscapeV324{display:block}
  async function disable(){if(busy)return;busy=true;updateUi();try{const {user}=await adminUser();await window.__psuDbRefV355('webPushMasterTokens/'+user.uid+'/'+deviceId()).remove();setStoredToken('');toastMsg('마스터 알림을 껐습니다.')}catch(e){psuAlert(e&&e.message?e.message:String(e))}finally{busy=false;updateUi()}}
  async function test(){if(busy)return;busy=true;updateUi();try{if(!storedToken())throw new Error('마스터 알림을 먼저 켜주세요.');const {user}=await adminUser(),idToken=await user.getIdToken();const res=await fetch(TEST_URL,{method:'POST',headers:{'Authorization':'Bearer '+idToken,'Content-Type':'application/json'},body:'{}'});let r={};try{r=await res.json()}catch(_e){}if(!res.ok||!r.ok)throw new Error(r&&r.message?r.message:'테스트 알림 발송에 실패했습니다.');toastMsg(`테스트 알림 발송 ${Number(r.sent||0)}건`)}catch(e){psuAlert(e&&e.message?e.message:String(e))}finally{busy=false;updateUi()}}
  function escV327(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
- async function readPresence(){if(!master())return{pc:0,web:0,items:[]};const {user}=await adminUser();const cut=Date.now()-90000,snap=await window.__psuDbRefV355('presence').orderByChild('lastSeen').startAt(new Date(cut).toISOString()).once('value'),raw=snap.val()||{},items=[];let pc=0,web=0;Object.values(raw).forEach(x=>{if(!x)return;const t=Date.parse(String(x.lastSeen||''));if(!Number.isFinite(t)||t<cut)return;const k=String(x.kind||'').toLowerCase();if(k==='viewer')pc++;else if(k==='web')web++;else return;items.push({kind:k,name:String(x.name||'이름 미등록'),env:String(x.clientEnv||''),lastSeen:String(x.lastSeen||'')})});items.sort((a,b)=>String(b.lastSeen).localeCompare(String(a.lastSeen)));return{pc,web,items}}
+ function presenceActiveMsV393(){return Number(window.__PSU_PRESENCE_ACTIVE_MS_V393||90000)}
+ function presenceFromRawV393(raw){const cut=Date.now()-presenceActiveMsV393(),items=[];let pc=0,web=0;Object.values(raw&&typeof raw==='object'?raw:{}).forEach(x=>{if(!x)return;const t=Date.parse(String(x.lastSeen||''));if(!Number.isFinite(t)||t<cut)return;const k=String(x.kind||'').toLowerCase();if(k==='viewer')pc++;else if(k==='web')web++;else return;items.push({kind:k,name:String(x.name||'이름 미등록'),env:String(x.clientEnv||''),lastSeen:String(x.lastSeen||''),connectionId:String(x.connectionId||''),sessionId:String(x.sessionId||'')})});items.sort((a,b)=>(Date.parse(b.lastSeen)||0)-(Date.parse(a.lastSeen)||0));return{pc,web,items,checkedAt:new Date().toISOString()}}
+ async function readPresence(){if(!master())return{pc:0,web:0,items:[]};await adminUser();const cut=Date.now()-presenceActiveMsV393(),snap=await window.__psuDbRefV355('presence').orderByChild('lastSeen').startAt(new Date(cut).toISOString()).once('value'),raw=snap.val()||{};return presenceFromRawV393(raw)}
  function applyPresence(r,full){const b=document.getElementById('adminLoginBtnV131');if(master()&&b){b.dataset.presenceOwnedV388='1';b.textContent=`● PC ${r.pc} · 웹 ${r.web}`};const sm=document.getElementById('masterPresenceSummaryV327');if(sm)sm.textContent=`PC ${r.pc} · 웹 ${r.web}`;if(full){const box=document.getElementById('masterPresenceListV327');if(box)box.innerHTML=r.items.length?r.items.map(x=>`<div class="master-presence-row-v327"><b>${escV327(x.name)}</b><span>${x.kind==='viewer'?'PC뷰어':'웹'}${x.env?' · '+escV327(x.env):''}</span></div>`).join(''):'<div class="master-presence-empty-v327">현재 접속자가 없습니다.</div>'}}
  let presenceReadV371=null,presenceLastV371=null,presenceLastAtV371=0,presencePendingFullV371=false;
  async function refreshPresence(full,force=false){if(!master())return null;const now=Date.now();if(presenceReadV371){if(full)presencePendingFullV371=true;return presenceReadV371}if(!force&&!full&&presenceLastV371&&now-presenceLastAtV371<5000){applyPresence(presenceLastV371,false);return presenceLastV371}presenceReadV371=(async()=>{try{const r=await readPresence();presenceLastV371=r;presenceLastAtV371=Date.now();applyPresence(r,!!full);return r}catch(e){if(full){const box=document.getElementById('masterPresenceListV327');if(box)box.innerHTML='<div class="master-presence-empty-v327">접속현황을 불러오지 못했습니다.</div>'}return null}finally{presenceReadV371=null;if(presencePendingFullV371){presencePendingFullV371=false;if(presenceLastV371)applyPresence(presenceLastV371,true)}}})();return presenceReadV371}
+ function stopPresenceLiveV393(){if(presenceLiveRefV393&&presenceLiveHandlerV393)try{presenceLiveRefV393.off('value',presenceLiveHandlerV393)}catch(_e){}presenceLiveRefV393=presenceLiveHandlerV393=null;presenceLiveRawV393={};clearInterval(presenceLiveExpiryV393);presenceLiveExpiryV393=0}
+ async function startPresenceLiveV393(){if(!master()||presenceLiveRefV393)return;try{await adminUser();const cut=new Date(Date.now()-presenceActiveMsV393()).toISOString(),q=window.__psuDbRefV355('presence').orderByChild('lastSeen').startAt(cut);presenceLiveRefV393=q;presenceLiveHandlerV393=snap=>{presenceLiveRetryV393=0;presenceLiveRawV393=snap.val()||{};const r=presenceFromRawV393(presenceLiveRawV393);presenceLastV371=r;presenceLastAtV371=Date.now();applyPresence(r,true)};q.on('value',presenceLiveHandlerV393,()=>{stopPresenceLiveV393();const ms=Math.min(15000,1200*Math.pow(2,presenceLiveRetryV393++));setTimeout(()=>{if(master())startPresenceLiveV393();else refreshPresence(false,true)},ms)});presenceLiveExpiryV393=setInterval(()=>{if(!master())return;const r=presenceFromRawV393(presenceLiveRawV393);presenceLastV371=r;presenceLastAtV371=Date.now();applyPresence(r,true)},5000)}catch(_e){stopPresenceLiveV393();const ms=Math.min(15000,1200*Math.pow(2,presenceLiveRetryV393++));setTimeout(()=>{if(master())startPresenceLiveV393()},ms)}}
  window.__psuMasterPushV335={isOn:()=>!!storedToken(),enable:()=>enable(false),disable,test};
- window.__psuBindMasterPanelV327=function(){updateUi();if(document.getElementById('masterPresenceListV327'))refreshPresence(true);const tg=document.getElementById('masterPushToggleV335');if(tg&&!tg.dataset.boundV335){tg.dataset.boundV335='1';tg.onchange=async()=>{const want=!!tg.checked;tg.disabled=true;try{if(want)await enable(false);else await disable()}finally{updateUi()}}}updateUi();try{window.__psuBindHiddenPushTestsV335&&window.__psuBindHiddenPushTestsV335()}catch(_e){}};
+ window.__psuBindMasterPanelV327=function(){updateUi();startPresenceLiveV393();if(document.getElementById('masterPresenceListV327')){if(presenceLastV371)applyPresence(presenceLastV371,true);else refreshPresence(true);}const tg=document.getElementById('masterPushToggleV335');if(tg&&!tg.dataset.boundV335){tg.dataset.boundV335='1';tg.onchange=async()=>{const want=!!tg.checked;tg.disabled=true;try{if(want)await enable(false);else await disable()}finally{updateUi()}}}updateUi();try{window.__psuBindHiddenPushTestsV335&&window.__psuBindHiddenPushTestsV335()}catch(_e){}};
  window.__psuShowMasterPushSettingsV335=function(){if(!master())return;const title=document.getElementById('mtitle'),body=document.getElementById('mbody');if(!title||!body)return;title.textContent='알림 설정';body.innerHTML='<div class="push-personal-modal-v333"><div class="push-personal-box-v333" id="masterPushBoxV335"><div class="push-personal-row-v333"><div class="push-personal-text-v333"><b id="masterPushTitleV335">마스터 알림</b><span>연차 · 관리자 승인 요청 등 마스터 전용 알림</span></div><label class="push-personal-switch-v333"><input type="checkbox" id="masterPushToggleV335"><span class="push-personal-track-v333"></span></label></div></div><div id="adminPushInlineV334"></div></div><div style="display:flex;justify-content:flex-end;gap:7px;margin-top:10px"><button class="btn" id="masterPushBackV335">뒤로</button></div>';window.__psuBindMasterPanelV327();try{window.__psuRenderAdminPushInlineV334&&window.__psuRenderAdminPushInlineV334()}catch(_e){}const back=document.getElementById('masterPushBackV335');if(back)back.onclick=()=>{try{const loginBtn=document.getElementById('adminLoginBtnV131');if(loginBtn)loginBtn.click()}catch(_e){}}};
  // v3.27: 웹 저장 후 Apps Script로 알림을 다시 요청하지 않는다. Firebase DB trigger가 단일 알림 원본이다.
  window.__psuNotifyChangeV326=function(){return Promise.resolve({ok:true,migrated:'firebase-trigger-v327'})};
  let presenceKickTimerV371=0;
- function tick(force=false){if(master()&&document.visibilityState==='visible')refreshPresence(false,!!force)}
+ function tick(force=false){if(!master()||document.visibilityState!=='visible')return;if(!presenceLiveRefV393||force)refreshPresence(false,!!force);if(!presenceLiveRefV393)startPresenceLiveV393()}
  function schedulePresenceV371(ms=250,force=false){clearTimeout(presenceKickTimerV371);presenceKickTimerV371=setTimeout(()=>{presenceKickTimerV371=0;tick(force)},Math.max(0,ms))}
  schedulePresenceV371(700,true);presenceTimer=setInterval(()=>tick(false),30000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')schedulePresenceV371(350,true)},{passive:true});
- window.addEventListener('psu-auth-mode',e=>{const d=e&&e.detail||{};if(d.role==='master'&&!d.optimistic)schedulePresenceV371(250,true)});
- window.addEventListener('psu-transport-mode',e=>{const m=String(e&&e.detail&&e.detail.mode||'');if(m==='RELAY'||m==='DIRECT')schedulePresenceV371(450,true)});
+ window.addEventListener('psu-auth-mode',e=>{const d=e&&e.detail||{};if(d.role==='master'&&!d.optimistic){startPresenceLiveV393();schedulePresenceV371(250,true)}else if(d.role!=='master')stopPresenceLiveV393()});
+ window.addEventListener('psu-transport-mode',e=>{const m=String(e&&e.detail&&e.detail.mode||'');if(m==='RELAY'||m==='DIRECT'){stopPresenceLiveV393();startPresenceLiveV393();schedulePresenceV371(450,true)}});
  window.__psuRefreshMasterPresenceV328=()=>refreshPresence(false);
  function restore(){if(master()&&('Notification'in window)&&Notification.permission==='granted'&&storedToken()&&!regFresh())enable(true)}
  setTimeout(restore,1800);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(restore,500)},{passive:true});
