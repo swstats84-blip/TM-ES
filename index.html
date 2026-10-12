@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.95";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.96";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v389-progress-canonical-resolver">
 (function(){
  if(window.__webProgressCanonicalResolverV389)return;window.__webProgressCanonicalResolverV389=true;
@@ -941,27 +941,53 @@ prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1
     const k=auditPrefixV395+String(event.id||'');
     localStorage.setItem(k,JSON.stringify(event));
   }
+  // v3.96: activityLog is the durable canonical event. Never bundle it with
+  // revision or the lease marker: a rejection on either auxiliary path must
+  // not prevent a real connection from being recorded. Retain exact IDs.
   async function flushAuditPendingV395(){
     if(auditFlushBusyV395||!window.firebase||!window.__psuDbRefV355)return false;
     const user=firebase.auth().currentUser;if(!user||!user.uid)return false;
     auditFlushBusyV395=true;
+    let allOK=true;
     try{
       const keys=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf(auditPrefixV395)===0)keys.push(k)}
       keys.sort();
       for(const key of keys){
-        let event;try{event=JSON.parse(localStorage.getItem(key)||'null')}catch(e){console.warn('손상된 audit outbox 항목 보존',key);continue}
+        let event;try{event=JSON.parse(localStorage.getItem(key)||'null')}catch(e){console.warn('손상된 audit outbox 항목 보존',key);allOK=false;continue}
         if(!event||!event.id||!event.record||String(event.uid||'')!==String(user.uid))continue;
-        const updates={};updates['activityLog/'+event.id]=event.record;
-        updates['meta/revisions/activity']=String(Date.now())+'-'+Math.random().toString(36).slice(2,9);
-        if(event.leasePath&&event.connectionId){
-          // A delayed old connection must never mark the new lease completed.
-          const cur=(await window.__psuDbRefV355(event.leasePath).once('value')).val()||{};
-          if(String(cur.connectionId||'')===String(event.connectionId))updates[event.leasePath+'/accessLoggedConnectionId']=event.connectionId;
+        // A failed record is retried independently. A poison entry cannot
+        // block subsequent connections or activity events in the outbox.
+        if(!event.recordCommitted){
+          try{
+            await window.__psuDbRefV355('activityLog/'+event.id).set(event.record);
+            event.recordCommitted=true;
+            localStorage.setItem(key,JSON.stringify(event));
+          }catch(e){allOK=false;console.warn('activityLog 기록 저장 실패 (보류 유지)',event.id,e);continue}
         }
-        try{await window.__psuDbRefV355('').update(updates);localStorage.removeItem(key)}
-        catch(e){console.warn('activity audit pending replay',event.id,e);break}
+        // Revision and completion marker are retryable independently of the
+        // already committed record. An activity must become visible to live
+        // administrator views even if the first revision write is rejected.
+        let revisionOK=true, leaseOK=true;
+        try{
+          await window.__psuDbRefV355('meta/revisions/activity').set(String(Date.now())+'-'+Math.random().toString(36).slice(2,9));
+        }catch(e){revisionOK=false;console.warn('activityLog 저장됨 · revision 갱신 재시도',event.id,e)}
+        if(event.leasePath&&event.connectionId){
+          try{
+            const leaseRef=window.__psuDbRefV355(event.leasePath);
+            await leaseRef.transaction(cur=>{
+              if(!cur||String(cur.connectionId||'')!==String(event.connectionId))return;
+              cur.accessLoggedConnectionId=event.connectionId;
+              return cur;
+            });
+          }catch(e){leaseOK=false;console.warn('activityLog 저장됨 · lease 완료표시 재시도',event.id,e)}
+        }
+        if(revisionOK&&leaseOK){
+          localStorage.removeItem(key);
+        }else{
+          allOK=false;
+        }
       }
-      return true;
+      return allOK;
     }finally{auditFlushBusyV395=false}
   }
   window.__psuFlushAuditV395=flushAuditPendingV395;
