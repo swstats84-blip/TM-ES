@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.93";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.94";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v389-progress-canonical-resolver">
 (function(){
  if(window.__webProgressCanonicalResolverV389)return;window.__webProgressCanonicalResolverV389=true;
@@ -921,6 +921,11 @@ prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1
   const isAndroidApp=/PSUAdminApp\//.test(navigator.userAgent||'')||/[?&]app=android(?:&|$)/.test(location.search||'');
   if(isAndroidApp)window.__PSU_ANDROID_APP=true;
   function currentName(){const a=window.__webAuthInfoV136||null;let n=a&&(a.displayName||a.username)||'';if(!n&&window.__psuNameSyncV158)n=window.__psuNameSyncV158();if(!n)try{n=localStorage.getItem('psuMyLeaveNameV131')||''}catch(e){}return String(n||'').trim()}
+  async function firebaseUserV394(){
+    if(!window.firebase)throw new Error('Firebase 연결 준비 중');
+    if(!firebase.auth().currentUser)await firebase.auth().signInAnonymously();
+    const u=firebase.auth().currentUser;if(!u||!String(u.uid||'').trim())throw new Error('Firebase 사용자 식별값을 확인하지 못했습니다.');return u;
+  }
   let auditSettingsV392={loadedAt:0,excludeNames:[]};
   async function activityExcludedV392(name){
     const n=String(name||'').trim().toLocaleLowerCase();if(!n)return true;
@@ -932,10 +937,10 @@ prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1
   async function auditMutationV392(action,unit='',detail=''){
     const name=currentName();if(!name||!window.firebase||!action)return false;
     try{
-      if(!firebase.auth().currentUser)await firebase.auth().signInAnonymously();
+      const user=await firebaseUserV394();
       if(await activityExcludedV392(name))return false;
       const a=window.__webAuthInfoV136||null,role=String(a&&a.role||''),id='web_activity_'+sessionId+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9),at=new Date().toISOString();
-      await window.__psuDbRefV355('activityLog/'+id).set({id,at,eventType:'activity',actorName:name,sourceKind:'web',clientId:clientId,sessionId:sessionId,action:String(action||'').slice(0,80),unit:String(unit||'').trim().slice(0,80),detail:String(detail||'').slice(0,500),role,version:WEB_VERSION_V197});
+      await window.__psuDbRefV355('activityLog/'+id).set({id,at,eventType:'activity',actorName:name,sourceKind:'web',clientId:clientId,sessionId:sessionId,ownerUid:String(user.uid||''),action:String(action||'').slice(0,80),unit:String(unit||'').trim().slice(0,80),detail:String(detail||'').slice(0,500),role,version:WEB_VERSION_V197});
       try{await window.__psuDbRefV355('meta/revisions/activity').set(String(Date.now())+'-'+Math.random().toString(36).slice(2,8))}catch(_e){}
       return true
     }catch(e){console.warn('활동기록 저장 실패(업무 저장은 유지)',action,e);return false}
@@ -947,48 +952,57 @@ prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1
   window.__psuRunAuditedMutationV392=runAuditedMutationV392;
   async function cleanupAndroidPresence(){
     if(!isAndroidApp||!window.firebase)return;
-    try{if(!firebase.auth().currentUser)await firebase.auth().signInAnonymously();await window.__psuDbRefV355('presence/'+clientId).remove()}catch(e){}
+    try{await firebaseUserV394();await window.__psuDbRefV355('presence/'+clientId).remove()}catch(e){}
   }
   function adminRestorePendingV298(){try{const t=window.__psuAuthTokenSyncV212?window.__psuAuthTokenSyncV212():'';return !!t&&window.__psuAuthRestoreSettledV291!==true}catch(_e){return false}}
-  const presenceActiveMsV393=90000;window.__PSU_PRESENCE_ACTIVE_MS_V393=presenceActiveMsV393;
-  async function ensureAccessForConnectionV393(presenceRef,presenceNow,name,role,env,now){
-    const connectionId=String(presenceNow&&presenceNow.connectionId||'').trim();if(!connectionId)return false;
-    if(String(presenceNow&&presenceNow.accessLoggedConnectionId||'').trim()===connectionId)return true;
-    if(window.__psuAccessLoggingV393)return false;window.__psuAccessLoggingV393=true;
+  const presenceActiveMsV394=90000;window.__PSU_PRESENCE_ACTIVE_MS_V393=presenceActiveMsV394;window.__PSU_PRESENCE_ACTIVE_MS_V394=presenceActiveMsV394;
+  function leaseRefV394(uid){return window.__psuDbRefV355('presenceLeases/'+String(uid||'')+'/'+clientId)}
+  async function markLeaseAccessV394(leaseRef,connectionId){
+    await leaseRef.transaction(cur=>{if(!cur||String(cur.connectionId||'')!==connectionId)return cur;if(String(cur.accessLoggedConnectionId||'')===connectionId)return cur;cur.accessLoggedConnectionId=connectionId;return cur})
+  }
+  async function ensureAccessForConnectionV394(leaseRef,leaseNow,name,role,env,now,user){
+    const connectionId=String(leaseNow&&leaseNow.connectionId||'').trim();if(!connectionId)return false;
+    if(String(leaseNow&&leaseNow.accessLoggedConnectionId||'').trim()===connectionId)return true;
+    if(window.__psuAccessLoggingV394)return false;window.__psuAccessLoggingV394=true;
     try{
       const excluded=await activityExcludedV392(name);
       if(!excluded){
-        const id='web_access_'+connectionId,detail='웹뷰어 접속'+(env.label?' · '+env.label:''),ref=window.__psuDbRefV355('activityLog/'+id),rec={id,at:String(presenceNow.connectedAt||now),eventType:'access',accessModel:'connection-v393',actorName:name,sourceKind:'web',clientId:clientId,sessionId:connectionId,browserSessionId:sessionId,connectionId:connectionId,action:'접속',unit:'',detail:detail,role:role,version:WEB_VERSION_V197};
-        const tr=await ref.transaction(cur=>cur||rec);if(!tr||!tr.snapshot||!tr.snapshot.val())throw new Error('접속기록 저장 결과를 확인하지 못했습니다.');
-        try{await window.__psuDbRefV355('meta/revisions/activity').set(String(Date.now())+'-'+Math.random().toString(36).slice(2,8))}catch(_e){}
+        const id='web_access_'+connectionId,detail='웹뷰어 접속'+(env.label?' · '+env.label:''),ref=window.__psuDbRefV355('activityLog/'+id),rec={id,at:String(leaseNow.connectedAt||now),eventType:'access',accessModel:'connection-v394',actorName:name,sourceKind:'web',clientId:clientId,sessionId:connectionId,browserSessionId:sessionId,connectionId:connectionId,ownerUid:String(user.uid||''),action:'접속',unit:'',detail:detail,role:role,version:WEB_VERSION_V197};
+        const rev=String(Date.now())+'-'+Math.random().toString(36).slice(2,8),updates={};
+        updates['activityLog/'+id]=rec;
+        updates['presenceLeases/'+String(user.uid||'')+'/'+clientId+'/accessLoggedConnectionId']=connectionId;
+        updates['meta/revisions/activity']=rev;
+        // 접속기록 + private lease 완료표시를 하나의 root multi-location update로 원자 저장한다.
+        // 성공하면 둘 다 저장되고, 실패하면 둘 다 저장되지 않아 다음 heartbeat가 안전하게 재시도한다.
+        await window.__psuDbRefV355('').update(updates);
+      }else{
+        await markLeaseAccessV394(leaseRef,connectionId);
       }
-      // 제외 사용자도 같은 connection에서 매 heartbeat마다 재검사하지 않도록 처리한다.
-      await presenceRef.transaction(cur=>{if(!cur||String(cur.connectionId||'')!==connectionId)return cur;cur.accessLoggedConnectionId=connectionId;return cur});
       return true;
-    }finally{window.__psuAccessLoggingV393=false}
+    }finally{window.__psuAccessLoggingV394=false}
   }
   async function ping(){
     if(isAndroidApp||window.__PSU_ANDROID_APP||adminRestorePendingV298())return;
     const name=currentName();if(!name||!window.firebase)return;
     const a=window.__webAuthInfoV136||null,role=a&&a.role||'';
     try{
-      if(!firebase.auth().currentUser)await firebase.auth().signInAnonymously();
-      const env=window.__psuClientEnvV174||{};
-      const nowMsV393=Date.now(),now=new Date(nowMsV393).toISOString();
-      // v3.93: 현재 접속 판정(90초)과 새 connection 판정을 같은 시간창으로 통일한다.
-      // 브라우저 sessionStorage는 추적용일 뿐 접속 세션 판정에 사용하지 않는다.
-      const presenceRefV393=window.__psuDbRefV355('presence/'+clientId),candidateConnectionIdV393='wc_'+nowMsV393.toString(36)+'_'+Math.random().toString(36).slice(2,10);
-      const presenceTxV393=await presenceRefV393.transaction(cur=>{
+      const user=await firebaseUserV394(),env=window.__psuClientEnvV174||{};
+      const nowMs=Date.now(),now=new Date(nowMs).toISOString(),leaseRef=leaseRefV394(user.uid),candidate='wc_'+nowMs.toString(36)+'_'+Math.random().toString(36).slice(2,10);
+      // v3.94: 일반 사용자가 읽을 수 없는 공용 presence에서 transaction하지 않는다.
+      // 자기 UID 아래 private lease에서만 90초 연속성을 원자적으로 판정하고, 공용 presence에는 결과를 write-only로 반영한다.
+      const leaseTx=await leaseRef.transaction(cur=>{
         cur=cur&&typeof cur==='object'?cur:{};
-        const prevMs=Date.parse(String(cur.lastSeen||'')),continuous=Number.isFinite(prevMs)&&(nowMsV393-prevMs)>=0&&(nowMsV393-prevMs)<presenceActiveMsV393&&String(cur.name||'').trim()===name&&String(cur.kind||'web').toLowerCase()==='web';
-        const connectionId=continuous&&String(cur.connectionId||'').trim()?String(cur.connectionId):candidateConnectionIdV393;
-        const connectedAt=connectionId===candidateConnectionIdV393?now:String(cur.connectedAt||cur.lastSeen||now);
+        const prevMs=Date.parse(String(cur.lastSeen||'')),continuous=Number.isFinite(prevMs)&&(nowMs-prevMs)>=0&&(nowMs-prevMs)<presenceActiveMsV394&&String(cur.name||'').trim()===name&&String(cur.kind||'web').toLowerCase()==='web';
+        const connectionId=continuous&&String(cur.connectionId||'').trim()?String(cur.connectionId):candidate;
+        const connectedAt=connectionId===candidate?now:String(cur.connectedAt||cur.lastSeen||now);
         const accessLoggedConnectionId=continuous?String(cur.accessLoggedConnectionId||''):'';
-        return {clientId:clientId,kind:'web',version:WEB_VERSION_V197,name:name,role:role,sessionId:sessionId,connectionId,connectedAt,accessLoggedConnectionId,clientEnv:String(env.label||''),lastSeen:now}
+        return {clientId:clientId,kind:'web',name:name,connectionId,connectedAt,accessLoggedConnectionId,lastSeen:now}
       });
-      const presenceNowV393=presenceTxV393&&presenceTxV393.snapshot?presenceTxV393.snapshot.val()||{}:{};
-      // 접속로그 쓰기가 순간 실패해도 accessLoggedConnectionId가 남지 않으므로 다음 heartbeat에서 반드시 재시도한다.
-      await ensureAccessForConnectionV393(presenceRefV393,presenceNowV393,name,role,env,now);
+      const leaseNow=leaseTx&&leaseTx.snapshot?leaseTx.snapshot.val()||{}:{};
+      const connectionId=String(leaseNow.connectionId||'').trim();if(!connectionId)throw new Error('접속 connection 식별값을 준비하지 못했습니다.');
+      await window.__psuDbRefV355('presence/'+clientId).set({clientId:clientId,kind:'web',version:WEB_VERSION_V197,name:name,role:role,sessionId:sessionId,connectionId:connectionId,connectedAt:String(leaseNow.connectedAt||now),clientEnv:String(env.label||''),ownerUid:String(user.uid||''),lastSeen:now});
+      // 접속로그 쓰기가 순간 실패하면 private lease의 완료 marker가 남지 않아 다음 heartbeat가 동일 key로 재시도한다.
+      await ensureAccessForConnectionV394(leaseRef,leaseNow,name,role,env,now,user);
     }catch(e){console.warn('Firebase presence ping 실패',e)}
   }
   window.__psuPresencePingV138=ping;
