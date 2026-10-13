@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.97";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.98";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v389-progress-canonical-resolver">
 (function(){
  if(window.__webProgressCanonicalResolverV389)return;window.__webProgressCanonicalResolverV389=true;
@@ -1353,13 +1353,20 @@ body.general-mode .tabs,body.general-mode .calendar-wrap,body.general-mode .mobi
  function weeklyMondayV271(d){const x=new Date(d);x.setHours(12,0,0,0);const n=(x.getDay()+6)%7;x.setDate(x.getDate()-n);return x}
  function weeklyInfoV271(slot){
    const mon=weeklyMondayV271(new Date());if(slot==='next')mon.setDate(mon.getDate()+7);
-   const weekStart=weeklyIsoV271(mon),label=slot==='next'?'다음주':'이번주',name=`PSU_주간스케줄_${weekStart}.jpg`;
-   return {ok:true,found:true,slot,label,weekStart,name,mime:'image/jpeg',url:WEEKLY_GITHUB_BASE_V272+encodeURIComponent(name)};
+   const weekStart=weeklyIsoV271(mon),label=slot==='next'?'다음주':'이번주',name=`PSU_주간스케줄_${weekStart}.png`;
+   return {ok:true,found:true,slot,label,weekStart,name,mime:'image/png',url:WEEKLY_GITHUB_BASE_V272+encodeURIComponent(name),legacyName:`PSU_주간스케줄_${weekStart}.jpg`};
  }
  async function weeklyExistsV271(info){
-   const u=info.url+(info.url.includes('?')?'&':'?')+'psu_check='+Date.now();
-   try{const r=await fetch(u,{method:'HEAD',cache:'no-store'});if(r.ok)return true;if(r.status===404)return false}catch(_e){}
-   return await new Promise(resolve=>{const im=new Image(),done=v=>{im.onload=null;im.onerror=null;resolve(v)};const t=setTimeout(()=>done(false),5000);im.onload=()=>{clearTimeout(t);done(true)};im.onerror=()=>{clearTimeout(t);done(false)};im.src=u});
+   // Prefer PNG; display previously registered JPG until it is re-registered.
+   const files=[info.name,info.legacyName].filter(Boolean);
+   for(const name of files){
+     const u=WEEKLY_GITHUB_BASE_V272+encodeURIComponent(name),check=u+'?psu_check='+Date.now();
+     let ok=false,missing=false;
+     try{const r=await fetch(check,{method:'HEAD',cache:'no-store'});ok=r.ok;missing=r.status===404}catch(_e){}
+     if(!ok&&!missing)ok=await new Promise(resolve=>{const im=new Image(),done=v=>{im.onload=null;im.onerror=null;resolve(v)};const t=setTimeout(()=>done(false),5000);im.onload=()=>{clearTimeout(t);done(true)};im.onerror=()=>{clearTimeout(t);done(false)};im.src=check});
+     if(ok){info.name=name;info.url=u;info.mime=name.endsWith('.png')?'image/png':'image/jpeg';return true}
+   }
+   return false;
  }
  function installWeeklyImageV132(r){
    const vp=document.getElementById('weeklyViewportV132'),meta=document.getElementById('weeklyMetaV132');if(!vp)return;
