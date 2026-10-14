@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v3.99";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v4.00";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v389-progress-canonical-resolver">
 (function(){
  if(window.__webProgressCanonicalResolverV389)return;window.__webProgressCanonicalResolverV389=true;
@@ -2393,13 +2393,18 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
 (function(){
  if(window.__webV244PrivateNoteInstalled)return;window.__webV244PrivateNoteInstalled=true;
  let privateUnits=new Set(),privateRaw={},privateRef=null,privateHandlers=null,privateUid='',privateReady=false,privateReadyPromise=Promise.resolve(),privateReadyResolve=null,connectBusy=false,connectTimer=0,privateReadyTimer=0,privateRetryV280=0;
- const isAdmin=()=>{const r=String(window.__webAuthInfoV136&&window.__webAuthInfoV136.role||'');return r==='admin'||r==='master'};
+ const isAdmin=()=>String(window.__webAuthInfoV136&&window.__webAuthInfoV136.role||'')==='master';
  function session(){try{return typeof window.__webAuthTokenV136==='function'?String(window.__webAuthTokenV136()||''):String(localStorage.getItem('psuWebAdminSessionV131')||'')}catch(e){return ''}}
- function privateBadgeOwnerV375(){const a=window.__webAuthInfoV136||{},role=String(a.role||''),user=String(a.username||''),name=String(a.displayName||'');return (role==='admin'||role==='master')?encodeURIComponent(role+'|'+user+'|'+name):''}
+ function privateBadgeOwnerV375(){const a=window.__webAuthInfoV136||{},role=String(a.role||''),user=String(a.username||''),name=String(a.displayName||'');return role==='master'?encodeURIComponent(role+'|'+user+'|'+name):''}
  function privateBadgeKeyV375(){const o=privateBadgeOwnerV375();return o?'psuPrivateBadgeStableV375_'+o:''}
  function restorePrivateBadgeCacheV375(){const k=privateBadgeKeyV375();if(!k){privateUnits=new Set();return false}try{const x=JSON.parse(localStorage.getItem(k)||'null');if(!x||x.schema!==1||!Array.isArray(x.units))return false;privateUnits=new Set(x.units.map(v=>String(v||'').trim()).filter(Boolean));window.__psuBadgePrivateReadyV314=true;decorate();return true}catch(_e){return false}}
  function savePrivateBadgeCacheV375(){const k=privateBadgeKeyV375();if(!k)return;try{localStorage.setItem(k,JSON.stringify({schema:1,at:Date.now(),units:[...privateUnits]}))}catch(_e){}}
- let privateBadgeReadyResolveV375=null,privateBadgeReadySettledV375=false;window.__psuPrivateBadgeCacheReadyV375=new Promise(r=>{privateBadgeReadyResolveV375=r});function settlePrivateBadgeReadyV375(v){if(privateBadgeReadySettledV375)return;privateBadgeReadySettledV375=true;if(privateBadgeReadyResolveV375){privateBadgeReadyResolveV375(!!v);privateBadgeReadyResolveV375=null}}const privateBadgeCachedV375=restorePrivateBadgeCacheV375();if(privateBadgeCachedV375)settlePrivateBadgeReadyV375(true);else if(window.__psuAuthRestoreSettledV291===true&&!isAdmin())settlePrivateBadgeReadyV375(true);window.addEventListener('psu-auth-mode',e=>{const d=e&&e.detail||{};if(d.optimistic)return;if(d.admin){if(restorePrivateBadgeCacheV375())settlePrivateBadgeReadyV375(true)}else settlePrivateBadgeReadyV375(true)});
+ let privateBadgeReadyResolveV375=null,privateBadgeReadySettledV375=false;window.__psuPrivateBadgeCacheReadyV375=new Promise(r=>{privateBadgeReadyResolveV375=r});function settlePrivateBadgeReadyV375(v){if(privateBadgeReadySettledV375)return;privateBadgeReadySettledV375=true;if(privateBadgeReadyResolveV375){privateBadgeReadyResolveV375(!!v);privateBadgeReadyResolveV375=null}}const privateBadgeCachedV375=restorePrivateBadgeCacheV375();if(privateBadgeCachedV375)settlePrivateBadgeReadyV375(true);else if(window.__psuAuthRestoreSettledV291===true&&!isAdmin())settlePrivateBadgeReadyV375(true);window.addEventListener('psu-auth-mode',e=>{
+   const d=e&&e.detail||{};if(d.optimistic)return;
+   if(!isAdmin()){clearPrivateRefV272(true);settlePrivateBadgeReadyV375(true)}
+   else {if(restorePrivateBadgeCacheV375())settlePrivateBadgeReadyV375(true);scheduleConnectV272(0)}
+   decorate();
+ });
  function fmt(s){try{return new Date(s).toLocaleString('ko-KR',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch(e){return String(s||'')}}
  function info(unit){const p=typeof progressFor==='function'?(progressFor(unit)||{}):{},e=(typeof activeEvents==='function'?(activeEvents()||[]):[]).find(x=>x&&String(x.unit||'')===String(unit))||{};return {sn:String(p.sn||e.sn||'')}}
  function ensureButton(card){
@@ -2414,7 +2419,7 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
  function decorate(){document.querySelectorAll('#plist .pitem[data-unit]').forEach(ensureButton);if(!isAdmin())document.querySelectorAll('.private-note-btn-v244').forEach(x=>x.remove())}
  const SHARED_NAME_V256='임영규',SHARED_UID_V256='psu-name-6ca73e26e20509f2691babd8161db65b';
  async function privateIdentV256(){
-   if(!isAdmin())throw new Error('개인메모는 관리자 계정만 사용할 수 있습니다.');
+   if(!isAdmin())throw new Error('개인메모는 웹뷰어 마스터 계정에서만 사용할 수 있습니다.');
    let u=window.firebase&&firebase.auth?firebase.auth().currentUser:null;
    if((!u||u.isAnonymous)&&typeof window.__firebaseFastWebRestoreV186==='function'){try{await window.__firebaseFastWebRestoreV186()}catch(_e){}u=firebase.auth().currentUser}
    if(!u||u.isAnonymous)throw new Error('관리자 로그인이 필요합니다.');
@@ -2444,12 +2449,12 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
  function scheduleConnectV272(delay){clearTimeout(connectTimer);connectTimer=setTimeout(()=>connectPrivateV272().catch(()=>{}),Number(delay||0))}
  async function refresh(){decorate();if(!privateRef&&isAdmin()&&session())await connectPrivateV272();return privateRaw}
  window.openPrivateNoteV244=async function(unit){
-   unit=String(unit||'').trim();if(!isAdmin())return psuAlert('개인메모는 관리자 계정만 사용할 수 있습니다.');if(!session())return psuAlert('관리자 로그인이 필요합니다.');const x=info(unit);
+   unit=String(unit||'').trim();if(!isAdmin())return psuAlert('개인메모는 웹뷰어 마스터 계정에서만 사용할 수 있습니다.');if(!session())return psuAlert('관리자 로그인이 필요합니다.');const x=info(unit);
    mtitle.textContent=`${unit} 개인메모`;mbody.innerHTML='<div class="empty">개인메모를 불러오는 중...</div>';modalback.classList.add('show');
    try{
      const ident=await privateIdentV256();if(!privateRef||privateUid!==ident.uid||!privateReady)await connectPrivateV272();if(!privateReady)await privateReadyPromise;
      const fb=window.__fbDirectV187,key=fb.b64key(unit),path='privateNotes/'+ident.uid+'/'+key,raw=Object.assign({},privateRaw[key]||{});
-     const render=note=>{const ex=!!String(note&&note.text||'').trim(),up=String(note&&note.updatedAt||'');mbody.innerHTML=`<div class="private-note-info-v244"><b>${esc(unit)}</b>${x.sn?` · S/N ${esc(x.sn)}`:''}<br>개인메모입니다. 임영규는 관리자 프로그램·PC뷰어·웹뷰어에서 하나로 연동되고, 다른 관리자는 각 계정별로 분리됩니다.</div>${up?`<div class="private-note-meta-v244">마지막 수정 ${esc(fmt(up))}</div>`:''}<textarea class="private-note-text-v244" id="privateNoteTextV244" maxlength="12000" placeholder="개인메모 내용을 입력하세요.">${esc(note&&note.text||'')}</textarea><div class="private-note-actions-v244">${ex?'<button class="btn danger" id="privateNoteDeleteV244">삭제</button>':''}<button class="btn primary" id="privateNoteSaveV244">저장</button></div>`;
+     const render=note=>{const ex=!!String(note&&note.text||'').trim(),up=String(note&&note.updatedAt||'');mbody.innerHTML=`<div class="private-note-info-v244"><b>${esc(unit)}</b>${x.sn?` · S/N ${esc(x.sn)}`:''}<br>마스터 개인메모입니다.</div>${up?`<div class="private-note-meta-v244">마지막 수정 ${esc(fmt(up))}</div>`:''}<textarea class="private-note-text-v244" id="privateNoteTextV244" maxlength="12000" placeholder="개인메모 내용을 입력하세요.">${esc(note&&note.text||'')}</textarea><div class="private-note-actions-v244">${ex?'<button class="btn danger" id="privateNoteDeleteV244">삭제</button>':''}<button class="btn primary" id="privateNoteSaveV244">저장</button></div>`;
        const save=document.getElementById('privateNoteSaveV244'),del=document.getElementById('privateNoteDeleteV244'),tb=document.getElementById('privateNoteTextV244');
        if(save)save.onclick=async()=>{const tx=String(tb&&tb.value||'').trim();if(!tx)return psuAlert('개인메모 내용을 입력하세요.');save.disabled=true;try{const now=new Date().toISOString(),newNote={unit:unit,sn:x.sn||'',text:tx,createdAt:String(note&&note.createdAt||'').trim()||now,updatedAt:now};await fb.set(path,newNote);privateRaw[key]=newNote;privateUnits.add(unit);decorate();await fb.bump('privateNote');if(window.__psuAuditMutationV392)await window.__psuAuditMutationV392(ex?'개인메모 수정':'개인메모 추가',unit,'내용 비공개');toastMsg('개인메모를 저장했습니다.');render(newNote);setTimeout(()=>updateUsageV256(ident,ex?'update':'create').catch(()=>{}),0)}catch(e){save.disabled=false;psuAlert(e&&e.message?e.message:String(e))}};
        if(del)del.onclick=async()=>{if(!await psuConfirm('이 개인메모를 삭제할까요?'))return;del.disabled=true;try{await fb.del(path);delete privateRaw[key];privateUnits.delete(unit);decorate();await fb.bump('privateNote');if(window.__psuAuditMutationV392)await window.__psuAuditMutationV392('개인메모 삭제',unit,'내용 비공개');toastMsg('개인메모를 삭제했습니다.');render({});setTimeout(()=>updateUsageV256(ident,'delete').catch(()=>{}),0)}catch(e){del.disabled=false;psuAlert(e&&e.message?e.message:String(e))}};
