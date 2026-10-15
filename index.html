@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v4.00";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v4.01";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v389-progress-canonical-resolver">
 (function(){
  if(window.__webProgressCanonicalResolverV389)return;window.__webProgressCanonicalResolverV389=true;
@@ -2913,24 +2913,41 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
     }
     return out;
   }
+  let activityRowsV401=null,activityRowsRevV401='',activityRowsFlightV401=null;
   async function readActivity(){
     const f=await masterAuth(),cut=Date.now()-30*86400000,cutIso=new Date(cut).toISOString();
-    // v2.79 traffic: 접속/활동 팝업도 activityLog 전체가 아니라 최근 30일만 indexed query로 받는다.
-    const [snap,st]=await Promise.all([window.__psuDbRefV355('activityLog').orderByChild('at').startAt(cutIso).once('value'),f.read('activitySettings/current')]),raw=snap.val()||{};
+    // v4.01: a tiny revision read detects changes even when the master panel
+    // was closed/offline. Reopening must not re-download unchanged 30-day rows.
+    const revisionSnap=await window.__psuDbRefV355('meta/revisions/activity').once('value');
+    const revision=String(revisionSnap.val()||'');
+    const stale=!activityRowsV401||activityRowsRevV401!==revision;
+    if(stale&&!activityRowsFlightV401){
+      activityRowsFlightV401=window.__psuDbRefV355('activityLog').orderByChild('at').startAt(cutIso).once('value')
+        .then(x=>x.val()||{});
+    }
+    let raw=activityRowsV401||{};
+    if(stale){
+      try{raw=await activityRowsFlightV401;activityRowsV401=raw;activityRowsRevV401=revision}
+      finally{activityRowsFlightV401=null}
+    }
+    const st=await f.read('activitySettings/current');
+    // Do not claim absence of expired items from cache: the date predicate
+    // below always uses the current cutoff, even for a reused snapshot.
     const settings=Object.assign({excludeNames:[],dedupeMinutes:10},st||{}),ex=new Set((settings.excludeNames||[]).map(x=>String(x||'').trim().toLowerCase()));
     let items=Object.keys(raw||{}).map(id=>Object.assign({id},raw[id]||{})).filter(x=>{const t=Date.parse(String(x.at||''));if(!Number.isFinite(t)||t<cut)return false;const a=String(x.actorName||'').trim().toLowerCase();return !a||!ex.has(a)});
     items.sort((a,b)=>(Date.parse(b.at||0)||0)-(Date.parse(a.at||0)||0));
     return {items:dedupe(items,settings.dedupeMinutes).slice(0,300),settings};
   }
+
   async function ensureActivityRealtimeV393(refresh){activityLiveRefreshV393=refresh;if(activityRevRefV393)return;await masterAuth();activityRevRefV393=window.__psuDbRefV355('meta/revisions/activity');activityRevHandlerV393=snap=>{const v=String(snap&&snap.val?snap.val()||'':'');if(!activityRevLastV393){activityRevLastV393=v;return}if(v===activityRevLastV393)return;activityRevLastV393=v;clearTimeout(activityRevReloadTimerV393);activityRevReloadTimerV393=setTimeout(()=>{if(activityLiveRefreshV393&&modalback.classList.contains('show')&&mtitle.textContent==='접속 / 활동 기록')activityLiveRefreshV393()},80)};activityRevRefV393.on('value',activityRevHandlerV393,()=>{try{activityRevRefV393&&activityRevRefV393.off()}catch(_e){}activityRevRefV393=activityRevHandlerV393=null;activityRevLastV393='';setTimeout(()=>{if(isMaster()&&activityLiveRefreshV393)ensureActivityRealtimeV393(activityLiveRefreshV393).catch(()=>{})},1800)})}
-  async function removeIds(ids){const f=await masterAuth(),a=[...new Set((ids||[]).map(String).filter(Boolean))];await Promise.all(a.map(id=>window.__psuDbRefV355('activityLog/'+id).remove()));await f.bump('activity')}
-  async function setExcluded(names,purge){
+  async function removeIds(ids){activityRowsRevV401='';const f=await masterAuth(),a=[...new Set((ids||[]).map(String).filter(Boolean))];await Promise.all(a.map(id=>window.__psuDbRefV355('activityLog/'+id).remove()));await f.bump('activity')}
+  async function setExcluded(names,purge){activityRowsRevV401='';
     const f=await masterAuth(),clean=[],seen=new Set();
     (names||[]).forEach(v=>{const n=String(v||'').trim(),k=n.toLowerCase();if(n&&!seen.has(k)){seen.add(k);clean.push(n)}});
     await f.set('activitySettings/current',{excludeNames:clean.slice(0,50),dedupeMinutes:10,updatedAt:new Date().toISOString()});
     if(purge&&clean.length){const parts=await Promise.all(clean.map(name=>window.__psuDbRefV355('activityLog').orderByChild('actorName').equalTo(name).once('value'))),ids=[];parts.forEach(s=>{const raw=s.val()||{};Object.keys(raw).forEach(id=>ids.push(id))});await removeIds(ids)}else await f.bump('activity');
   }
-  async function clearAll(){const f=await masterAuth();/* v2.79 traffic: 전체삭제 전 activityLog 전체조회 제거 */await window.__psuDbRefV355('activityLog').remove();await f.bump('activity')}
+  async function clearAll(){activityRowsRevV401='';const f=await masterAuth();/* v2.79 traffic: 전체삭제 전 activityLog 전체조회 제거 */await window.__psuDbRefV355('activityLog').remove();await f.bump('activity')}
   async function openActivity(){
     if(!isMaster()) return psuAlertV148('권한 확인','마스터 권한에서만 볼 수 있습니다.');
     mtitle.textContent='접속 / 활동 기록';mbody.classList.add('master-panel-v266');mbody.innerHTML='<div class="empty">기록을 불러오는 중...</div>';modalback.classList.add('show');
