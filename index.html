@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v4.01";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v4.02";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v389-progress-canonical-resolver">
 (function(){
  if(window.__webProgressCanonicalResolverV389)return;window.__webProgressCanonicalResolverV389=true;
@@ -964,14 +964,23 @@ prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1
             localStorage.setItem(key,JSON.stringify(event));
           }catch(e){allOK=false;console.warn('activityLog 기록 저장 실패 (보류 유지)',event.id,e);continue}
         }
-        // Revision and completion marker are retryable independently of the
-        // already committed record. An activity must become visible to live
-        // administrator views even if the first revision write is rejected.
-        let revisionOK=true, leaseOK=true;
-        try{
-          await window.__psuDbRefV355('meta/revisions/activity').set(String(Date.now())+'-'+Math.random().toString(36).slice(2,9));
-        }catch(e){revisionOK=false;console.warn('activityLog 저장됨 · revision 갱신 재시도',event.id,e)}
-        if(event.leasePath&&event.connectionId){
+        // v4.02: A committed canonical record has exactly one legacy UI
+        // revision announcement. A lease retry must NEVER mint a new random
+        // revision. Persist independent completion flags across reloads.
+        let revisionOK=!!event.revisionCommitted, leaseOK=!!event.leaseCommitted;
+        if(!revisionOK){
+          try{
+            if(!event.revisionValue){
+              event.revisionValue=String(Date.now())+'-'+Math.random().toString(36).slice(2,9);
+              saveAuditPendingV395(event);
+            }
+            await window.__psuDbRefV355('meta/revisions/activity').set(event.revisionValue);
+            event.revisionCommitted=true;revisionOK=true;
+            saveAuditPendingV395(event);
+          }catch(e){console.warn('activityLog 저장됨 · revision 갱신 재시도',event.id,e)}
+        }
+        if(!event.leasePath||!event.connectionId){leaseOK=true}
+        else if(!leaseOK){
           try{
             const leaseRef=window.__psuDbRefV355(event.leasePath);
             await leaseRef.transaction(cur=>{
@@ -979,7 +988,9 @@ prev.onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1
               cur.accessLoggedConnectionId=event.connectionId;
               return cur;
             });
-          }catch(e){leaseOK=false;console.warn('activityLog 저장됨 · lease 완료표시 재시도',event.id,e)}
+            event.leaseCommitted=true;leaseOK=true;
+            saveAuditPendingV395(event);
+          }catch(e){console.warn('activityLog 저장됨 · lease 완료표시 재시도',event.id,e)}
         }
         if(revisionOK&&leaseOK){
           localStorage.removeItem(key);
@@ -2916,10 +2927,13 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
   let activityRowsV401=null,activityRowsRevV401='',activityRowsFlightV401=null;
   async function readActivity(){
     const f=await masterAuth(),cut=Date.now()-30*86400000,cutIso=new Date(cut).toISOString();
-    // v4.01: a tiny revision read detects changes even when the master panel
-    // was closed/offline. Reopening must not re-download unchanged 30-day rows.
-    const revisionSnap=await window.__psuDbRefV355('meta/revisions/activity').once('value');
-    const revision=String(revisionSnap.val()||'');
+    // v4.02: the Functions onWrite tick represents an actual canonical
+    // activityLog mutation. Legacy revisions are notifications and can be
+    // retried without a data change; use them only when no tick exists.
+    const tickSnap=await window.__psuDbRefV355('meta/deltaTicks/activityLog').once('value');
+    const tick=tickSnap.val();
+    const revision=tick!==null&&tick!==undefined?'delta:'+String(tick):
+      'legacy:'+String((await window.__psuDbRefV355('meta/revisions/activity').once('value')).val()||'');
     const stale=!activityRowsV401||activityRowsRevV401!==revision;
     if(stale&&!activityRowsFlightV401){
       activityRowsFlightV401=window.__psuDbRefV355('activityLog').orderByChild('at').startAt(cutIso).once('value')
@@ -2940,6 +2954,36 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
   }
 
   async function ensureActivityRealtimeV393(refresh){activityLiveRefreshV393=refresh;if(activityRevRefV393)return;await masterAuth();activityRevRefV393=window.__psuDbRefV355('meta/revisions/activity');activityRevHandlerV393=snap=>{const v=String(snap&&snap.val?snap.val()||'':'');if(!activityRevLastV393){activityRevLastV393=v;return}if(v===activityRevLastV393)return;activityRevLastV393=v;clearTimeout(activityRevReloadTimerV393);activityRevReloadTimerV393=setTimeout(()=>{if(activityLiveRefreshV393&&modalback.classList.contains('show')&&mtitle.textContent==='접속 / 활동 기록')activityLiveRefreshV393()},80)};activityRevRefV393.on('value',activityRevHandlerV393,()=>{try{activityRevRefV393&&activityRevRefV393.off()}catch(_e){}activityRevRefV393=activityRevHandlerV393=null;activityRevLastV393='';setTimeout(()=>{if(isMaster()&&activityLiveRefreshV393)ensureActivityRealtimeV393(activityLiveRefreshV393).catch(()=>{})},1800)})}
+  // Server-authored tick is the authoritative invalidation source. Revisions
+  // remain subscribed only for older deployments and settings-only changes.
+  let activityTickRefV402=null,activityTickHandlerV402=null,activityTickLastV402=null,activityTickInitializedV402=false;
+  async function ensureActivityTickV402(){
+    if(activityTickRefV402)return;
+    await masterAuth();
+    const ref=window.__psuDbRefV355('meta/deltaTicks/activityLog');
+    activityTickRefV402=ref;
+    activityTickHandlerV402=snap=>{
+      const n=snap&&snap.val?snap.val():null;
+      if(!activityTickInitializedV402){activityTickLastV402=n;activityTickInitializedV402=true;return}
+      if(n===activityTickLastV402)return;
+      activityTickLastV402=n;
+      activityRowsRevV401='';
+      if(activityLiveRefreshV393&&modalback.classList.contains('show')&&mtitle.textContent==='접속 / 활동 기록'){
+        clearTimeout(activityRevReloadTimerV393);
+        activityRevReloadTimerV393=setTimeout(()=>activityLiveRefreshV393(),100);
+      }
+    };
+    ref.on('value',activityTickHandlerV402,()=>{
+      try{ref.off('value',activityTickHandlerV402)}catch(_e){}
+      activityTickRefV402=activityTickHandlerV402=null;activityTickLastV402=null;activityTickInitializedV402=false;
+    });
+  }
+  // The v3.93 setup entrypoint is kept for old callers.
+  const ensureActivityRealtimeLegacyV402=ensureActivityRealtimeV393;
+  ensureActivityRealtimeV393=async function(refresh){
+    await ensureActivityRealtimeLegacyV402(refresh);
+    await ensureActivityTickV402();
+  };
   async function removeIds(ids){activityRowsRevV401='';const f=await masterAuth(),a=[...new Set((ids||[]).map(String).filter(Boolean))];await Promise.all(a.map(id=>window.__psuDbRefV355('activityLog/'+id).remove()));await f.bump('activity')}
   async function setExcluded(names,purge){activityRowsRevV401='';
     const f=await masterAuth(),clean=[],seen=new Set();
