@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v4.03";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v4.04";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v389-progress-canonical-resolver">
 (function(){
  if(window.__webProgressCanonicalResolverV389)return;window.__webProgressCanonicalResolverV389=true;
@@ -2666,7 +2666,7 @@ body.general-mode #plist .private-note-btn-v244{display:none!important}
  function byId(id){return items.find(x=>String(x.id||'')===String(id||''))||null}
  function itemsForDate(ds){return sortItems(items.filter(x=>String(x.date||'')===String(ds||'')))}
  window.__personalScheduleItemsForDateV384=function(ds){return itemsForDate(ds).map(x=>Object.assign({},x))};
- function ensureMobileDate(ds){if(!window.mobileList||mobileList.querySelector(`.dategroup[data-date="${String(ds||'')}"]`))return;const d=fromISO(ds);if(!d)return;const w=d.getDay();if(w===0||w===6)return;const empty=mobileList.querySelector(':scope > .empty');if(empty)empty.remove();const wn=['일','월','화','수','목','금','토'][w],g=document.createElement('div');g.className='dategroup personal-only-v262';g.dataset.date=ds;g.innerHTML=`<h3>${d.getMonth()+1}/${d.getDate()} <span class="weekday">${wn}요일</span></h3><div class="mnone">등록된 작업 일정이 없습니다.</div>`;mobileList.appendChild(g)}
+ function ensureMobileDate(ds){if(!window.mobileList||mobileList.querySelector(`.dategroup[data-date="${String(ds||'')}"]`))return;const d=fromISO(ds),[s,e]=monthWeekRangeV328();if(!Number.isFinite(d.getTime())||d<s||d>e)return;const w=d.getDay();if(w===0||w===6)return;const empty=mobileList.querySelector(':scope > .empty');if(empty)empty.remove();const wn=['일','월','화','수','목','금','토'][w],g=document.createElement('div');g.className='dategroup personal-only-v262';g.dataset.date=ds;g.innerHTML=`<h3>${d.getMonth()+1}/${d.getDate()} <span class="weekday">${wn}요일</span></h3><div class="mnone">등록된 작업 일정이 없습니다.</div>`;mobileList.appendChild(g)}
  function addFor(holder,head,ds){
    if(!holder||!head)return;head.querySelectorAll('.personal-add-v262').forEach(x=>x.remove());holder.querySelectorAll(':scope > .personal-line-v262').forEach(x=>x.remove());
    const plus=document.createElement('button');plus.type='button';plus.className='personal-add-v262';plus.hidden=!canEdit();plus.textContent='일정+';plus.title='개인일정 추가';plus.onclick=e=>{e.preventDefault();e.stopPropagation();openPersonalScheduleV262('',ds)};
