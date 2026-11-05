@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v4.04";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v4.05";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v389-progress-canonical-resolver">
 (function(){
  if(window.__webProgressCanonicalResolverV389)return;window.__webProgressCanonicalResolverV389=true;
@@ -3773,7 +3773,7 @@ body.master-landscape-v324-on #masterLandscapeV324{display:block}
  function eventOf(card){const id=clean(card&&card.dataset&&card.dataset.eventId);if(id){const x=(state.scheduleEvents||[]).find(e=>clean(e&&e.eventId)===id);if(x)return x}const u=clean(card&&card.dataset&&card.dataset.unit),d=clean(card&&card.dataset&&card.dataset.date);return (state.scheduleEvents||[]).find(e=>e&&clean(e.unit)===u&&clean(e.date)===d)||null}
  function refreshSelects(){document.querySelectorAll('#mVendorV168').forEach(s=>{const cur=clean(s.value).toUpperCase()==='D'?'D1':clean(s.value).toUpperCase();s.innerHTML=options();s.dataset.teamV339=String(teams.length);s.value=map()[cur]?cur:''})}
  function decorateTeamCards(scope=document){const q=scope&&typeof scope.querySelectorAll==='function'?scope:document;q.querySelectorAll('#calendar .event[data-unit][data-date],#mobileList .mcard[data-unit][data-date],.master-land-event-v324[data-unit][data-date]').forEach(c=>{const v=val(eventOf(c));applyCard(c,v);const edge=c.querySelector('.vendor-edge-v169');if(edge){edge.dataset.v=v;applyEdge(edge,v)}})}
- function applyAll(){window.__psuWorkTeamsV339=teams;window.vendorValueV167=val;window.vendorOrderV167=order;window.vendorClassV167=e=>{const v=val(e);return v?'vendor-'+v.toLowerCase().replace(/[^a-z0-9_-]/g,'-'):''};try{vendorValueV167=window.vendorValueV167;vendorOrderV167=window.vendorOrderV167;vendorClassV167=window.vendorClassV167}catch(_e){}decorateTeamCards(document);refreshSelects()}
+ function applyAll(){window.__psuWorkTeamsV339=teams;window.vendorValueV167=val;window.vendorOrderV167=order;window.vendorClassV167=e=>{const v=val(e);return v?'vendor-'+v.toLowerCase().replace(/[^a-z0-9_-]/g,'-'):''};try{vendorValueV167=window.vendorValueV167;vendorOrderV167=window.vendorOrderV167;vendorClassV167=window.vendorClassV167}catch(_e){}decorateTeamCards(document);refreshSelects();if(typeof window.__psuDecorateTodayProgressV405==='function')window.__psuDecorateTodayProgressV405()}
  async function load(force=true){if(loading)return;loading=true;try{const loader=window.__psuLoadTeamRosterV348||window.__psuLoadTeamRosterV230||loadRosterV230;const r=typeof loader==='function'?await loader(!!force):null,got=norm(r&&r.workTeams,r&&r.workTeamsConfigured),sig=JSON.stringify(got);if(sig!==lastSig){teams=got;lastSig=sig;applyAll();if(typeof renderCalendar==='function')renderCalendar();if(typeof renderMobile==='function')renderMobile()}}catch(e){console.warn('동적 팀 설정 갱신 실패',e);if(!lastSig){teams=DEFAULTS.map(x=>({...x}));lastSig=JSON.stringify(teams);applyAll()}}finally{loading=false}}
  window.__psuTeamValueV339=val;window.__psuTeamOrderV339=order;window.__psuApplyTeamCardV339=applyCard;window.__psuApplyTeamEdgeV339=applyEdge;window.__psuDecorateTeamCardsV378=decorateTeamCards;window.__psuTeamPickerButtonsV339=buttons;window.__psuTeamSelectOptionsV339=options;window.__psuLoadWorkTeamsV339=load;
  let teamRefV343=null,teamRevRefV343=null,teamRetryV343=0,lastTeamRevV343='',teamRetryTimerV344=null;
@@ -3967,6 +3967,79 @@ html:not(.psu-master-notes-v779) .private-note-btn-v244,html:not(.psu-master-not
  if(host)host.insertAdjacentElement('afterend',clearButton);
  document.addEventListener('contextmenu',ev=>{const card=ev.target&&ev.target.closest&&ev.target.closest('#calendar .event[data-unit],#mobileList .mcard[data-unit],#masterLandscapeV324 .master-land-event-v324[data-unit]');if(!card)return;const u=String(card.dataset.unit||'').trim();if(!u)return;ev.preventDefault();ev.stopPropagation();if(!window.__psuCalendarOnlyUnitV403)saved={area:area.value,task:task.value,search:search.value};window.__psuCalendarOnlyUnitV403=u;area.value='전체 지역';task.value='전체 작업';search.value='';clearButton.hidden=false;clearButton.textContent=`${u} · 전체 일정 보기`;render()},true);
  window.__psuRightClickV403={clear:()=>clearButton.click(),getSelected:()=>window.__psuCalendarOnlyUnitV403};
+})();
+</script>
+
+<!-- v4.05: Today-work progress cards only. Keep existing sorting, card contents and data transport unchanged. -->
+<style id="web-v405-today-team-border-style">
+body.general-mode #plist .pitem.psu-today-team-border-v405{
+ border:2px solid var(--psu-today-team-border-v405)!important;
+ padding:8px; /* original 1px border + 9px padding = unchanged footprint */
+}
+</style>
+<script id="web-v405-today-team-border-script">
+(function(){'use strict';
+ if(window.__webV405TodayTeamBorderInstalled)return;
+ window.__webV405TodayTeamBorderInstalled=true;
+ const clean=v=>String(v==null?'':v).trim();
+ function vendorOf(e){
+   const fromExisting=typeof window.__psuTeamValueV339==='function'?window.__psuTeamValueV339(e):'';
+   let v=clean(fromExisting||e&&e.vendor).toUpperCase();
+   if(v==='D')v='D1';
+   return v;
+ }
+ function chooseVendor(p,events){
+   if(!events||!events.length)return '';
+   let candidates=events;
+   const job=clean(p&&p.workInstanceId);
+   if(job){
+     const exact=candidates.filter(e=>clean(e&&e.workInstanceId)===job);
+     if(exact.length)candidates=exact;
+     else if(candidates.some(e=>clean(e&&e.workInstanceId)))return '';
+   }
+   const sn=clean(p&&p.sn).toUpperCase();
+   if(sn){
+     const exact=candidates.filter(e=>clean(e&&e.sn).toUpperCase()===sn);
+     if(exact.length)candidates=exact;
+     else if(candidates.some(e=>clean(e&&e.sn)))return '';
+   }
+   const values=[...new Set(candidates.map(vendorOf).filter(Boolean))];
+   return values.length===1?values[0]:'';
+ }
+ function decorate(){
+   const list=document.getElementById('plist');
+   if(!list)return;
+   // Deliberately reuse the date and fallback rules already used by renderProgress sorting.
+   const date=typeof progressFocusDateV246==='function'?progressFocusDateV246():'';
+   const today=(typeof activeEvents==='function'?activeEvents():[]).filter(e=>e&&e.calendarVisible!==false&&clean(e.date)===date);
+   const byUnit=new Map();
+   today.forEach(e=>{const u=clean(e.unit);if(!u)return;if(!byUnit.has(u))byUnit.set(u,[]);byUnit.get(u).push(e)});
+   const hasTodayEvents=byUnit.size>0;
+   const progressByUnit=new Map();
+   (typeof activeProgress==='function'?activeProgress():[]).forEach(p=>{if(p&&clean(p.unit)&&!progressByUnit.has(clean(p.unit)))progressByUnit.set(clean(p.unit),p)});
+   const palette=new Map((Array.isArray(window.__psuWorkTeamsV339)?window.__psuWorkTeamsV339:[]).map(t=>[clean(t&&t.id).toUpperCase(),clean(t&&t.color)]));
+   list.querySelectorAll('.pitem[data-unit]').forEach(card=>{
+     card.classList.remove('psu-today-team-border-v405');
+     card.style.removeProperty('--psu-today-team-border-v405');
+     const unit=clean(card.dataset.unit),p=progressByUnit.get(unit),events=byUnit.get(unit)||[];
+     if(!p)return;
+     const isTopToday=hasTodayEvents?byUnit.has(unit):p.publicTodayWorkV157===true;
+     if(!isTopToday)return;
+     const vendor=chooseVendor(p,events),color=palette.get(vendor)||'';
+     if(!/^#[0-9a-f]{6}$/i.test(color))return;
+     card.style.setProperty('--psu-today-team-border-v405',color);
+     card.classList.add('psu-today-team-border-v405');
+   });
+ }
+ window.__psuDecorateTodayProgressV405=decorate;
+ // Leave the current render/sort function intact; add visual decoration afterwards.
+ const previous=window.renderProgress;
+ if(typeof previous==='function')window.renderProgress=renderProgress=function(){
+   const result=previous.apply(this,arguments);decorate();return result;
+ };
+ const list=document.getElementById('plist');
+ if(list&&typeof MutationObserver==='function')new MutationObserver(decorate).observe(list,{childList:true});
+ decorate();
 })();
 </script>
 </body></html>
