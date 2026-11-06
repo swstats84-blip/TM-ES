@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v4.05";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v4.06";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v389-progress-canonical-resolver">
 (function(){
  if(window.__webProgressCanonicalResolverV389)return;window.__webProgressCanonicalResolverV389=true;
@@ -3970,11 +3970,14 @@ html:not(.psu-master-notes-v779) .private-note-btn-v244,html:not(.psu-master-not
 })();
 </script>
 
-<!-- v4.05: Today-work progress cards only. Keep existing sorting, card contents and data transport unchanged. -->
+<!-- v4.06: Today-work progress cards, matching admin border shape. Keep existing sorting, card contents and transport unchanged. -->
 <style id="web-v405-today-team-border-style">
 body.general-mode #plist .pitem.psu-today-team-border-v405{
- border:2px solid var(--psu-today-team-border-v405)!important;
- padding:8px; /* original 1px border + 9px padding = unchanged footprint */
+ /* Same shape as administrator progress cards: thin team-color outline + bold left edge. */
+ border:1px solid var(--psu-today-team-border-v405)!important;
+ border-left:4px solid var(--psu-today-team-border-v405)!important;
+ border-radius:9px;
+ padding:9px 9px 9px 6px; /* Original total insets: L 10px; top/right/bottom 10px. */
 }
 </style>
 <script id="web-v405-today-team-border-script">
