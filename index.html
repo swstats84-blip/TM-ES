@@ -109,7 +109,7 @@ html:not(.psu-web-boot-v247) #psuBootV247{display:none!important}
   html,body,#mobileList,.mobile-list,.dategroup{overflow-anchor:none!important;}
 }
 </style>
-<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v4.06";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
+<script id="web-v197-version-source">const WEB_VERSION_V197="웹 v4.07";window.__PSU_WEB_VERSION=WEB_VERSION_V197;</script>
 <script id="web-v389-progress-canonical-resolver">
 (function(){
  if(window.__webProgressCanonicalResolverV389)return;window.__webProgressCanonicalResolverV389=true;
@@ -3970,7 +3970,7 @@ html:not(.psu-master-notes-v779) .private-note-btn-v244,html:not(.psu-master-not
 })();
 </script>
 
-<!-- v4.06: Today-work progress cards, matching admin border shape. Keep existing sorting, card contents and transport unchanged. -->
+<!-- v4.07: Preserve today-first and border; group today-work progress cards by administrator calendar team order only. -->
 <style id="web-v405-today-team-border-style">
 body.general-mode #plist .pitem.psu-today-team-border-v405{
  /* Same shape as administrator progress cards: thin team-color outline + bold left edge. */
@@ -4009,6 +4009,40 @@ body.general-mode #plist .pitem.psu-today-team-border-v405{
    const values=[...new Set(candidates.map(vendorOf).filter(Boolean))];
    return values.length===1?values[0]:'';
  }
+ function sortTodayCardsV407(list,byUnit,hasTodayEvents,progressByUnit){
+   // General viewers only. Preserve the pre-existing order of every non-today card.
+   if(!document.body||!document.body.classList.contains('general-mode'))return;
+   if(typeof list.insertBefore!=='function'||!list.children)return;
+   const cards=[...list.querySelectorAll(':scope > .pitem[data-unit]')];
+   if(cards.length<2||cards.length!==list.children.length)return;
+   const teams=Array.isArray(window.__psuWorkTeamsV339)?window.__psuWorkTeamsV339:[];
+   const teamOrder=new Map(teams.map((t,i)=>[clean(t&&t.id).toUpperCase(),i]));
+   const isToday=card=>{
+     const unit=clean(card.dataset.unit),p=progressByUnit.get(unit);
+     return !!p&&(hasTodayEvents?byUnit.has(unit):p.publicTodayWorkV157===true);
+   };
+   const todayCards=cards.filter(isToday);
+   if(todayCards.length<2)return;
+   const original=new Map(todayCards.map((card,i)=>[card,i]));
+   const groupInfo=card=>{
+     const unit=clean(card.dataset.unit),p=progressByUnit.get(unit)||{};
+     const vendor=chooseVendor(p,byUnit.get(unit)||[]);
+     const order=teamOrder.has(vendor)?teamOrder.get(vendor):Number.MAX_SAFE_INTEGER;
+     return {order,area:(typeof AREA_ORDER!=='undefined'&&typeof areaOf==='function'?(AREA_ORDER[areaOf(p)]||9):9),line:clean(p.line),unit};
+   };
+   const group=new Map(todayCards.map(card=>[card,groupInfo(card)]));
+   const sorted=todayCards.slice().sort((a,b)=>{
+     const x=group.get(a),y=group.get(b);
+     if(x.order!==y.order)return x.order-y.order;
+     // Unassigned/ambiguous jobs keep their existing relative order.
+     if(x.order===Number.MAX_SAFE_INTEGER)return original.get(a)-original.get(b);
+     return x.area-y.area||x.line.localeCompare(y.line,'ko')||x.unit.localeCompare(y.unit,'ko')||original.get(a)-original.get(b);
+   });
+   const desired=sorted.concat(cards.filter(card=>!isToday(card)));
+   if(desired.every((card,i)=>card===cards[i]))return;
+   // Move existing DOM nodes only: no card HTML, event handlers, or data changes.
+   desired.forEach((card,i)=>{if(list.children[i]!==card)list.insertBefore(card,list.children[i]||null)});
+ }
  function decorate(){
    const list=document.getElementById('plist');
    if(!list)return;
@@ -4033,6 +4067,7 @@ body.general-mode #plist .pitem.psu-today-team-border-v405{
      card.style.setProperty('--psu-today-team-border-v405',color);
      card.classList.add('psu-today-team-border-v405');
    });
+   sortTodayCardsV407(list,byUnit,hasTodayEvents,progressByUnit);
  }
  window.__psuDecorateTodayProgressV405=decorate;
  // Leave the current render/sort function intact; add visual decoration afterwards.
